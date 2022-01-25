@@ -3,8 +3,10 @@
 defined('ABSPATH') || exit;
 
 use Wc1c\Exceptions\Exception;
+use Wc1c\Schemas\Productscml\Utilities\UtilityCml;
 use Wc1c\Traits\SingletonTrait;
 use Wc1c\Traits\UtilityTrait;
+use XMLReader;
 
 /**
  * Receiver
@@ -15,6 +17,7 @@ final class Receiver
 {
 	use SingletonTrait;
 	use UtilityTrait;
+	use UtilityCml;
 
 	/**
 	 * @var Core Schema core
@@ -170,7 +173,7 @@ final class Receiver
 		$type = apply_filters('wc1c_schema_productscml_send_response_by_type_description', $type);
 		$description = apply_filters('wc1c_schema_productscml_send_response_by_type_description', $description, $type);
 
-		$this->core()->log()->info(__('In 1C was send a response of the type:', 'wc1c') . ' ' . $type, ['type' => $type, 'description' => $description]);
+		$this->core()->log()->debug(__('In 1C was send a response of the type:', 'wc1c') . ' ' . $type, ['type' => $type, 'description' => $description]);
 
 		$headers= [];
 		$headers['Content-Type'] = 'Content-Type: text/plain; charset=utf-8';
@@ -411,7 +414,7 @@ final class Receiver
 			$this->sendResponseByType('failure', $error);
 		}
 
-		$data['zip'] = 'zip=no';
+		$data['zip'] = 'zip=no' . PHP_EOL;
 
 		$size = $this->utilityConvertFileSize(wc1c()->environment()->get('php_post_max_size'));
 		$max_wc1c = $this->utilityConvertFileSize(wc1c()->settings('main')->get('php_post_max_size'));
@@ -428,7 +431,7 @@ final class Receiver
 		if($max_configuration && $max_configuration < $size)
 		{
 			$size = $max_configuration;
-			$this->core()->log()->debug(__('Based on the configuration settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c') . size_format($size));
+			$this->core()->log()->debug(__('Based on the configuration settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c') . ' ' . size_format($size));
 		}
 
 		$data['file_limit'] = 'file_limit=' . $size . PHP_EOL;
@@ -437,6 +440,7 @@ final class Receiver
 
 		foreach($data as $line_id => $line)
 		{
+			$this->core()->log()->debug(__('Print line for 1C.', 'wc1c'), ['line_id' => $line_id, 'line' => $line]);
 			echo $line;
 		}
 		exit;
@@ -549,9 +553,16 @@ final class Receiver
 
 		$file = $this->core()->getUploadDirectory() . DIRECTORY_SEPARATOR . $filename;
 
+		if(!wc1c()->filesystem()->exists($file))
+		{
+			$response_description = __('File for import is not exists.', 'wc1c');
+			$this->core()->log()->error($response_description);
+			$this->sendResponseByType('success', $response_description);
+		}
+
 		try
 		{
-			$result_file_processing = $this->core()->fileProcessing($file);
+			$result_file_processing = $this->fileProcessing($file);
 
 			if($result_file_processing)
 			{
@@ -567,6 +578,44 @@ final class Receiver
 			$this->sendResponseByType('failure', $response_description);
 		}
 
+		$response_description = __('Importing data from a file ended with an error.', 'wc1c');
+		$this->core()->log()->error($response_description);
 		$this->sendResponseByType('failure', $response_description);
+	}
+
+	/**
+	 * CommerceML file processing
+	 *
+	 * @param $file_path
+	 *
+	 * @return boolean true - success, false - error
+	 * @throws Exception Processing error
+	 */
+	public function fileProcessing($file_path)
+	{
+		$file_type = $this->cmlDetectFileType($file_path);
+
+		$this->core()->log()->debug(__('File type:') . ' ' . $file_type, ['file_type' => $file_type]);
+
+		if($file_type === '')
+		{
+			throw new Exception('CommerceML file type is not valid.');
+		}
+
+		if(!defined('LIBXML_VERSION'))
+		{
+			throw new Exception('LIBXML_VERSION not defined.');
+		}
+
+		if(!function_exists('libxml_use_internal_errors'))
+		{
+			throw new Exception('libxml_use_internal_errors is not exists.');
+		}
+
+		libxml_use_internal_errors(true);
+
+
+
+		return false;
 	}
 }
