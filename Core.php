@@ -12,6 +12,11 @@ use Wc1c\Abstracts\SchemaAbstract;
 class Core extends SchemaAbstract
 {
 	/**
+	 * @var
+	 */
+	protected $upload_directory;
+
+	/**
 	 * Core constructor.
 	 */
 	public function __construct()
@@ -29,6 +34,7 @@ class Core extends SchemaAbstract
 	public function init()
 	{
 		$this->setOptions($this->configuration()->getOptions());
+		$this->setUploadDirectory($this->configuration()->getUploadDirectory() . '/catalog');
 
 		if(true === wc1c()->context()->isAdmin('plugin'))
 		{
@@ -45,5 +51,21 @@ class Core extends SchemaAbstract
 		}
 
 		return true;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getUploadDirectory()
+	{
+		return $this->upload_directory;
+	}
+
+	/**
+	 * @param mixed $upload_directory
+	 */
+	public function setUploadDirectory($upload_directory)
+	{
+		$this->upload_directory = $upload_directory;
 	}
 }
