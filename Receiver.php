@@ -6,7 +6,6 @@ use Wc1c\Exceptions\Exception;
 use Wc1c\Schemas\Productscml\Utilities\UtilityCml;
 use Wc1c\Traits\SingletonTrait;
 use Wc1c\Traits\UtilityTrait;
-use XMLReader;
 
 /**
  * Receiver
@@ -30,7 +29,6 @@ final class Receiver
 	public function initHandler()
 	{
 		add_action(WC1C_PREFIX . 'receiver_' . $this->core()->getId(), [$this, 'handler'], 10, 0);
-
 		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_checkauth', [$this, 'handlerCheckauth'], 10, 0);
 		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_init', [$this, 'handlerCatalogModeInit'], 10, 0);
 		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_file', [$this, 'handlerCatalogModeFile'], 10, 0);
@@ -170,14 +168,16 @@ final class Receiver
 	 */
 	public function sendResponseByType($type = 'failure', $description = '')
 	{
-		$type = apply_filters('wc1c_schema_productscml_send_response_by_type_description', $type);
-		$description = apply_filters('wc1c_schema_productscml_send_response_by_type_description', $description, $type);
+		$type = apply_filters('wc1c_schema_productscml_receiver_send_response_type', $type, $this);
+		$description = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_description', $description, $this, $type);
 
-		$this->core()->log()->debug(__('In 1C was send a response of the type:', 'wc1c') . ' ' . $type, ['type' => $type, 'description' => $description]);
+		$this->core()->log()->debug(__('In 1C was send a response of the type:', 'wc1c') . ' ' . $type);
 
 		$headers= [];
 		$headers['Content-Type'] = 'Content-Type: text/plain; charset=utf-8';
-		$headers = apply_filters('wc1c_schema_productscml_send_response_by_type_headers', $headers, $type);
+		$headers = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_headers', $headers, $this, $type);
+
+		$this->core()->log()->debug(__('Headers for response.', 'wc1c'), ['context' => $headers]);
 
 		foreach($headers as $header)
 		{
@@ -438,9 +438,10 @@ final class Receiver
 
 		$data = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_data', $data, $this);
 
+		$this->core()->log()->debug(__('Print lines for 1C.', 'wc1c'), ['data' => $data]);
+
 		foreach($data as $line_id => $line)
 		{
-			$this->core()->log()->debug(__('Print line for 1C.', 'wc1c'), ['line_id' => $line_id, 'line' => $line]);
 			echo $line;
 		}
 		exit;
@@ -562,7 +563,7 @@ final class Receiver
 
 		try
 		{
-			$result_file_processing = $this->fileProcessing($file);
+			$result_file_processing = $this->core()->fileProcessing($file);
 
 			if($result_file_processing)
 			{
@@ -581,41 +582,5 @@ final class Receiver
 		$response_description = __('Importing data from a file ended with an error.', 'wc1c');
 		$this->core()->log()->error($response_description);
 		$this->sendResponseByType('failure', $response_description);
-	}
-
-	/**
-	 * CommerceML file processing
-	 *
-	 * @param $file_path
-	 *
-	 * @return boolean true - success, false - error
-	 * @throws Exception Processing error
-	 */
-	public function fileProcessing($file_path)
-	{
-		$file_type = $this->cmlDetectFileType($file_path);
-
-		$this->core()->log()->debug(__('File type:') . ' ' . $file_type, ['file_type' => $file_type]);
-
-		if($file_type === '')
-		{
-			throw new Exception('CommerceML file type is not valid.');
-		}
-
-		if(!defined('LIBXML_VERSION'))
-		{
-			throw new Exception('LIBXML_VERSION not defined.');
-		}
-
-		if(!function_exists('libxml_use_internal_errors'))
-		{
-			throw new Exception('libxml_use_internal_errors is not exists.');
-		}
-
-		libxml_use_internal_errors(true);
-
-
-
-		return false;
 	}
 }
