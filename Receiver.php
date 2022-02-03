@@ -3,7 +3,6 @@
 defined('ABSPATH') || exit;
 
 use Wc1c\Exceptions\Exception;
-use Wc1c\Schemas\Productscml\Utilities\UtilityCml;
 use Wc1c\Traits\SingletonTrait;
 use Wc1c\Traits\UtilityTrait;
 
@@ -16,7 +15,6 @@ final class Receiver
 {
 	use SingletonTrait;
 	use UtilityTrait;
-	use UtilityCml;
 
 	/**
 	 * @var Core Schema core
