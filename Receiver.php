@@ -98,40 +98,40 @@ final class Receiver
 
 		if($type === 'catalog' && $mode !== '')
 		{
-			do_action('wc1c_schema_productscml_catalog_handler', $mode);
+			do_action('wc1c_schema_productscml_catalog_handler', $mode, $this);
 
 			switch($mode)
 			{
 				case 'checkauth':
-					do_action('wc1c_schema_productscml_catalog_handler_checkauth');
+					do_action('wc1c_schema_productscml_catalog_handler_checkauth', $this);
 					break;
 				case 'init':
 					$this->handlerCheckauthKey(true);
-					do_action('wc1c_schema_productscml_catalog_handler_init');
+					do_action('wc1c_schema_productscml_catalog_handler_init', $this);
 					break;
 				case 'file':
 					$this->handlerCheckauthKey(true);
-					do_action('wc1c_schema_productscml_catalog_handler_file');
+					do_action('wc1c_schema_productscml_catalog_handler_file', $this);
 					break;
 				case 'import':
 					$this->handlerCheckauthKey(true);
-					do_action('wc1c_schema_productscml_catalog_handler_import');
+					do_action('wc1c_schema_productscml_catalog_handler_import', $this);
 					break;
 				case 'deactivate':
 					$this->handlerCheckauthKey(true);
-					do_action('wc1c_schema_productscml_catalog_handler_deactivate');
+					do_action('wc1c_schema_productscml_catalog_handler_deactivate', $this);
 					break;
 				case 'complete':
 					$this->handlerCheckauthKey(true);
-					do_action('wc1c_schema_productscml_catalog_handler_complete');
+					do_action('wc1c_schema_productscml_catalog_handler_complete', $this);
 					break;
 				default:
-					do_action('wc1c_schema_productscml_catalog_handler_none', $mode);
+					do_action('wc1c_schema_productscml_catalog_handler_none', $mode, $this);
 					$this->sendResponseByType('failure', __('Catalog: mode not found.', 'wc1c'));
 			}
 		}
 
-		do_action('wc1c_schema_productscml_handler_none', $mode);
+		do_action('wc1c_schema_productscml_handler_none', $mode, $this);
 
 		$response_description = __('Schema: action not found.', 'wc1c');
 		$this->core()->log()->warning($response_description);
