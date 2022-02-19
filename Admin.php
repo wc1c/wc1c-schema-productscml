@@ -241,34 +241,47 @@ class Admin
 
 		$fields['categories_classifier_groups_merge'] =
 		[
-			'title' => __('Merging categories when the name matches', 'wc1c'),
+			'title' => __('Merging categories before creating', 'wc1c'),
 			'type' => 'select',
 			'description' => sprintf
-            ('%s <br />%s <br />%s',
-             __('If the names match - the categories will be linked when the names match without any other data matching.', 'wc1c'),
-             __('If the names match, with the match of the parent category - categories will be linked only if they have the same name and parent category.', 'wc1c'),
-             __('If the names match, with the match of all parent categories - the categories will be linked only if they have the same names and the entire structure of the parent categories.', 'wc1c')
+            ('%s<br /><b>%s</b> - %s <br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+             __('In the event that the categories were created manually or from another configuration, you must enable the merge. Merging will avoid duplication of categories.', 'wc1c'),
+             __('If the names match', 'wc1c'),
+             __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
+             __('If the names match, with the match of the parent category ', 'wc1c'),
+             __('The categories will be linked only if they have the same name and parent category.', 'wc1c'),
+             __('If the names match, with the match of all parent categories', 'wc1c'),
+             __('The categories will be linked only if they have the same names and the entire structure of the parent categories.', 'wc1c')
             ),
 			'default' => 'no',
 			'options' => $merge_options
 		];
 
-		$fields['categories_classifier_groups_merge_assign_data'] =
+		$fields['categories_classifier_groups_create_assign_parent'] =
 		[
-			'title' => __('Assign 1c data to categories on merge', 'wc1c'),
+			'title' => __('Assign parent categories on creating', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('Assignment of 1C data for categories that were found during the merger. When assigning data, categories will be considered as created from 1C.', 'wc1c'),
-			'default' => 'no'
+			'description' => __('If there is a parent category in 1C, it will also be assigned in WooCommerce. The setting is triggered when a category is created.', 'wc1c'),
+			'default' => 'yes'
 		];
 
-		$fields['categories_classifier_groups_create_description'] =
+		$fields['categories_classifier_groups_create_assign_description'] =
 		[
 			'title' => __('Assign categories description on creating', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('When creating categories, descriptions will be filled in if category descriptions are present in 1C.', 'wc1c'),
 			'default' => 'no'
+		];
+
+		$fields['categories_classifier_groups_update_parent'] =
+		[
+			'title' => __('Update parent categories on updating', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When enabled, parent categories will be updated when they are updated in 1C. The setting is triggered when a category is updated.', 'wc1c'),
+			'default' => 'yes'
 		];
 
 		$fields['categories_classifier_groups_update_name'] =
