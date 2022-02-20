@@ -231,6 +231,15 @@ class Admin
 			'default' => 'no'
 		];
 
+		$fields['categories_classifier_groups_update_only_configuration'] =
+		[
+			'title' => __('Consider configuration when updating categories', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When updating category data, the update will only occur if the category was created through the current configuration.', 'wc1c'),
+			'default' => 'no'
+		];
+
 		$merge_options =
 		[
 			'no' => __('Do not use', 'wc1c'),
