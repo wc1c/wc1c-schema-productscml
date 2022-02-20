@@ -257,7 +257,7 @@ class Admin
              __('If the names match', 'wc1c'),
              __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
              __('If the names match, with the match of the parent category ', 'wc1c'),
-             __('The categories will be linked only if they have the same name and parent category.', 'wc1c'),
+             __('The categories will be linked only if they have the same name and parent category.', 'wc1c')
             ),
 			'default' => 'no',
 			'options' => $merge_options
