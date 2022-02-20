@@ -245,7 +245,6 @@ class Admin
 			'no' => __('Do not use', 'wc1c'),
 			'yes' => __('If the names match', 'wc1c'),
 			'yes_parent' => __('If the names match, with the match of the parent category ', 'wc1c'),
-			'yes_parent_all' => __('If the names match, with the match of all parent categories', 'wc1c'),
 		];
 
 		$fields['categories_classifier_groups_merge'] =
@@ -253,14 +252,12 @@ class Admin
 			'title' => __('Merging categories before creating', 'wc1c'),
 			'type' => 'select',
 			'description' => sprintf
-            ('%s<br /><b>%s</b> - %s <br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+            ('%s<br /><b>%s</b> - %s <br /><b>%s</b> - %s',
              __('In the event that the categories were created manually or from another configuration, you must enable the merge. Merging will avoid duplication of categories.', 'wc1c'),
              __('If the names match', 'wc1c'),
              __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
              __('If the names match, with the match of the parent category ', 'wc1c'),
              __('The categories will be linked only if they have the same name and parent category.', 'wc1c'),
-             __('If the names match, with the match of all parent categories', 'wc1c'),
-             __('The categories will be linked only if they have the same names and the entire structure of the parent categories.', 'wc1c')
             ),
 			'default' => 'no',
 			'options' => $merge_options
