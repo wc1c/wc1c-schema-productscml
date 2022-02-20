@@ -485,7 +485,7 @@ class Admin
 	{
 		$fields['title_products_price'] =
 		[
-			'title' => __('Products (goods, services): prices', 'wc1c'),
+			'title' => __('Products (goods): prices', 'wc1c'),
 			'type' => 'title',
 			'description' => __('Comparison of WooCommerce and 1C prices and other settings.', 'wc1c'),
 		];
