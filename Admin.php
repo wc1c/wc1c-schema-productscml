@@ -213,6 +213,29 @@ class Admin
 			'description' => __('Create and update categories based on groups from the classifier.', 'wc1c'),
 		];
 
+		$merge_options =
+		[
+			'no' => __('Do not use', 'wc1c'),
+			'yes' => __('If the names match', 'wc1c'),
+			'yes_parent' => __('If the names match, with the match of the parent category ', 'wc1c'),
+		];
+
+		$fields['categories_classifier_groups_merge'] =
+		[
+			'title' => __('Using existing categories', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			('%s<br /><b>%s</b> - %s <br /><b>%s</b> - %s',
+			 __('In the event that the categories were created manually or from another configuration, you must enable the merge. Merging will avoid duplication of categories.', 'wc1c'),
+			 __('If the names match', 'wc1c'),
+			 __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
+			 __('If the names match, with the match of the parent category ', 'wc1c'),
+			 __('The categories will be linked only if they have the same name and parent category.', 'wc1c')
+			),
+			'default' => 'no',
+			'options' => $merge_options
+		];
+
 		$fields['categories_classifier_groups_create'] =
 		[
 			'title' => __('Creating categories from classifier groups', 'wc1c'),
@@ -238,29 +261,6 @@ class Admin
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('When updating category data, the update will only occur if the category was created through the current configuration.', 'wc1c'),
 			'default' => 'no'
-		];
-
-		$merge_options =
-		[
-			'no' => __('Do not use', 'wc1c'),
-			'yes' => __('If the names match', 'wc1c'),
-			'yes_parent' => __('If the names match, with the match of the parent category ', 'wc1c'),
-		];
-
-		$fields['categories_classifier_groups_merge'] =
-		[
-			'title' => __('Merging categories before creating', 'wc1c'),
-			'type' => 'select',
-			'description' => sprintf
-            ('%s<br /><b>%s</b> - %s <br /><b>%s</b> - %s',
-             __('In the event that the categories were created manually or from another configuration, you must enable the merge. Merging will avoid duplication of categories.', 'wc1c'),
-             __('If the names match', 'wc1c'),
-             __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
-             __('If the names match, with the match of the parent category ', 'wc1c'),
-             __('The categories will be linked only if they have the same name and parent category.', 'wc1c')
-            ),
-			'default' => 'no',
-			'options' => $merge_options
 		];
 
 		$fields['categories_classifier_groups_create_assign_parent'] =
