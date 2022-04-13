@@ -26,13 +26,13 @@ final class Receiver
 	 */
 	public function initHandler()
 	{
-		add_action(WC1C_PREFIX . 'receiver_' . $this->core()->getId(), [$this, 'handler'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_checkauth', [$this, 'handlerCheckauth'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_init', [$this, 'handlerCatalogModeInit'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_file', [$this, 'handlerCatalogModeFile'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_import', [$this, 'handlerCatalogModeImport'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_deactivate', [$this, 'handlerCatalogModeDeactivate'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_complete', [$this, 'handlerCatalogModeComplete'], 10, 0);
+		add_action('wc1c_receiver_' . $this->core()->getId(), [$this, 'handler'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_checkauth', [$this, 'handlerCheckauth'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_init', [$this, 'handlerCatalogModeInit'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_file', [$this, 'handlerCatalogModeFile'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_import', [$this, 'handlerCatalogModeImport'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_deactivate', [$this, 'handlerCatalogModeDeactivate'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_complete', [$this, 'handlerCatalogModeComplete'], 10, 0);
 	}
 
 	/**
