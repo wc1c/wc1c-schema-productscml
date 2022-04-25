@@ -41,22 +41,22 @@ class Admin
 	 */
 	public function initConfigurationsFields()
 	{
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsReceiver'], 10, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsReceiver'], 10, 1);
 
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsProducts'], 20, 1);
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSync'], 30, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProducts'], 20, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSync'], 30, 1);
 
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrice'], 40, 1);
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 50, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrice'], 40, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 50, 1);
 
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsCategories'], 60, 1);
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsCategoriesClassifierGroups'], 65, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategories'], 60, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategoriesClassifierGroups'], 65, 1);
 
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributes'], 70, 1);
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributesClassifierProperties'], 75, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributes'], 70, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributesClassifierProperties'], 75, 1);
 
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsLogs'], 80, 1);
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsOther'], 90, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsLogs'], 80, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsOther'], 90, 1);
 	}
 
 	/**
@@ -176,6 +176,29 @@ class Admin
 			'description' => __('Categorization of product positions on the WooCommerce side according to data from 1C.', 'wc1c'),
 		];
 
+		$merge_options =
+		[
+			'no' => __('Do not use', 'wc1c'),
+			'yes' => __('If the names match', 'wc1c'),
+			'yes_parent' => __('If the names match, with the match of the parent category ', 'wc1c'),
+		];
+
+		$fields['categories_merge'] =
+		[
+			'title' => __('Using existing categories', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			('%s<br /><b>%s</b> - %s <br /><b>%s</b> - %s',
+			 __('In the event that the categories were created manually or from another configuration, you must enable the merge. Merging will avoid duplication of categories.', 'wc1c'),
+			 __('If the names match', 'wc1c'),
+			 __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
+			 __('If the names match, with the match of the parent category ', 'wc1c'),
+			 __('The categories will be linked only if they have the same name and parent category.', 'wc1c')
+			),
+			'default' => 'no',
+			'options' => $merge_options
+		];
+
 		$fields['categories_create'] =
 		[
 			'title' => __('Creating categories', 'wc1c'),
@@ -191,6 +214,15 @@ class Admin
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('If the category created earlier was linked to 1C data, then when you change any category data in 1C, the data will also change in WooCommerce.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		$fields['categories_update_only_configuration'] =
+		[
+			'title' => __('Consider configuration when updating categories', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When updating category data, the update will only occur if the category was created through the current configuration.', 'wc1c'),
 			'default' => 'no'
 		];
 
@@ -213,53 +245,12 @@ class Admin
 			'description' => __('Create and update categories based on groups from the classifier.', 'wc1c'),
 		];
 
-		$merge_options =
-		[
-			'no' => __('Do not use', 'wc1c'),
-			'yes' => __('If the names match', 'wc1c'),
-			'yes_parent' => __('If the names match, with the match of the parent category ', 'wc1c'),
-		];
-
-		$fields['categories_classifier_groups_merge'] =
-		[
-			'title' => __('Using existing categories', 'wc1c'),
-			'type' => 'select',
-			'description' => sprintf
-			('%s<br /><b>%s</b> - %s <br /><b>%s</b> - %s',
-			 __('In the event that the categories were created manually or from another configuration, you must enable the merge. Merging will avoid duplication of categories.', 'wc1c'),
-			 __('If the names match', 'wc1c'),
-			 __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
-			 __('If the names match, with the match of the parent category ', 'wc1c'),
-			 __('The categories will be linked only if they have the same name and parent category.', 'wc1c')
-			),
-			'default' => 'no',
-			'options' => $merge_options
-		];
-
 		$fields['categories_classifier_groups_create'] =
 		[
 			'title' => __('Creating categories from classifier groups', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('Categories are only created if they have not been created before. Also, if access to work with categories is allowed from the global settings.', 'wc1c'),
-			'default' => 'no'
-		];
-
-		$fields['categories_classifier_groups_update'] =
-		[
-			'title' => __('Updating categories from classifier groups', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('If the category created earlier was linked to 1C data, then when you change any category data in 1C, the data will also change in WooCommerce.', 'wc1c'),
-			'default' => 'no'
-		];
-
-		$fields['categories_classifier_groups_update_only_configuration'] =
-		[
-			'title' => __('Consider configuration when updating categories', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('When updating category data, the update will only occur if the category was created through the current configuration.', 'wc1c'),
 			'default' => 'no'
 		];
 
@@ -278,6 +269,15 @@ class Admin
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('When creating categories, descriptions will be filled in if category descriptions are present in 1C.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		$fields['categories_classifier_groups_update'] =
+		[
+			'title' => __('Updating categories from classifier groups', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('If the category created earlier was linked to 1C data, then when you change any category data in 1C, the data will also change in WooCommerce.', 'wc1c'),
 			'default' => 'no'
 		];
 
