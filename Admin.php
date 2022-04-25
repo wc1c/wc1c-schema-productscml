@@ -477,6 +477,15 @@ class Admin
 			'default' => 'no'
 		];
 
+		$fields['products_update_only_configuration'] =
+		[
+			'title' => __('Consider configuration when updating products', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When updating products data, the update will only occur if the product was created through the current configuration.', 'wc1c'),
+			'default' => 'no'
+		];
+
 		return $fields;
 	}
 
