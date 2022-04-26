@@ -188,7 +188,7 @@ class Admin
 			'title' => __('Using existing categories', 'wc1c'),
 			'type' => 'select',
 			'description' => sprintf
-			('%s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b>',
+			('%s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><hr>%s',
 			 __('In the event that the categories were created manually or from another configuration, you must enable the merge. Merging will avoid duplication of categories.', 'wc1c'),
 			 __('Name matching', 'wc1c'),
 			 __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
