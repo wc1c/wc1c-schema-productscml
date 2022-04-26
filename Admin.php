@@ -180,6 +180,7 @@ class Admin
 		[
 			'no' => __('Do not use', 'wc1c'),
 			'yes' => __('Name matching', 'wc1c'),
+			'yes_parent' => __('Name matching, with the match of the parent category', 'wc1c'),
 		];
 
 		$fields['categories_merge'] =
@@ -187,10 +188,13 @@ class Admin
 			'title' => __('Using existing categories', 'wc1c'),
 			'type' => 'select',
 			'description' => sprintf
-			('%s<br /><b>%s</b> - %s <br />',
+			('%s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b>',
 			 __('In the event that the categories were created manually or from another configuration, you must enable the merge. Merging will avoid duplication of categories.', 'wc1c'),
 			 __('Name matching', 'wc1c'),
-			 __('The categories will be linked when the names match without any other data matching.', 'wc1c')
+			 __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
+			 __('Name matching, with the match of the parent category', 'wc1c'),
+			 __('The categories will be linked only if they have the same name and parent category.', 'wc1c'),
+			 __('The found categories will be updated according to 1C data according to the update settings. If not want to refresh the data, must enable refresh based on the configuration.', 'wc1c')
 			),
 			'default' => 'no',
 			'options' => $merge_options
