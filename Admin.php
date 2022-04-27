@@ -538,7 +538,7 @@ class Admin
 		[
 			'title' => __('WooCommerce sale price: name in 1C', 'wc1c'),
 			'type' => 'text',
-			'description' => __('Specify the name of the base price in 1C, which is used for uploading to WooCommerce as the sale price.', 'wc1c'),
+			'description' => __('Specify the name of the sale price in 1C, which is used for uploading to WooCommerce as the sale price.', 'wc1c'),
 			'default' => '',
 			'css' => 'min-width: 370px;',
 		];
