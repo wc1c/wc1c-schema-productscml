@@ -72,7 +72,7 @@ class Admin
 		[
 			'title' => __('Receiving requests from 1C', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Authorization of requests and regulation of algorithms for receiving requests for the Recipient from the 1C program.', 'wc1c'),
+			'description' => __('Authorization of requests and regulation of algorithms for receiving requests for the Receiver from the 1C programs by CommerceML protocol.', 'wc1c'),
 		];
 
 		$lazy_sign = $this->core()->configuration()->getMeta('receiver_lazy_sign');
@@ -457,7 +457,7 @@ class Admin
 		[
 			'title' => __('Products (goods)', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Regulation of algorithms for creating and updating products on requests from 1C.', 'wc1c'),
+			'description' => __('Regulation of algorithms for products. Operations on products are based on data from product catalogs and offer packages described in CommerceML.', 'wc1c'),
 		];
 
 		$fields['products_create'] =
@@ -465,7 +465,12 @@ class Admin
 			'title' => __('Creation of products', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable the creation of new products upon request from 1C. Disabled by default.', 'wc1c'),
-			'description' => __('The product is only created if it is not found in WooCommerce when searching by criteria for synchronization.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<br /><hr>%s',
+				__('The products is only created if it is not found in WooCommerce when searching by criteria for synchronization.', 'wc1c'),
+				__('The option works only with automatic creation of products. When disabled, it is still possible to manually create products through ManualCML and similar extensions.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
@@ -474,7 +479,12 @@ class Admin
 			'title' => __('Update of products', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable product updates on demand from 1C. Disabled by default.', 'wc1c'),
-			'description' => __('Products are updated only if they were found using the product synchronization keys.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<br /><hr>%s',
+				__('Products are updated only if they were found using the product synchronization keys.', 'wc1c'),
+				__('The option works only with automatic updating of products. When disabled, it is still possible to manually update products through ManualCML and similar extensions.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
