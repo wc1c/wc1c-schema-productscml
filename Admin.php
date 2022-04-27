@@ -513,7 +513,7 @@ class Admin
 		[
 			'title' => __('Products (goods): prices', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Comparison of WooCommerce and 1C prices and other settings.', 'wc1c'),
+			'description' => __('Comprehensive settings for updating prices based on data from the offer package.', 'wc1c'),
 		];
 
 		$fields['products_price_from_primary'] =
@@ -559,7 +559,7 @@ class Admin
 		[
 			'title' => __('Products (goods): inventories', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Matching inventories for 1C and Woocommerce products.', 'wc1c'),
+			'description' => __('Comprehensive settings for updating inventories based on data from the offer package.', 'wc1c'),
 		];
 
 		$fields['products_inventories_by_offers_quantity'] =
