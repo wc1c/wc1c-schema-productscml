@@ -47,7 +47,8 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSync'], 30, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrice'], 40, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 50, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 42, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDimensions'], 44, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsVariablesCharacteristics'], 50, 1);
 
@@ -618,6 +619,70 @@ class Admin
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('It will be allowed to fill in the quantity of product stocks in WooCommerce based on the quantity received in 1C offers.', 'wc1c'),
 			'default' => 'no'
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products dimensions
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsDimensions($fields)
+	{
+		$fields['title_products_dimensions'] =
+		[
+			'title' => __('Products (goods): dimensions', 'wc1c'),
+			'type' => 'title',
+			'description' => __('The main settings for filling in the dimensions of products (goods) according to data from 1C. Dimensions include: weight, length, width, height.', 'wc1c'),
+		];
+
+		$fields['products_dimensions_by_requisites'] =
+		[
+			'title' => __('Filling dimensions based on requisites', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('Filling in the dimensions will be performed from the given details of the products. For the setting to work, you must specify the correspondence of the details in the fields below.', 'wc1c'),
+			'default' => 'yes'
+		];
+
+		$fields['products_dimensions_by_requisites_weight_from_name'] =
+		[
+			'title' => __('Dimensions based on requisites: weight', 'wc1c'),
+			'type' => 'text',
+			'description' => __('Specify the requisite name of the weight in 1C, which is used for filling to WooCommerce as the weight.', 'wc1c'),
+			'default' => __('Weight', 'wc1c'),
+			'css' => 'min-width: 370px;',
+		];
+
+		$fields['products_dimensions_by_requisites_length_from_name'] =
+		[
+			'title' => __('Dimensions based on requisites: length', 'wc1c'),
+			'type' => 'text',
+			'description' => __('Specify the requisite name of the length in 1C, which is used for filling to WooCommerce as the length.', 'wc1c'),
+			'default' => __('Length', 'wc1c'),
+			'css' => 'min-width: 370px;',
+		];
+
+		$fields['products_dimensions_by_requisites_width_from_name'] =
+		[
+			'title' => __('Dimensions based on requisites: width', 'wc1c'),
+			'type' => 'text',
+			'description' => __('Specify the requisite name of the width in 1C, which is used for filling to WooCommerce as the width.', 'wc1c'),
+			'default' => __('Width', 'wc1c'),
+			'css' => 'min-width: 370px;',
+		];
+
+		$fields['products_dimensions_by_requisites_height_from_name'] =
+		[
+			'title' => __('Dimensions based on requisites: height', 'wc1c'),
+			'type' => 'text',
+			'description' => __('Specify the requisite name of the height in 1C, which is used for filling to WooCommerce as the height.', 'wc1c'),
+			'default' => __('Height', 'wc1c'),
+			'css' => 'min-width: 370px;',
 		];
 
 		return $fields;
