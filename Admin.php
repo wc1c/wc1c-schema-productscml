@@ -49,6 +49,8 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrice'], 40, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 50, 1);
 
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsVariablesCharacteristics'], 50, 1);
+
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategories'], 60, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategoriesClassifierGroups'], 65, 1);
 
@@ -307,6 +309,53 @@ class Admin
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('If the category was previously linked to 1C data, then when you change the description in 1C, the description will also change in WooCommerce. 
 			It should be borne in mind that descriptions in 1C are not always stored. Therefore, you should not enable this function if the descriptions were filled out on the site.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: variables by characteristics
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsVariablesCharacteristics($fields)
+	{
+		$fields['variable_characteristics'] =
+		[
+			'title' => __('Products (goods): variables by characteristics', 'wc1c'),
+			'type' => 'title',
+			'description' => __('Variable execution of products in WooCommerce based on the characteristics of products from 1C. The same products, but with different characteristics.', 'wc1c'),
+		];
+
+		$fields['variable_characteristics_create'] =
+		[
+			'title' => __('Creating variations', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<br /><hr>%s',
+				__('The variations is only created if it is not found in WooCommerce when searching by criteria for synchronization.', 'wc1c'),
+				__('The option works only with automatic creation of variations. When disabled, it is still possible to manually create variations through ManualCML and similar extensions.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
+		$fields['variable_characteristics_update'] =
+		[
+			'title' => __('Updating variations', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<br /><hr>%s',
+				__('Variations are updated only if they were found using the product synchronization keys.', 'wc1c'),
+				__('The option works only with automatic updating of variations. When disabled, it is still possible to manually update product variations through ManualCML and similar extensions.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
