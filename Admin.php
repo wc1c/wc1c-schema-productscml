@@ -45,21 +45,22 @@ class Admin
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProducts'], 20, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSync'], 30, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsImages'], 40, 1);
 
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrice'], 40, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 42, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDimensions'], 44, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrice'], 50, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 52, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDimensions'], 54, 1);
 
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsVariablesCharacteristics'], 50, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsVariablesCharacteristics'], 60, 1);
 
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategories'], 60, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategoriesClassifierGroups'], 65, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategories'], 70, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategoriesClassifierGroups'], 75, 1);
 
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributes'], 70, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributesClassifierProperties'], 75, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributes'], 80, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributesClassifierProperties'], 80, 1);
 
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsLogs'], 80, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsOther'], 90, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsLogs'], 90, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsOther'], 100, 1);
 	}
 
 	/**
@@ -547,6 +548,15 @@ class Admin
 			'default' => 'no'
 		];
 
+		$fields['products_update_only_schema'] =
+		[
+			'title' => __('Consider schema when updating products', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When updating products data, the update will only occur if the product was created through the current schema.', 'wc1c'),
+			'default' => 'no'
+		];
+
 		return $fields;
 	}
 
@@ -591,6 +601,102 @@ class Admin
 			'description' => __('Specify the name of the sale price in 1C, which is used for uploading to WooCommerce as the sale price.', 'wc1c'),
 			'default' => '',
 			'css' => 'min-width: 370px;',
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products images
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsImages($fields)
+	{
+		$fields['title_products_images'] =
+		[
+			'title' => __('Products (goods): images', 'wc1c'),
+			'type' => 'title',
+			'description' => __('Regulation of algorithms for working with images of products (goods).', 'wc1c'),
+		];
+
+		$fields['products_images_by_cml'] =
+		[
+			'title' => __('Images based on CommerceML files.', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When enabled, work with images based on CommerceML files will be allowed.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		$fields['products_images_by_cml_max'] =
+		[
+			'title' => __('Images based on CommerceML files: maximum images', 'wc1c'),
+			'type' => 'text',
+			'description' => __('The maximum number of images to be processed. The excess number will be ignored. To remove the limit, specify - 0. The limit is necessary for weak systems.', 'wc1c'),
+			'default' => '10',
+			'css' => 'min-width: 60px;',
+		];
+
+		$products_create_mode_options =
+		[
+			'no' => __('Do not use images', 'wc1c'),
+			'yes' => __('Add images', 'wc1c'),
+		];
+
+		$fields['products_create_images_by_cml_mode'] =
+		[
+			'title' => __('Images based on CommerceML files: mode for products create', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s',
+			 __('The setting works only when creating new products (goods). There is another option to update products.', 'wc1c'),
+			 __('Do not use images', 'wc1c'),
+			 __('The use of images will be skipped. None of the images will end up in the gallery of the newly created product.', 'wc1c'),
+			 __('Add images', 'wc1c'),
+			 __('Images will be added considering the maximum number option.', 'wc1c')
+			),
+			'default' => 'no',
+			'options' => $products_create_mode_options
+		];
+
+		$products_update_mode_options =
+		[
+			'no' => __('Do not update images', 'wc1c'),
+			'yes' => __('Add images', 'wc1c'),
+			'yes_adding_deleting' => __('Add missing images and remove redundant ones', 'wc1c'),
+			'yes_deleting' => __('Removing extra images without adding new ones', 'wc1c'),
+		];
+
+		$fields['products_images_by_cml_mode'] =
+		[
+			'title' => __('Images based on CommerceML files: mode for products update', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+			 __('The setting works only when updating existing products (products). Another option is used to add products.', 'wc1c'),
+			 __('Add images', 'wc1c'),
+			 __('Previously missing images will be added without any removal of old ones.', 'wc1c'),
+			 __('Add missing images and remove redundant ones', 'wc1c'),
+			 __('Previously missing images will be added and all unnecessary images that are missing in the new exchange will be removed.', 'wc1c'),
+			 __('Removing extra images without adding new ones', 'wc1c'),
+			 __('Old images are cleared without adding any new ones. At the same time, the images physically remain in the WordPress media library.', 'wc1c')
+			),
+			'default' => 'no',
+			'options' => $products_update_mode_options
+		];
+
+		$fields['products_images_check'] =
+		[
+			'title' => __('Checking images for physical existence', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('If the exchange is stable, it is recommended to disable this setting. Enabling validation adds physical load to the server.', 'wc1c'),
+			'default' => 'no'
 		];
 
 		return $fields;
