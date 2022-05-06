@@ -690,6 +690,24 @@ class Admin
 			'options' => $products_update_mode_options
 		];
 
+		$fields['products_images_by_cml_mode_only_configuration'] =
+		[
+			'title' => __('Consider configuration when deleting images', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When deleting images, the deletion will only occur if the image was added using the current configuration.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		$fields['products_images_by_cml_mode_only_schema'] =
+		[
+			'title' => __('Consider schema when deleting images', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When deleting images, the deletion will only occur if the image was added using the current schema.', 'wc1c'),
+			'default' => 'no'
+		];
+
 		$fields['products_images_check'] =
 		[
 			'title' => __('Checking images for physical existence', 'wc1c'),
