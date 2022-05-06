@@ -696,7 +696,7 @@ class Admin
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('When deleting images, the deletion will only occur if the image was added using the current configuration.', 'wc1c'),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		$fields['products_images_by_cml_mode_only_schema'] =
@@ -705,7 +705,7 @@ class Admin
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('When deleting images, the deletion will only occur if the image was added using the current schema.', 'wc1c'),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		$fields['products_images_check'] =
