@@ -385,6 +385,21 @@ class Admin
 			'default' => 'yes'
 		];
 
+		$fields['variable_characteristics_create_parent'] =
+		[
+			'title' => __('Creating a parent based on the first characteristic', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s %s<br /><hr>%s',
+				__('In some cases, the parent product is missing from the CommerceML files. Therefore, it is possible to create products based on data from the first characteristic.', 'wc1c'),
+				__('If the parent product is not created, all characteristic-based variations will be skipped.', 'wc1c'),
+				__('It is recommended not to enable this setting because the name of the main product will be filled in incorrectly in most cases.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
 		return $fields;
 	}
 
@@ -401,7 +416,13 @@ class Admin
 		[
 			'title' => __('Attributes', 'wc1c'),
 			'type' => 'title',
-			'description' => __('General (global) attributes are used for all products. It is possible to sort products according to them.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s %s %s',
+				__('General (global) attributes are used for all products.', 'wc1c'),
+				__('Work with individual product attributes is configured at the product level.', 'wc1c'),
+				__('These settings only affect the global attributes. As a rule, there is no deletion of global attributes and their values. Removal operations are performed manually or through a cleaner.', 'wc1c')
+			)
 		];
 
 		$fields['attributes_create'] =
@@ -409,7 +430,12 @@ class Admin
 			'title' => __('Creating attributes', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('It will be allowed to add common attributes for products based on characteristics, properties and other data according to the settings.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('It will be allowed to add common attributes for products based on characteristics, properties and other data according to the settings..', 'wc1c'),
+				__('Creation will only occur if the attribute has not been previously created. Verification is possible by: name, identifier from 1C, etc.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
