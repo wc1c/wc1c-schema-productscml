@@ -231,6 +231,15 @@ class Admin
 			'default' => 'no'
 		];
 
+		$fields['categories_update_only_schema'] =
+		[
+			'title' => __('Consider schema when updating categories', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When updating category data, the update will only occur if the category was created through the current schema.', 'wc1c'),
+			'default' => 'yes'
+		];
+
 		return $fields;
 	}
 
