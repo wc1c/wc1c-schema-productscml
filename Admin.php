@@ -646,15 +646,6 @@ class Admin
 			'default' => 'no'
 		];
 
-		$fields['products_images_by_cml_max'] =
-		[
-			'title' => __('Images based on CommerceML files: maximum images', 'wc1c'),
-			'type' => 'text',
-			'description' => __('The maximum number of images to be processed. The excess number will be ignored. To remove the limit, specify - 0. The limit is necessary for weak systems.', 'wc1c'),
-			'default' => '10',
-			'css' => 'min-width: 60px;',
-		];
-
 		$products_create_mode_options =
 		[
 			'no' => __('Do not use images', 'wc1c'),
@@ -721,6 +712,15 @@ class Admin
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('When deleting images, the deletion will only occur if the image was added using the current schema.', 'wc1c'),
 			'default' => 'yes'
+		];
+
+		$fields['products_images_by_cml_max'] =
+		[
+			'title' => __('Images based on CommerceML files: maximum images', 'wc1c'),
+			'type' => 'text',
+			'description' => __('The maximum number of images to be processed. The excess number will be ignored. To remove the limit, specify - 0. The limit is necessary for weak systems.', 'wc1c'),
+			'default' => '10',
+			'css' => 'min-width: 60px;',
 		];
 
 		$fields['products_images_check'] =
