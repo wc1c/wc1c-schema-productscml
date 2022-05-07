@@ -361,6 +361,21 @@ class Admin
 			'default' => 'no'
 		];
 
+		$fields['variable_characteristics_from_simple'] =
+		[
+			'title' => __('Turning simple products into variables', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<br /><hr>%s %s',
+				__('Information about product variations comes in a completely different process, so simple products are initially created.', 'wc1c'),
+				__('When this setting is enabled, variations will be created for simple products, thereby turning simple products into variable ones.', 'wc1c'),
+				__('If the setting is disabled, variations will only be created for variable products.', 'wc1c')
+			),
+			'default' => 'yes'
+		];
+
 		return $fields;
 	}
 
