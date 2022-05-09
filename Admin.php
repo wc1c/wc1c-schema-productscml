@@ -51,7 +51,7 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 52, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDimensions'], 54, 1);
 
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsVariablesCharacteristics'], 60, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsWithCharacteristics'], 60, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategories'], 70, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategoriesClassifierGroups'], 75, 1);
@@ -327,75 +327,56 @@ class Admin
 	}
 
 	/**
-	 * Configuration fields: variables by characteristics
+	 * Configuration fields: products with characteristics
 	 *
-	 * @param $fields
+	 * @param array $fields Прежний массив настроек
 	 *
-	 * @return array
+	 * @return array Новый массив настроек
 	 */
-	public function configurationsFieldsVariablesCharacteristics($fields)
+	public function configurationsFieldsProductsWithCharacteristics($fields)
 	{
-		$fields['variable_characteristics'] =
+		$fields['title_products_with_characteristics'] =
 		[
-			'title' => __('Products (goods): variables by characteristics', 'wc1c'),
+			'title' => __('Products (goods): with characteristics', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Variable execution of products in WooCommerce based on the characteristics of products from 1C. The same products, but with different characteristics.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s %s %s',
+				__('The same product (product) can have various kinds of differences, such as color, size, etc.', 'wc1c'),
+				__('In 1C programs, these differences can be presented in the form of characteristics.', 'wc1c'),
+				__('This section of the settings regulates the behavior of the processing of such characteristics on the Woocommerce side.', 'wc1c')
+			)
 		];
 
-		$fields['variable_characteristics_create'] =
+		$fields['products_with_characteristics'] =
 		[
-			'title' => __('Creating variations', 'wc1c'),
+			'title' => __('Using characteristics', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => sprintf
 			(
-				'%s<br /><hr>%s',
-				__('The variations is only created if it is not found in WooCommerce when searching by criteria for synchronization.', 'wc1c'),
-				__('The option works only with automatic creation of variations. When disabled, it is still possible to manually create variations through ManualCML and similar extensions.', 'wc1c')
+				'%s<br/>%s %s %s<br /><hr>%s',
+				__('When turning on, products with characteristics will processing on the basis of settings for products.', 'wc1c'),
+				__('At the same time, products are divided into simple and variable. Work with simple products will occur when the parent is not found.', 'wc1c'),
+				__('The search for the parent product takes place according to a unique identifier of 1C. Search for simple products is carried out in all available settings for synchronization.', 'wc1c'),
+				__('', 'wc1c'),
+				__('With the option disconnected, all the data of products with characteristics will be simply missed. Neither the creation, nor update and no other processing will be.', 'wc1c')
 			),
 			'default' => 'no'
 		];
 
-		$fields['variable_characteristics_update'] =
-		[
-			'title' => __('Updating variations', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => sprintf
-			(
-				'%s<br /><hr>%s',
-				__('Variations are updated only if they were found using the product synchronization keys.', 'wc1c'),
-				__('The option works only with automatic updating of variations. When disabled, it is still possible to manually update product variations through ManualCML and similar extensions.', 'wc1c')
-			),
-			'default' => 'no'
-		];
-
-		$fields['variable_characteristics_from_simple'] =
-		[
-			'title' => __('Turning simple products into variables', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c'),
-			'description' => sprintf
-			(
-				'%s<br /><hr>%s %s',
-				__('Information about product variations comes in a completely different process, so simple products are initially created.', 'wc1c'),
-				__('When this setting is enabled, variations will be created for simple products, thereby turning simple products into variable ones.', 'wc1c'),
-				__('If the setting is disabled, variations will only be created for variable products.', 'wc1c')
-			),
-			'default' => 'yes'
-		];
-
-		$fields['variable_characteristics_create_parent'] =
+		$fields['products_with_characteristics_parent_create'] =
 		[
 			'title' => __('Creating a parent based on the first characteristic', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => sprintf
 			(
-				'%s %s<br /><hr>%s',
-				__('In some cases, the parent product is missing from the CommerceML files. Therefore, it is possible to create products based on data from the first characteristic.', 'wc1c'),
-				__('If the parent product is not created, all characteristic-based variations will be skipped.', 'wc1c'),
-				__('It is recommended not to enable this setting because the name of the main product will be filled in incorrectly in most cases.', 'wc1c')
+				'%s %s<br /><hr>%s %s',
+				__('In some cases, the parent product is missing from the CommerceML files. Therefore, it is possible to create parent products based on data from the first characteristic.', 'wc1c'),
+				__('If the parent product is not created, all products with characteristics will be created as simple, and not as variations in a variable product.', 'wc1c'),
+				__('It is recommended not to enable this setting because the name of the main product will be filled in incorrectly in most cases.', 'wc1c'),
+				__('In addition, if the parent product is not unloaded from 1C, then most likely it should be. It was decided to unload the products with characteristics as simple products.', 'wc1c')
 			),
 			'default' => 'no'
 		];
