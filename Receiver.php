@@ -454,20 +454,27 @@ final class Receiver
 	{
 		$upload_directory = $this->core()->getUploadDirectory() . DIRECTORY_SEPARATOR;
 
-		$upload_directory = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_directory', $upload_directory);
+		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_file_directory'))
+		{
+			$upload_directory = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_directory', $upload_directory);
+		}
 
 		wc1c()->filesystem()->ensureDirectoryExists($upload_directory);
 
 		if(!wc1c()->filesystem()->exists($upload_directory))
 		{
 			$response_description = __('Directory is unavailable:', 'wc1c') . ' ' . $upload_directory;
+
 			$this->core()->log()->error($response_description, ['directory' => $upload_directory]);
 			$this->sendResponseByType('failure', $response_description);
 		}
 
 		$filename = wc1c()->getVar($_GET['filename'], '');
 
-		$filename = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_filename', $filename);
+		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_file_filename'))
+		{
+			$filename = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_filename', $filename);
+		}
 
 		if(empty($filename))
 		{
@@ -488,6 +495,7 @@ final class Receiver
 		if(!wc1c()->filesystem()->isWritable($upload_directory))
 		{
 			$response_description = __('Directory is unavailable for write.', 'wc1c');
+
 			$this->core()->log()->error($response_description, ['directory' => $upload_directory]);
 			$this->sendResponseByType('failure', $response_description);
 		}
@@ -505,6 +513,7 @@ final class Receiver
 		if(false === $file_data)
 		{
 			$response_description = __('The request contains no data to write to the file. Retry the upload.', 'wc1c');
+
 			$this->core()->log()->error($response_description);
 			$this->sendResponseByType('failure', $response_description);
 		}
@@ -525,11 +534,13 @@ final class Receiver
 			wc1c()->filesystem()->chmod($upload_file_path , 0755);
 
 			$response_description = __('The data is successfully written to a file. Recorded data size:', 'wc1c') . ' '. size_format($file_size);
+
 			$this->core()->log()->info($response_description, ['file_size' => $file_size]);
 			$this->sendResponseByType('success', $response_description);
 		}
 
 		$response_description = __('Failed to write data to file.', 'wc1c');
+
 		$this->core()->log()->error($response_description, ['file_path' => $upload_file_path]);
 		$this->sendResponseByType('failure', $response_description);
 	}
