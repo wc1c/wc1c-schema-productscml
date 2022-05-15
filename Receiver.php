@@ -258,8 +258,12 @@ final class Receiver
 	public function handlerCheckauth()
 	{
 		$credentials = $this->getCredentialsByServer();
+		$validator = false;
 
-		$validator = apply_filters('wc1c_schema_productscml_handler_checkauth_validate', $credentials);
+		if(has_filter('wc1c_schema_productscml_handler_checkauth_validate'))
+		{
+			$validator = apply_filters('wc1c_schema_productscml_handler_checkauth_validate', $credentials);
+		}
 
 		if(true !== $validator)
 		{
@@ -296,7 +300,12 @@ final class Receiver
 		$lines['bitrix_sessid'] = 'sessid=' . $session_id . PHP_EOL;
 		$lines['timestamp'] = 'timestamp=' . time() . PHP_EOL;
 
-		$lines = apply_filters('wc1c_schema_productscml_handler_checkauth_lines', $lines);
+		if(has_filter('wc1c_schema_productscml_handler_checkauth_lines'))
+		{
+			$lines = apply_filters('wc1c_schema_productscml_handler_checkauth_lines', $lines);
+		}
+
+		$this->core()->log()->debug(__('Print lines for 1C.', 'wc1c'), ['data' => $lines]);
 
 		foreach($lines as $line)
 		{
