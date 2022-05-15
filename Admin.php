@@ -157,7 +157,7 @@ class Admin
 				wc1c()->settings()->get('php_post_max_size', wc1c()->environment()->get('php_post_max_size')),
 				__('Can only decrease the value, because it must not exceed the limits from the WC1C settings.', 'wc1c')
 			),
-			'default' => wc1c()->settings()->get('php_post_max_size', ''),
+			'default' => wc1c()->settings()->get('php_post_max_size', wc1c()->environment()->get('php_post_max_size')),
 			'css' => 'min-width: 100px;',
 		];
 
@@ -668,7 +668,7 @@ class Admin
 			'yes' => __('Add images', 'wc1c'),
 		];
 
-		$fields['products_create_images_by_cml_mode'] =
+		$fields['products_images_by_cml_mode_create'] =
 		[
 			'title' => __('Images based on CommerceML files: mode for products create', 'wc1c'),
 			'type' => 'select',
@@ -693,7 +693,7 @@ class Admin
 			'yes_deleting' => __('Removing extra images without adding new ones', 'wc1c'),
 		];
 
-		$fields['products_images_by_cml_mode'] =
+		$fields['products_images_by_cml_mode_update'] =
 		[
 			'title' => __('Images based on CommerceML files: mode for products update', 'wc1c'),
 			'type' => 'select',
