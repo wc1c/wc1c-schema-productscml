@@ -397,7 +397,10 @@ final class Receiver
 	{
 		$this->core()->log()->info(__('Initialization of receiving requests from 1C.', 'wc1c'));
 
-		$_SESSION = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_session', $_SESSION, $this);
+		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_init_session'))
+		{
+			$_SESSION = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_session', $_SESSION, $this);
+		}
 
 		$this->core()->log()->debug(__('Session for receiving requests.', 'wc1c'), ['session'=> $_SESSION]);
 
@@ -414,27 +417,30 @@ final class Receiver
 
 		$data['zip'] = 'zip=no' . PHP_EOL;
 
-		$size = $this->utilityConvertFileSize(wc1c()->environment()->get('php_post_max_size'));
+		$max_size = $this->utilityConvertFileSize(wc1c()->environment()->get('php_post_max_size'));
 		$max_wc1c = $this->utilityConvertFileSize(wc1c()->settings('main')->get('php_post_max_size'));
 		$max_configuration = $this->utilityConvertFileSize($this->core()->getOptions('php_post_max_size'));
 
-		$this->core()->log()->debug(__('The maximum size of accepted files from 1C is assigned:', 'wc1c') . ' ' . size_format($size));
+		$this->core()->log()->debug(__('The maximum size of accepted files from 1C is assigned:', 'wc1c') . ' ' . size_format($max_size));
 
-		if($max_wc1c && $max_wc1c < $size)
+		if($max_wc1c && $max_wc1c < $max_size)
 		{
-			$size = $max_wc1c;
-			$this->core()->log()->debug(__('Based on the global settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c') . ' ' . size_format($size));
+			$max_size = $max_wc1c;
+			$this->core()->log()->debug(__('Based on the global settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c') . ' ' . size_format($max_size));
 		}
 
-		if($max_configuration && $max_configuration < $size)
+		if($max_configuration && $max_configuration < $max_size)
 		{
-			$size = $max_configuration;
-			$this->core()->log()->debug(__('Based on the configuration settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c') . ' ' . size_format($size));
+			$max_size = $max_configuration;
+			$this->core()->log()->debug(__('Based on the configuration settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c') . ' ' . size_format($max_size));
 		}
 
-		$data['file_limit'] = 'file_limit=' . $size . PHP_EOL;
+		$data['file_limit'] = 'file_limit=' . $max_size . PHP_EOL;
 
-		$data = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_data', $data, $this);
+		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_init_data'))
+		{
+			$data = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_data', $data, $this);
+		}
 
 		$this->core()->log()->debug(__('Print lines for 1C.', 'wc1c'), ['data' => $data]);
 
