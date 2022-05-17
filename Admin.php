@@ -45,6 +45,8 @@ class Admin
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProducts'], 20, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSync'], 30, 1);
+
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDescriptions'], 40, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsImages'], 40, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrice'], 50, 1);
@@ -630,6 +632,93 @@ class Admin
 			'title' => __('WooCommerce sale price: name in 1C', 'wc1c'),
 			'type' => 'text',
 			'description' => __('Specify the name of the sale price in 1C, which is used for uploading to WooCommerce as the sale price.', 'wc1c'),
+			'default' => '',
+			'css' => 'min-width: 370px;',
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products descriptions
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsDescriptions($fields)
+	{
+		$fields['title_products_descriptions'] =
+		[
+			'title' => __('Products (goods): descriptions', 'wc1c'),
+			'type' => 'title',
+			'description' => __('Sources and algorithms for filling out product descriptions, both short descriptions and full descriptions.', 'wc1c'),
+		];
+
+		$products_descriptions_by_cml_options =
+		[
+			'no' => __('Do not use', 'wc1c'),
+			'yes' => __('From the standard description', 'wc1c'),
+			'yes_html' => __('From the HTML description', 'wc1c'),
+			'yes_requisites' => __('From requisite with the specified name', 'wc1c'),
+		];
+
+		$fields['products_descriptions_short_by_cml'] =
+		[
+			'title' => __('Descriptions based on CommerceML data: short', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods).', 'wc1c'),
+				__('Do not use', 'wc1c'),
+				__('Populating the short description data from CommerceML data will be skipped. If a product is updating, then its current short description will not be updated.', 'wc1c'),
+				__('From the standard description', 'wc1c'),
+				__('This description is contained in the standard description of 1C products. It is located in the conditional tag - description.', 'wc1c'),
+				__('From the HTML description', 'wc1c'),
+				__('Standard description, in HTML format only. Unloaded in a short description if there is a checkmark in 1C - Description in HTML format.', 'wc1c'),
+				__('From requisite with the specified name', 'wc1c'),
+				__('The short description data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c')
+			),
+			'default' => 'yes',
+			'options' => $products_descriptions_by_cml_options
+		];
+
+		$fields['products_descriptions_short_from_requisites_name'] =
+		[
+			'title' => __('Descriptions based on CommerceML data: short - name for requisite', 'wc1c'),
+			'type' => 'text',
+			'description' => __('The name of the requisite of the product (goods) which contains a short description of the product.', 'wc1c'),
+			'default' => '',
+			'css' => 'min-width: 370px;',
+		];
+
+		$fields['products_descriptions_by_cml'] =
+		[
+			'title' => __('Descriptions based on CommerceML data: full', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods).', 'wc1c'),
+				__('Do not use', 'wc1c'),
+				__('Filling in full description data from CommerceML data will be skipped. If a product is updating, then its current full description will not be updated.', 'wc1c'),
+				__('From the standard description', 'wc1c'),
+				__('This description is contained in the standard description of 1C products. It is located in the conditional tag - description.', 'wc1c'),
+				__('From the HTML description', 'wc1c'),
+				__('Standard description, in HTML format only. It is unloaded when there is a checkmark in 1C - Description in HTML format.', 'wc1c'),
+				__('From requisite with the specified name', 'wc1c'),
+				__('The full description data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c')
+			),
+			'default' => 'yes_html',
+			'options' => $products_descriptions_by_cml_options
+		];
+
+		$fields['products_descriptions_from_requisites_name'] =
+		[
+			'title' => __('Descriptions based on CommerceML data: full - name for requisite', 'wc1c'),
+			'type' => 'text',
+			'description' => __('The name of the requisite of the product (goods) which contains a full description of the product.', 'wc1c'),
 			'default' => '',
 			'css' => 'min-width: 370px;',
 		];
