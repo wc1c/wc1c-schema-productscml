@@ -46,6 +46,7 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProducts'], 20, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSync'], 30, 1);
 
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsNames'], 40, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDescriptions'], 40, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsImages'], 40, 1);
 
@@ -632,6 +633,63 @@ class Admin
 			'title' => __('WooCommerce sale price: name in 1C', 'wc1c'),
 			'type' => 'text',
 			'description' => __('Specify the name of the sale price in 1C, which is used for uploading to WooCommerce as the sale price.', 'wc1c'),
+			'default' => '',
+			'css' => 'min-width: 370px;',
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products names
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsNames($fields)
+	{
+		$fields['title_products_names'] =
+		[
+			'title' => __('Products (goods): names', 'wc1c'),
+			'type' => 'title',
+			'description' => __('Sources and algorithms for filling out product names.', 'wc1c'),
+		];
+
+		$products_names_by_cml_options =
+		[
+			'no' => __('Do not use', 'wc1c'),
+			'name' => __('From the standard name', 'wc1c'),
+			'full_name' => __('From the full name', 'wc1c'),
+			'yes_requisites' => __('From requisite with the specified name', 'wc1c'),
+		];
+
+		$fields['products_names_by_cml'] =
+		[
+			'title' => __('Names based on CommerceML data', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods).', 'wc1c'),
+				__('Do not use', 'wc1c'),
+				__('Populating the name data from CommerceML data will be skipped. If a product is updating, then its current name will not be updated.', 'wc1c'),
+				__('From the standard name', 'wc1c'),
+				__('This name is contained in the standard name of 1C products. It is located in the conditional tag - name.', 'wc1c'),
+				__('From the full name', 'wc1c'),
+				__('In 1C it is presented in the form of the Full name of the nomenclature. Unloaded as a requisite with the appropriate name.', 'wc1c'),
+				__('From requisite with the specified name', 'wc1c'),
+				__('The name data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c')
+			),
+			'default' => 'name',
+			'options' => $products_names_by_cml_options
+		];
+
+		$fields['products_names_from_requisites_name'] =
+		[
+			'title' => __('Names based on CommerceML data: name for requisite', 'wc1c'),
+			'type' => 'text',
+			'description' => __('The name of the requisite of the product (goods) which contains a name of the product.', 'wc1c'),
 			'default' => '',
 			'css' => 'min-width: 370px;',
 		];
