@@ -50,7 +50,7 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDescriptions'], 40, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsImages'], 40, 1);
 
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrice'], 50, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrices'], 50, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 52, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDimensions'], 54, 1);
 
@@ -595,44 +595,80 @@ class Admin
 	}
 
 	/**
-	 * Configuration fields: products price
+	 * Configuration fields: products prices
 	 *
 	 * @param $fields
 	 *
 	 * @return array
 	 */
-	public function configurationsFieldsProductsPrice($fields)
+	public function configurationsFieldsProductsPrices($fields)
 	{
-		$fields['title_products_price'] =
+		$fields['title_products_prices'] =
 		[
 			'title' => __('Products (goods): prices', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Comprehensive settings for updating prices based on data from the offer package.', 'wc1c'),
+			'description' => __('Comprehensive settings for updating prices.', 'wc1c'),
 		];
 
-		$fields['products_price_from_primary'] =
+		$products_prices_by_cml_options =
 		[
-			'title' => __('Base price - first found', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('If the name of the base price from 1C is not specified for the WooCommerce base price, the first found price will be taken into account. It is convenient to use when accepting only one type of price.', 'wc1c'),
-			'default' => 'no'
+			'no' => __('Do not use', 'wc1c'),
+			'yes_primary' => __('From first found', 'wc1c'),
+			'yes_name' => __('From specified name', 'wc1c'),
 		];
 
-		$fields['products_price_from_name'] =
+		$fields['products_prices_regular_by_cml'] =
 		[
-			'title' => __('WooCommerce base price: name in 1C', 'wc1c'),
+			'title' => __('Prices based on CommerceML data: regular', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods). The found price after use will not be available for selection as a sale price.', 'wc1c'),
+				__('Do not use', 'wc1c'),
+				__('Populating the prices data from CommerceML data will be skipped. If a product is updating, then its current regular price will not be updated.', 'wc1c'),
+				__('From first found', 'wc1c'),
+				__('The first available price of all available prices for the product will be used as the regular price.', 'wc1c'),
+				__('From specified name', 'wc1c'),
+				__('The price with the specified name will be used as the regular price. If the price is not found by name, no value will be assigned.', 'wc1c')
+			),
+			'default' => 'no',
+			'options' => $products_prices_by_cml_options
+		];
+
+		$fields['products_prices_regular_by_cml_from_name'] =
+		[
+			'title' => __('Prices based on CommerceML data: regular - name in 1C', 'wc1c'),
 			'type' => 'text',
-			'description' => __('Specify the name of the base price in 1C, which is used for uploading to WooCommerce as the base price.', 'wc1c'),
+			'description' => __('Specify the name of the base price in 1C, which is used for filling to WooCommerce as the base price.', 'wc1c'),
 			'default' => '',
 			'css' => 'min-width: 370px;',
 		];
 
-		$fields['products_sale_price_from_name'] =
+		$fields['products_prices_sale_by_cml'] =
 		[
-			'title' => __('WooCommerce sale price: name in 1C', 'wc1c'),
+			'title' => __('Prices based on CommerceML data: sale', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods). The sale price must be less than the regular price. Otherwise, it simply wont apply.', 'wc1c'),
+				__('Do not use', 'wc1c'),
+				__('Filling in full description data from CommerceML data will be skipped. If a product is updating, then its current full description will not be updated.', 'wc1c'),
+				__('From first found', 'wc1c'),
+				__('The first available price of all available prices for the product will be used as the sale price.', 'wc1c'),
+				__('From specified name', 'wc1c'),
+				__('The price with the specified name will be used as the sale price. If the price is not found by name, no value will be assigned.', 'wc1c')
+			),
+			'default' => 'no',
+			'options' => $products_prices_by_cml_options
+		];
+
+		$fields['products_prices_sale_by_cml_from_name'] =
+		[
+			'title' => __('Prices based on CommerceML data: sale - name in 1C', 'wc1c'),
 			'type' => 'text',
-			'description' => __('Specify the name of the sale price in 1C, which is used for uploading to WooCommerce as the sale price.', 'wc1c'),
+			'description' => __('Specify the name of the sale price in 1C, which is used for filling to WooCommerce as the sale price.', 'wc1c'),
 			'default' => '',
 			'css' => 'min-width: 370px;',
 		];
