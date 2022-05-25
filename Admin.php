@@ -62,8 +62,10 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributes'], 80, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributesClassifierProperties'], 80, 1);
 
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsLogs'], 90, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsOther'], 100, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsMediaLibrary'], 90, 1);
+
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsLogs'], 100, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsOther'], 110, 1);
 	}
 
 	/**
@@ -358,11 +360,10 @@ class Admin
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => sprintf
 			(
-				'%s<br/>%s %s %s<br /><hr>%s',
+				'%s<br/>%s %s<br /><hr>%s',
 				__('When turning on, products with characteristics will processing on the basis of settings for products.', 'wc1c'),
 				__('At the same time, products are divided into simple and variable. Work with simple products will occur when the parent is not found.', 'wc1c'),
 				__('The search for the parent product takes place according to a unique identifier of 1C. Search for simple products is carried out in all available settings for synchronization.', 'wc1c'),
-				__('', 'wc1c'),
 				__('With the option disconnected, all the data of products with characteristics will be simply missed. Neither the creation, nor update and no other processing will be.', 'wc1c')
 			),
 			'default' => 'no'
@@ -838,97 +839,74 @@ class Admin
 
 		$fields['products_images_by_cml'] =
 		[
-			'title' => __('Images based on CommerceML files.', 'wc1c'),
+			'title' => __('Images based on CommerceML files', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('When enabled, work with images based on CommerceML files will be allowed.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('When enabled, work with images based on CommerceML files will be allowed.', 'wc1c'),
+				__('Available images in CommerceML files for products will be populated for future use.', 'wc1c'),
+				__('In this case, the image files themselves must first be added to the WordPress media library. If they are not included, their use will be skipped.', 'wc1c')
+			),
 			'default' => 'no'
-		];
-
-		$products_create_mode_options =
-		[
-			'no' => __('Do not use images', 'wc1c'),
-			'yes' => __('Add images', 'wc1c'),
-		];
-
-		$fields['products_images_by_cml_mode_create'] =
-		[
-			'title' => __('Images based on CommerceML files: mode for products create', 'wc1c'),
-			'type' => 'select',
-			'description' => sprintf
-			(
-				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s',
-			 __('The setting works only when creating new products (goods). There is another option to update products.', 'wc1c'),
-			 __('Do not use images', 'wc1c'),
-			 __('The use of images will be skipped. None of the images will end up in the gallery of the newly created product.', 'wc1c'),
-			 __('Add images', 'wc1c'),
-			 __('Images will be added considering the maximum number option.', 'wc1c')
-			),
-			'default' => 'no',
-			'options' => $products_create_mode_options
-		];
-
-		$products_update_mode_options =
-		[
-			'no' => __('Do not update images', 'wc1c'),
-			'yes' => __('Add images', 'wc1c'),
-			'yes_adding_deleting' => __('Add missing images and remove redundant ones', 'wc1c'),
-			'yes_deleting' => __('Removing extra images without adding new ones', 'wc1c'),
-		];
-
-		$fields['products_images_by_cml_mode_update'] =
-		[
-			'title' => __('Images based on CommerceML files: mode for products update', 'wc1c'),
-			'type' => 'select',
-			'description' => sprintf
-			(
-				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
-			 __('The setting works only when updating existing products (products). Another option is used to add products.', 'wc1c'),
-			 __('Add images', 'wc1c'),
-			 __('Previously missing images will be added without any removal of old ones.', 'wc1c'),
-			 __('Add missing images and remove redundant ones', 'wc1c'),
-			 __('Previously missing images will be added and all unnecessary images that are missing in the new exchange will be removed.', 'wc1c'),
-			 __('Removing extra images without adding new ones', 'wc1c'),
-			 __('Old images are cleared without adding any new ones. At the same time, the images physically remain in the WordPress media library.', 'wc1c')
-			),
-			'default' => 'no',
-			'options' => $products_update_mode_options
-		];
-
-		$fields['products_images_by_cml_mode_only_configuration'] =
-		[
-			'title' => __('Consider configuration when deleting images', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('When deleting images, the deletion will only occur if the image was added using the current configuration.', 'wc1c'),
-			'default' => 'yes'
-		];
-
-		$fields['products_images_by_cml_mode_only_schema'] =
-		[
-			'title' => __('Consider schema when deleting images', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('When deleting images, the deletion will only occur if the image was added using the current schema.', 'wc1c'),
-			'default' => 'yes'
 		];
 
 		$fields['products_images_by_cml_max'] =
 		[
-			'title' => __('Images based on CommerceML files: maximum images', 'wc1c'),
+			'title' => __('Images based on CommerceML files: maximum quantity', 'wc1c'),
 			'type' => 'text',
-			'description' => __('The maximum number of images to be processed. The excess number will be ignored. To remove the limit, specify - 0. The limit is necessary for weak systems.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('The maximum number of images to be processed. The excess number will be ignored. To remove the limit, specify - 0. The limit is necessary for weak systems.', 'wc1c'),
+				__('If you specify one image, it will be uploaded as the main one without adding the rest to the product gallery.', 'wc1c')
+			),
 			'default' => '10',
 			'css' => 'min-width: 60px;',
 		];
 
-		$fields['products_images_check'] =
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: media library
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsMediaLibrary($fields)
+	{
+		$fields['title_media_library'] =
 		[
-			'title' => __('Checking images for physical existence', 'wc1c'),
+			'title' => __('Media library', 'wc1c'),
+			'type' => 'title',
+			'description' => __('Regulation of algorithms for working with WordPress media library.', 'wc1c'),
+		];
+
+		$fields['media_library'] =
+		[
+			'title' => __('Using the media library', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('If the exchange is stable, it is recommended to disable this setting. Enabling validation adds physical load to the server.', 'wc1c'),
+			'description' => __('All file handling capabilities available to the library will be enabled. If disabled, no actions will be performed on files in the library through the schema.', 'wc1c'),
 			'default' => 'no'
+		];
+
+		$fields['media_library_images_by_receiver'] =
+		[
+			'title' => __('Images based on Receiver', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('All image files sent to Receiver files will be added to the WordPress media library.', 'wc1c'),
+				__('These images can later be used to populate product images.', 'wc1c'),
+				__('When adding an image, it will be assigned the identifier of the current configuration, as well as the identifier of the scheme and the path of being in 1C.', 'wc1c')
+			),
+			'default' => 'yes'
 		];
 
 		return $fields;
