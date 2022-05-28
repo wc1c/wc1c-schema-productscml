@@ -5,6 +5,9 @@ defined('ABSPATH') || exit;
 use Wc1c\Exceptions\Exception;
 use Wc1c\Traits\SingletonTrait;
 use Wc1c\Traits\UtilityTrait;
+use Wc1c\Wc\Contracts\ImagesStorageContract;
+use Wc1c\Wc\Image;
+use Wc1c\Wc\Storage;
 
 /**
  * Receiver
@@ -173,7 +176,11 @@ final class Receiver
 
 		$headers= [];
 		$headers['Content-Type'] = 'Content-Type: text/plain; charset=utf-8';
-		$headers = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_headers', $headers, $this, $type);
+
+		if(has_filter('wc1c_schema_productscml_receiver_send_response_by_type_headers'))
+		{
+			$headers = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_headers', $headers, $this, $type);
+		}
 
 		$this->core()->log()->debug(__('Headers for response.', 'wc1c'), ['context' => $headers]);
 
@@ -464,6 +471,7 @@ final class Receiver
 	 * Uploading files from 1C to a local directory
 	 *
 	 * @return void
+	 * @throws Exception
 	 */
 	public function handlerCatalogModeFile()
 	{
@@ -550,8 +558,67 @@ final class Receiver
 
 			$response_description = __('The data is successfully written to a file. Recorded data size:', 'wc1c') . ' '. size_format($file_size);
 
+			/*
+			 * Adding to media library
+			 */
+			if(is_file($upload_file_path) && 'yes' === $this->core()->getOptions('media_library_images_by_receiver', 'no'))
+			{
+				if('yes' !== $this->core()->getOptions('media_library', 'no'))
+				{
+					$this->core()->log()->notice(__('The file was not saved to the media library. Adding is disabled in the settings.', 'wc1c'));
+				}
+				else
+				{
+					$image = wp_get_image_mime($upload_file_path);
+					if($image)
+					{
+						/** @var ImagesStorageContract */
+						$images_storage = Storage::load('image');
+
+						$image_file_name = explode('.', basename($upload_file_path));
+
+						$image_current = $images_storage->getByExternalName($image_file_name[0]);
+						if(is_array($image_current))
+						{
+							$image_current = $image_current[0];
+						}
+
+						if(false === $image_current)
+						{
+							$new_image = new Image();
+
+							$new_image->setName(__('No name', 'wc1c'));
+							$new_image->setExternalName($image_file_name[0]);
+							$new_image->setSlug($image_file_name[0]);
+
+							$new_image->setConfigurationId($this->core()->configuration()->getId());
+							$new_image->setSchemaId($this->core()->getId());
+
+							$new_image->setUserId($this->core()->configuration()->getUserId());
+							$new_image->setMimeType($image);
+
+							$image_id = $images_storage->uploadByPath($upload_file_path, $new_image);
+
+							if($image_id === false)
+							{
+								$response_description .= '. ' . __('The image has not been added to the media library.', 'wc1c');
+							}
+							else
+							{
+								$response_description .= '. ' . __('Image added to media library, id:', 'wc1c') . ' ' . $image_id;
+							}
+						}
+						else
+						{
+							$response_description .= '. ' . __('The image has not been added to the media library. It was added earlier, id:', 'wc1c') . ' ' . $image_current->getId();
+						}
+					}
+				}
+			}
+
 			$this->core()->log()->info($response_description, ['file_size' => $file_size]);
 			$this->sendResponseByType('success', $response_description);
+			return;
 		}
 
 		$response_description = __('Failed to write data to file.', 'wc1c');
