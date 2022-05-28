@@ -576,7 +576,7 @@ class Admin
 
 		$fields['products_update_only_configuration'] =
 		[
-			'title' => __('Consider configuration when updating products', 'wc1c'),
+			'title' => __('Update of products: consider configuration', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('When updating products data, the update will only occur if the product was created through the current configuration.', 'wc1c'),
@@ -585,7 +585,7 @@ class Admin
 
 		$fields['products_update_only_schema'] =
 		[
-			'title' => __('Consider schema when updating products', 'wc1c'),
+			'title' => __('Update of products: consider schema', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('When updating products data, the update will only occur if the product was created through the current schema.', 'wc1c'),
