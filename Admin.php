@@ -418,8 +418,8 @@ class Admin
 			'description' => sprintf
 			(
 				'%s<hr>%s',
-				__('It will be allowed to add common attributes for products based on characteristics, properties and other data according to the settings..', 'wc1c'),
-				__('Creation will only occur if the attribute has not been previously created. Verification is possible by: name, identifier from 1C, etc.', 'wc1c')
+				__('It will be allowed to add common attributes for products based on characteristics, properties and other data according to the other setting sections.', 'wc1c'),
+				__('Creation will only occur if the attribute has not been previously created. Verification is possible by: name, identifier from 1C, etc. The default is to match by name.', 'wc1c')
 			),
 			'default' => 'no'
 		];
@@ -429,18 +429,12 @@ class Admin
 			'title' => __('Updating attributes', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('It will be allowed to update common attributes for products based on characteristics, properties and other data according to the settings.', 'wc1c'),
-			'default' => 'no'
-		];
-
-		$fields['attributes_values_adding'] =
-		[
-			'title' => __('Adding values for attributes', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('It will be allowed to add product attribute values based on characteristics, 
-			properties and other data specified in the settings. If you disable the addition, work will only occur 
-			with existing attribute values.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('It will be allowed to update common attributes for products based on characteristics, properties and other data according to the other setting sections.', 'wc1c'),
+				__('It will be allowed to add products attribute values based on characteristics, properties and other data specified in the settings. If you disable the feature, work will only occur with existing attribute values.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
@@ -477,17 +471,8 @@ class Admin
 			'title' => __('Updating attributes from classifier properties', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('The update will occur when the classifier properties are reprocessed. The update occurs only when the name matches or there is a found relationship between the source of the attribute creation.', 'wc1c'),
-			'default' => 'no'
-		];
-
-		$fields['attributes_values_adding_by_classifier_properties'] =
-		[
-			'title' => __('Adding attribute values from classifier properties values', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c'),
 			'description' => __('Adding product attribute values based on classifier property values will be allowed. The value is added only if it is absent: by name.', 'wc1c'),
-			'default' => 'yes'
+			'default' => 'no'
 		];
 
 		return $fields;
