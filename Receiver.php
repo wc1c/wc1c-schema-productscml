@@ -5,6 +5,9 @@ defined('ABSPATH') || exit;
 use Wc1c\Exceptions\Exception;
 use Wc1c\Traits\SingletonTrait;
 use Wc1c\Traits\UtilityTrait;
+use Wc1c\Wc\Contracts\ImagesStorageContract;
+use Wc1c\Wc\Image;
+use Wc1c\Wc\Storage;
 
 /**
  * Receiver
@@ -26,13 +29,13 @@ final class Receiver
 	 */
 	public function initHandler()
 	{
-		add_action(WC1C_PREFIX . 'receiver_' . $this->core()->getId(), [$this, 'handler'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_checkauth', [$this, 'handlerCheckauth'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_init', [$this, 'handlerCatalogModeInit'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_file', [$this, 'handlerCatalogModeFile'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_import', [$this, 'handlerCatalogModeImport'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_deactivate', [$this, 'handlerCatalogModeDeactivate'], 10, 0);
-		add_action(WC1C_PREFIX . 'schema_productscml_catalog_handler_complete', [$this, 'handlerCatalogModeComplete'], 10, 0);
+		add_action('wc1c_receiver_' . $this->core()->getId(), [$this, 'handler'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_checkauth', [$this, 'handlerCheckauth'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_init', [$this, 'handlerCatalogModeInit'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_file', [$this, 'handlerCatalogModeFile'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_import', [$this, 'handlerCatalogModeImport'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_deactivate', [$this, 'handlerCatalogModeDeactivate'], 10, 0);
+		add_action('wc1c_schema_productscml_catalog_handler_complete', [$this, 'handlerCatalogModeComplete'], 10, 0);
 	}
 
 	/**
@@ -169,11 +172,15 @@ final class Receiver
 		$type = apply_filters('wc1c_schema_productscml_receiver_send_response_type', $type, $this);
 		$description = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_description', $description, $this, $type);
 
-		$this->core()->log()->debug(__('In 1C was send a response of the type:', 'wc1c') . ' ' . $type);
+		$this->core()->log()->info(__('In 1C was send a response of the type:', 'wc1c') . ' ' . $type);
 
 		$headers= [];
 		$headers['Content-Type'] = 'Content-Type: text/plain; charset=utf-8';
-		$headers = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_headers', $headers, $this, $type);
+
+		if(has_filter('wc1c_schema_productscml_receiver_send_response_by_type_headers'))
+		{
+			$headers = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_headers', $headers, $this, $type);
+		}
 
 		$this->core()->log()->debug(__('Headers for response.', 'wc1c'), ['context' => $headers]);
 
@@ -258,8 +265,12 @@ final class Receiver
 	public function handlerCheckauth()
 	{
 		$credentials = $this->getCredentialsByServer();
+		$validator = false;
 
-		$validator = apply_filters('wc1c_schema_productscml_handler_checkauth_validate', $credentials);
+		if(has_filter('wc1c_schema_productscml_handler_checkauth_validate'))
+		{
+			$validator = apply_filters('wc1c_schema_productscml_handler_checkauth_validate', $credentials);
+		}
 
 		if(true !== $validator)
 		{
@@ -296,7 +307,12 @@ final class Receiver
 		$lines['bitrix_sessid'] = 'sessid=' . $session_id . PHP_EOL;
 		$lines['timestamp'] = 'timestamp=' . time() . PHP_EOL;
 
-		$lines = apply_filters('wc1c_schema_productscml_handler_checkauth_lines', $lines);
+		if(has_filter('wc1c_schema_productscml_handler_checkauth_lines'))
+		{
+			$lines = apply_filters('wc1c_schema_productscml_handler_checkauth_lines', $lines);
+		}
+
+		$this->core()->log()->debug(__('Print lines for 1C.', 'wc1c'), ['data' => $lines]);
 
 		foreach($lines as $line)
 		{
@@ -397,7 +413,10 @@ final class Receiver
 	{
 		$this->core()->log()->info(__('Initialization of receiving requests from 1C.', 'wc1c'));
 
-		$_SESSION = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_session', $_SESSION, $this);
+		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_init_session'))
+		{
+			$_SESSION = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_session', $_SESSION, $this);
+		}
 
 		$this->core()->log()->debug(__('Session for receiving requests.', 'wc1c'), ['session'=> $_SESSION]);
 
@@ -414,27 +433,30 @@ final class Receiver
 
 		$data['zip'] = 'zip=no' . PHP_EOL;
 
-		$size = $this->utilityConvertFileSize(wc1c()->environment()->get('php_post_max_size'));
+		$max_size = $this->utilityConvertFileSize(wc1c()->environment()->get('php_post_max_size'));
 		$max_wc1c = $this->utilityConvertFileSize(wc1c()->settings('main')->get('php_post_max_size'));
 		$max_configuration = $this->utilityConvertFileSize($this->core()->getOptions('php_post_max_size'));
 
-		$this->core()->log()->debug(__('The maximum size of accepted files from 1C is assigned:', 'wc1c') . ' ' . size_format($size));
+		$this->core()->log()->debug(__('The maximum size of accepted files from 1C is assigned:', 'wc1c') . ' ' . size_format($max_size));
 
-		if($max_wc1c && $max_wc1c < $size)
+		if($max_wc1c && $max_wc1c < $max_size)
 		{
-			$size = $max_wc1c;
-			$this->core()->log()->debug(__('Based on the global settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c') . ' ' . size_format($size));
+			$max_size = $max_wc1c;
+			$this->core()->log()->debug(__('Based on the global settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c') . ' ' . size_format($max_size));
 		}
 
-		if($max_configuration && $max_configuration < $size)
+		if($max_configuration && $max_configuration < $max_size)
 		{
-			$size = $max_configuration;
-			$this->core()->log()->debug(__('Based on the configuration settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c') . ' ' . size_format($size));
+			$max_size = $max_configuration;
+			$this->core()->log()->debug(__('Based on the configuration settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c') . ' ' . size_format($max_size));
 		}
 
-		$data['file_limit'] = 'file_limit=' . $size . PHP_EOL;
+		$data['file_limit'] = 'file_limit=' . $max_size . PHP_EOL;
 
-		$data = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_data', $data, $this);
+		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_init_data'))
+		{
+			$data = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_data', $data, $this);
+		}
 
 		$this->core()->log()->debug(__('Print lines for 1C.', 'wc1c'), ['data' => $data]);
 
@@ -449,25 +471,33 @@ final class Receiver
 	 * Uploading files from 1C to a local directory
 	 *
 	 * @return void
+	 * @throws Exception
 	 */
 	public function handlerCatalogModeFile()
 	{
 		$upload_directory = $this->core()->getUploadDirectory() . DIRECTORY_SEPARATOR;
 
-		$upload_directory = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_directory', $upload_directory);
+		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_file_directory'))
+		{
+			$upload_directory = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_directory', $upload_directory);
+		}
 
 		wc1c()->filesystem()->ensureDirectoryExists($upload_directory);
 
 		if(!wc1c()->filesystem()->exists($upload_directory))
 		{
 			$response_description = __('Directory is unavailable:', 'wc1c') . ' ' . $upload_directory;
+
 			$this->core()->log()->error($response_description, ['directory' => $upload_directory]);
 			$this->sendResponseByType('failure', $response_description);
 		}
 
 		$filename = wc1c()->getVar($_GET['filename'], '');
 
-		$filename = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_filename', $filename);
+		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_file_filename'))
+		{
+			$filename = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_filename', $filename);
+		}
 
 		if(empty($filename))
 		{
@@ -488,6 +518,7 @@ final class Receiver
 		if(!wc1c()->filesystem()->isWritable($upload_directory))
 		{
 			$response_description = __('Directory is unavailable for write.', 'wc1c');
+
 			$this->core()->log()->error($response_description, ['directory' => $upload_directory]);
 			$this->sendResponseByType('failure', $response_description);
 		}
@@ -505,6 +536,7 @@ final class Receiver
 		if(false === $file_data)
 		{
 			$response_description = __('The request contains no data to write to the file. Retry the upload.', 'wc1c');
+
 			$this->core()->log()->error($response_description);
 			$this->sendResponseByType('failure', $response_description);
 		}
@@ -525,11 +557,72 @@ final class Receiver
 			wc1c()->filesystem()->chmod($upload_file_path , 0755);
 
 			$response_description = __('The data is successfully written to a file. Recorded data size:', 'wc1c') . ' '. size_format($file_size);
+
+			/*
+			 * Adding to media library
+			 */
+			if(is_file($upload_file_path) && 'yes' === $this->core()->getOptions('media_library_images_by_receiver', 'no'))
+			{
+				if('yes' !== $this->core()->getOptions('media_library', 'no'))
+				{
+					$this->core()->log()->notice(__('The file was not saved to the media library. Adding is disabled in the settings.', 'wc1c'));
+				}
+				else
+				{
+					$image = wp_get_image_mime($upload_file_path);
+					if($image)
+					{
+						/** @var ImagesStorageContract */
+						$images_storage = Storage::load('image');
+
+						$image_file_name = explode('.', basename($upload_file_path));
+
+						$image_current = $images_storage->getByExternalName($image_file_name[0]);
+						if(is_array($image_current))
+						{
+							$image_current = $image_current[0];
+						}
+
+						if(false === $image_current)
+						{
+							$new_image = new Image();
+
+							$new_image->setName(__('No name', 'wc1c'));
+							$new_image->setExternalName($image_file_name[0]);
+							$new_image->setSlug($image_file_name[0]);
+
+							$new_image->setConfigurationId($this->core()->configuration()->getId());
+							$new_image->setSchemaId($this->core()->getId());
+
+							$new_image->setUserId($this->core()->configuration()->getUserId());
+							$new_image->setMimeType($image);
+
+							$image_id = $images_storage->uploadByPath($upload_file_path, $new_image);
+
+							if($image_id === false)
+							{
+								$response_description .= '. ' . __('The image has not been added to the media library.', 'wc1c');
+							}
+							else
+							{
+								$response_description .= '. ' . __('Image added to media library, id:', 'wc1c') . ' ' . $image_id;
+							}
+						}
+						else
+						{
+							$response_description .= '. ' . __('The image has not been added to the media library. It was added earlier, id:', 'wc1c') . ' ' . $image_current->getId();
+						}
+					}
+				}
+			}
+
 			$this->core()->log()->info($response_description, ['file_size' => $file_size]);
 			$this->sendResponseByType('success', $response_description);
+			return;
 		}
 
 		$response_description = __('Failed to write data to file.', 'wc1c');
+
 		$this->core()->log()->error($response_description, ['file_path' => $upload_file_path]);
 		$this->sendResponseByType('failure', $response_description);
 	}

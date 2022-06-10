@@ -41,22 +41,31 @@ class Admin
 	 */
 	public function initConfigurationsFields()
 	{
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsReceiver'], 10, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsReceiver'], 10, 1);
 
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsProducts'], 20, 1);
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSync'], 30, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProducts'], 20, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSync'], 30, 1);
 
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrice'], 40, 1);
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 50, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsNames'], 40, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDescriptions'], 40, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsImages'], 40, 1);
 
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsCategories'], 60, 1);
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsCategoriesClassifierGroups'], 65, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrices'], 50, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 52, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDimensions'], 54, 1);
 
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributes'], 70, 1);
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributesClassifierProperties'], 75, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsWithCharacteristics'], 60, 1);
 
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsLogs'], 80, 1);
-		add_filter(WC1C_PREFIX . 'configurations-update_form_load_fields', [$this, 'configurationsFieldsOther'], 90, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategories'], 70, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategoriesClassifierGroups'], 75, 1);
+
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributes'], 80, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributesClassifierProperties'], 80, 1);
+
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsMediaLibrary'], 90, 1);
+
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsLogs'], 100, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsOther'], 110, 1);
 	}
 
 	/**
@@ -72,7 +81,7 @@ class Admin
 		[
 			'title' => __('Receiving requests from 1C', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Authorization of requests and regulation of algorithms for receiving requests for the Recipient from the 1C program.', 'wc1c'),
+			'description' => __('Authorization of requests and regulation of algorithms for receiving requests for the Receiver from the 1C programs by CommerceML protocol.', 'wc1c'),
 		];
 
 		$lazy_sign = $this->core()->configuration()->getMeta('receiver_lazy_sign');
@@ -153,7 +162,7 @@ class Admin
 				wc1c()->settings()->get('php_post_max_size', wc1c()->environment()->get('php_post_max_size')),
 				__('Can only decrease the value, because it must not exceed the limits from the WC1C settings.', 'wc1c')
 			),
-			'default' => wc1c()->settings()->get('php_post_max_size', ''),
+			'default' => wc1c()->settings()->get('php_post_max_size', wc1c()->environment()->get('php_post_max_size')),
 			'css' => 'min-width: 100px;',
 		];
 
@@ -176,6 +185,30 @@ class Admin
 			'description' => __('Categorization of product positions on the WooCommerce side according to data from 1C.', 'wc1c'),
 		];
 
+		$merge_options =
+		[
+			'no' => __('Do not use', 'wc1c'),
+			'yes' => __('Name matching', 'wc1c'),
+			'yes_parent' => __('Name matching, with the match of the parent category', 'wc1c'),
+		];
+
+		$fields['categories_merge'] =
+		[
+			'title' => __('Using existing categories', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			('%s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><hr>%s',
+			 __('In the event that the categories were created manually or from another configuration, you must enable the merge. Merging will avoid duplication of categories.', 'wc1c'),
+			 __('Name matching', 'wc1c'),
+			 __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
+			 __('Name matching, with the match of the parent category', 'wc1c'),
+			 __('The categories will be linked only if they have the same name and parent category.', 'wc1c'),
+			 __('The found categories will be updated according to 1C data according to the update settings. If not want to refresh the data, must enable refresh based on the configuration.', 'wc1c')
+			),
+			'default' => 'no',
+			'options' => $merge_options
+		];
+
 		$fields['categories_create'] =
 		[
 			'title' => __('Creating categories', 'wc1c'),
@@ -192,6 +225,24 @@ class Admin
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('If the category created earlier was linked to 1C data, then when you change any category data in 1C, the data will also change in WooCommerce.', 'wc1c'),
 			'default' => 'no'
+		];
+
+		$fields['categories_update_only_configuration'] =
+		[
+			'title' => __('Consider configuration when updating categories', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When updating category data, the update will only occur if the category was created through the current configuration.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		$fields['categories_update_only_schema'] =
+		[
+			'title' => __('Consider schema when updating categories', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When updating category data, the update will only occur if the category was created through the current schema.', 'wc1c'),
+			'default' => 'yes'
 		];
 
 		return $fields;
@@ -222,47 +273,6 @@ class Admin
 			'default' => 'no'
 		];
 
-		$fields['categories_classifier_groups_update'] =
-		[
-			'title' => __('Updating categories from classifier groups', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('If the category created earlier was linked to 1C data, then when you change any category data in 1C, the data will also change in WooCommerce.', 'wc1c'),
-			'default' => 'no'
-		];
-
-		$fields['categories_classifier_groups_update_only_configuration'] =
-		[
-			'title' => __('Consider configuration when updating categories', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('When updating category data, the update will only occur if the category was created through the current configuration.', 'wc1c'),
-			'default' => 'no'
-		];
-
-		$merge_options =
-		[
-			'no' => __('Do not use', 'wc1c'),
-			'yes' => __('If the names match', 'wc1c'),
-			'yes_parent' => __('If the names match, with the match of the parent category ', 'wc1c'),
-		];
-
-		$fields['categories_classifier_groups_merge'] =
-		[
-			'title' => __('Merging categories before creating', 'wc1c'),
-			'type' => 'select',
-			'description' => sprintf
-            ('%s<br /><b>%s</b> - %s <br /><b>%s</b> - %s',
-             __('In the event that the categories were created manually or from another configuration, you must enable the merge. Merging will avoid duplication of categories.', 'wc1c'),
-             __('If the names match', 'wc1c'),
-             __('The categories will be linked when the names match without any other data matching.', 'wc1c'),
-             __('If the names match, with the match of the parent category ', 'wc1c'),
-             __('The categories will be linked only if they have the same name and parent category.', 'wc1c')
-            ),
-			'default' => 'no',
-			'options' => $merge_options
-		];
-
 		$fields['categories_classifier_groups_create_assign_parent'] =
 		[
 			'title' => __('Assign parent categories on creating', 'wc1c'),
@@ -278,6 +288,15 @@ class Admin
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('When creating categories, descriptions will be filled in if category descriptions are present in 1C.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		$fields['categories_classifier_groups_update'] =
+		[
+			'title' => __('Updating categories from classifier groups', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('If the category created earlier was linked to 1C data, then when you change any category data in 1C, the data will also change in WooCommerce.', 'wc1c'),
 			'default' => 'no'
 		];
 
@@ -313,6 +332,63 @@ class Admin
 	}
 
 	/**
+	 * Configuration fields: products with characteristics
+	 *
+	 * @param array $fields Прежний массив настроек
+	 *
+	 * @return array Новый массив настроек
+	 */
+	public function configurationsFieldsProductsWithCharacteristics($fields)
+	{
+		$fields['title_products_with_characteristics'] =
+		[
+			'title' => __('Products (goods): with characteristics', 'wc1c'),
+			'type' => 'title',
+			'description' => sprintf
+			(
+				'%s %s %s',
+				__('The same product (product) can have various kinds of differences, such as color, size, etc.', 'wc1c'),
+				__('In 1C programs, these differences can be presented in the form of characteristics.', 'wc1c'),
+				__('This section of the settings regulates the behavior of the processing of such characteristics on the Woocommerce side.', 'wc1c')
+			)
+		];
+
+		$fields['products_with_characteristics'] =
+		[
+			'title' => __('Using characteristics', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<br/>%s %s<br /><hr>%s',
+				__('When turning on, products with characteristics will processing on the basis of settings for products.', 'wc1c'),
+				__('At the same time, products are divided into simple and variable. Work with simple products will occur when the parent is not found.', 'wc1c'),
+				__('The search for the parent product takes place according to a unique identifier of 1C. Search for simple products is carried out in all available settings for synchronization.', 'wc1c'),
+				__('With the option disconnected, all the data of products with characteristics will be simply missed. Neither the creation, nor update and no other processing will be.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
+		$fields['products_with_characteristics_parent_create'] =
+		[
+			'title' => __('Creating a parent based on the first characteristic', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s %s<br /><hr>%s %s',
+				__('In some cases, the parent product is missing from the CommerceML files. Therefore, it is possible to create parent products based on data from the first characteristic.', 'wc1c'),
+				__('If the parent product is not created, all products with characteristics will be created as simple, and not as variations in a variable product.', 'wc1c'),
+				__('It is recommended not to enable this setting because the name of the main product will be filled in incorrectly in most cases.', 'wc1c'),
+				__('In addition, if the parent product is not unloaded from 1C, then most likely it should be. It was decided to unload the products with characteristics as simple products.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
+		return $fields;
+	}
+
+	/**
 	 * Configuration fields: attributes
 	 *
 	 * @param $fields
@@ -325,7 +401,13 @@ class Admin
 		[
 			'title' => __('Attributes', 'wc1c'),
 			'type' => 'title',
-			'description' => __('General (global) attributes are used for all products. It is possible to sort products according to them.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s %s %s',
+				__('General (global) attributes are used for all products.', 'wc1c'),
+				__('Work with individual product attributes is configured at the product level.', 'wc1c'),
+				__('These settings only affect the global attributes. As a rule, there is no deletion of global attributes and their values. Removal operations are performed manually or through a cleaner.', 'wc1c')
+			)
 		];
 
 		$fields['attributes_create'] =
@@ -333,7 +415,12 @@ class Admin
 			'title' => __('Creating attributes', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('It will be allowed to add common attributes for products based on characteristics, properties and other data according to the settings.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('It will be allowed to add common attributes for products based on characteristics, properties and other data according to the other setting sections.', 'wc1c'),
+				__('Creation will only occur if the attribute has not been previously created. Verification is possible by: name, identifier from 1C, etc. The default is to match by name.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
@@ -342,18 +429,12 @@ class Admin
 			'title' => __('Updating attributes', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('It will be allowed to update common attributes for products based on characteristics, properties and other data according to the settings.', 'wc1c'),
-			'default' => 'no'
-		];
-
-		$fields['attributes_values_adding'] =
-		[
-			'title' => __('Adding values for attributes', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('It will be allowed to add product attribute values based on characteristics, 
-			properties and other data specified in the settings. If you disable the addition, work will only occur 
-			with existing attribute values.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('It will be allowed to update common attributes for products based on characteristics, properties and other data according to the other setting sections.', 'wc1c'),
+				__('It will be allowed to add products attribute values based on characteristics, properties and other data specified in the settings. If you disable the feature, work will only occur with existing attribute values.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
@@ -390,17 +471,8 @@ class Admin
 			'title' => __('Updating attributes from classifier properties', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('The update will occur when the classifier properties are reprocessed. The update occurs only when the name matches or there is a found relationship between the source of the attribute creation.', 'wc1c'),
-			'default' => 'no'
-		];
-
-		$fields['attributes_values_adding_by_classifier_properties'] =
-		[
-			'title' => __('Adding attribute values from classifier properties values', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c'),
 			'description' => __('Adding product attribute values based on classifier property values will be allowed. The value is added only if it is absent: by name.', 'wc1c'),
-			'default' => 'yes'
+			'default' => 'no'
 		];
 
 		return $fields;
@@ -456,7 +528,7 @@ class Admin
 		[
 			'title' => __('Products (goods)', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Regulation of algorithms for creating and updating products on requests from 1C.', 'wc1c'),
+			'description' => __('Regulation of algorithms for products. Operations on products are based on data from product catalogs and offer packages described in CommerceML.', 'wc1c'),
 		];
 
 		$fields['products_create'] =
@@ -464,7 +536,12 @@ class Admin
 			'title' => __('Creation of products', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable the creation of new products upon request from 1C. Disabled by default.', 'wc1c'),
-			'description' => __('The product is only created if it is not found in WooCommerce when searching by criteria for synchronization.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<br /><hr>%s',
+				__('The products is only created if it is not found in WooCommerce when searching by criteria for synchronization.', 'wc1c'),
+				__('The option works only with automatic creation of products. When disabled, it is still possible to manually create products through ManualCML and similar extensions.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
@@ -473,7 +550,30 @@ class Admin
 			'title' => __('Update of products', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable product updates on demand from 1C. Disabled by default.', 'wc1c'),
-			'description' => __('Products are updated only if they were found using the product synchronization keys.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<br /><hr>%s',
+				__('Products are updated only if they were found using the product synchronization keys.', 'wc1c'),
+				__('The option works only with automatic updating of products. When disabled, it is still possible to manually update products through ManualCML and similar extensions.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
+		$fields['products_update_only_configuration'] =
+		[
+			'title' => __('Update of products: consider configuration', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When updating products data, the update will only occur if the product was created through the current configuration.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		$fields['products_update_only_schema'] =
+		[
+			'title' => __('Update of products: consider schema', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('When updating products data, the update will only occur if the product was created through the current schema.', 'wc1c'),
 			'default' => 'no'
 		];
 
@@ -481,46 +581,317 @@ class Admin
 	}
 
 	/**
-	 * Configuration fields: products price
+	 * Configuration fields: products prices
 	 *
 	 * @param $fields
 	 *
 	 * @return array
 	 */
-	public function configurationsFieldsProductsPrice($fields)
+	public function configurationsFieldsProductsPrices($fields)
 	{
-		$fields['title_products_price'] =
+		$fields['title_products_prices'] =
 		[
 			'title' => __('Products (goods): prices', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Comparison of WooCommerce and 1C prices and other settings.', 'wc1c'),
+			'description' => __('Comprehensive settings for updating prices.', 'wc1c'),
 		];
 
-		$fields['products_price_from_primary'] =
+		$products_prices_by_cml_options =
 		[
-			'title' => __('Base price - first found', 'wc1c'),
+			'no' => __('Do not use', 'wc1c'),
+			'yes_primary' => __('From first found', 'wc1c'),
+			'yes_name' => __('From specified name', 'wc1c'),
+		];
+
+		$fields['products_prices_regular_by_cml'] =
+		[
+			'title' => __('Prices based on CommerceML data: regular', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods). The found price after use will not be available for selection as a sale price.', 'wc1c'),
+				__('Do not use', 'wc1c'),
+				__('Populating the regular prices data from CommerceML data will be skipped.', 'wc1c'),
+				__('From first found', 'wc1c'),
+				__('The first available price of all available prices for the product will be used as the regular price.', 'wc1c'),
+				__('From specified name', 'wc1c'),
+				__('The price with the specified name will be used as the regular price. If the price is not found by name, no value will be assigned.', 'wc1c')
+			),
+			'default' => 'no',
+			'options' => $products_prices_by_cml_options
+		];
+
+		$fields['products_prices_regular_by_cml_from_name'] =
+		[
+			'title' => __('Prices based on CommerceML data: regular - name in 1C', 'wc1c'),
+			'type' => 'text',
+			'description' => __('Specify the name of the base price in 1C, which is used for filling to WooCommerce as the base price.', 'wc1c'),
+			'default' => '',
+			'css' => 'min-width: 370px;',
+		];
+
+		$fields['products_prices_sale_by_cml'] =
+		[
+			'title' => __('Prices based on CommerceML data: sale', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods). The sale price must be less than the regular price. Otherwise, it simply wont apply.', 'wc1c'),
+				__('Do not use', 'wc1c'),
+				__('Populating the sale prices data from CommerceML data will be skipped.', 'wc1c'),
+				__('From first found', 'wc1c'),
+				__('The first available price of all available prices for the product will be used as the sale price.', 'wc1c'),
+				__('From specified name', 'wc1c'),
+				__('The price with the specified name will be used as the sale price. If the price is not found by name, no value will be assigned.', 'wc1c')
+			),
+			'default' => 'no',
+			'options' => $products_prices_by_cml_options
+		];
+
+		$fields['products_prices_sale_by_cml_from_name'] =
+		[
+			'title' => __('Prices based on CommerceML data: sale - name in 1C', 'wc1c'),
+			'type' => 'text',
+			'description' => __('Specify the name of the sale price in 1C, which is used for filling to WooCommerce as the sale price.', 'wc1c'),
+			'default' => '',
+			'css' => 'min-width: 370px;',
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products names
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsNames($fields)
+	{
+		$fields['title_products_names'] =
+		[
+			'title' => __('Products (goods): names', 'wc1c'),
+			'type' => 'title',
+			'description' => __('Sources and algorithms for filling out product names.', 'wc1c'),
+		];
+
+		$products_names_by_cml_options =
+		[
+			'no' => __('Do not use', 'wc1c'),
+			'name' => __('From the standard name', 'wc1c'),
+			'full_name' => __('From the full name', 'wc1c'),
+			'yes_requisites' => __('From requisite with the specified name', 'wc1c'),
+		];
+
+		$fields['products_names_by_cml'] =
+		[
+			'title' => __('Names based on CommerceML data', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods).', 'wc1c'),
+				__('Do not use', 'wc1c'),
+				__('Populating the name data from CommerceML data will be skipped. If a product is updating, then its current name will not be updated.', 'wc1c'),
+				__('From the standard name', 'wc1c'),
+				__('This name is contained in the standard name of 1C products. It is located in the conditional tag - name.', 'wc1c'),
+				__('From the full name', 'wc1c'),
+				__('In 1C it is presented in the form of the Full name of the nomenclature. Unloaded as a requisite with the appropriate name.', 'wc1c'),
+				__('From requisite with the specified name', 'wc1c'),
+				__('The name data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c')
+			),
+			'default' => 'name',
+			'options' => $products_names_by_cml_options
+		];
+
+		$fields['products_names_from_requisites_name'] =
+		[
+			'title' => __('Names based on CommerceML data: name for requisite', 'wc1c'),
+			'type' => 'text',
+			'description' => __('The name of the requisite of the product (goods) which contains a name of the product.', 'wc1c'),
+			'default' => '',
+			'css' => 'min-width: 370px;',
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products descriptions
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsDescriptions($fields)
+	{
+		$fields['title_products_descriptions'] =
+		[
+			'title' => __('Products (goods): descriptions', 'wc1c'),
+			'type' => 'title',
+			'description' => __('Sources and algorithms for filling out product descriptions, both short descriptions and full descriptions.', 'wc1c'),
+		];
+
+		$products_descriptions_by_cml_options =
+		[
+			'no' => __('Do not use', 'wc1c'),
+			'yes' => __('From the standard description', 'wc1c'),
+			'yes_html' => __('From the HTML description', 'wc1c'),
+			'yes_requisites' => __('From requisite with the specified name', 'wc1c'),
+		];
+
+		$fields['products_descriptions_short_by_cml'] =
+		[
+			'title' => __('Descriptions based on CommerceML data: short', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods).', 'wc1c'),
+				__('Do not use', 'wc1c'),
+				__('Populating the short description data from CommerceML data will be skipped. If a product is updating, then its current short description will not be updated.', 'wc1c'),
+				__('From the standard description', 'wc1c'),
+				__('This description is contained in the standard description of 1C products. It is located in the conditional tag - description.', 'wc1c'),
+				__('From the HTML description', 'wc1c'),
+				__('Standard description, in HTML format only. Unloaded in a short description if there is a checkmark in 1C - Description in HTML format.', 'wc1c'),
+				__('From requisite with the specified name', 'wc1c'),
+				__('The short description data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c')
+			),
+			'default' => 'yes',
+			'options' => $products_descriptions_by_cml_options
+		];
+
+		$fields['products_descriptions_short_from_requisites_name'] =
+		[
+			'title' => __('Descriptions based on CommerceML data: short - name for requisite', 'wc1c'),
+			'type' => 'text',
+			'description' => __('The name of the requisite of the product (goods) which contains a short description of the product.', 'wc1c'),
+			'default' => '',
+			'css' => 'min-width: 370px;',
+		];
+
+		$fields['products_descriptions_by_cml'] =
+		[
+			'title' => __('Descriptions based on CommerceML data: full', 'wc1c'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods).', 'wc1c'),
+				__('Do not use', 'wc1c'),
+				__('Filling in full description data from CommerceML data will be skipped. If a product is updating, then its current full description will not be updated.', 'wc1c'),
+				__('From the standard description', 'wc1c'),
+				__('This description is contained in the standard description of 1C products. It is located in the conditional tag - description.', 'wc1c'),
+				__('From the HTML description', 'wc1c'),
+				__('Standard description, in HTML format only. It is unloaded when there is a checkmark in 1C - Description in HTML format.', 'wc1c'),
+				__('From requisite with the specified name', 'wc1c'),
+				__('The full description data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c')
+			),
+			'default' => 'yes_html',
+			'options' => $products_descriptions_by_cml_options
+		];
+
+		$fields['products_descriptions_from_requisites_name'] =
+		[
+			'title' => __('Descriptions based on CommerceML data: full - name for requisite', 'wc1c'),
+			'type' => 'text',
+			'description' => __('The name of the requisite of the product (goods) which contains a full description of the product.', 'wc1c'),
+			'default' => '',
+			'css' => 'min-width: 370px;',
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products images
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsImages($fields)
+	{
+		$fields['title_products_images'] =
+		[
+			'title' => __('Products (goods): images', 'wc1c'),
+			'type' => 'title',
+			'description' => __('Regulation of algorithms for working with images of products (goods).', 'wc1c'),
+		];
+
+		$fields['products_images_by_cml'] =
+		[
+			'title' => __('Images based on CommerceML files', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('If the name of the base price from 1C is not specified for the WooCommerce base price, the first found price will be taken into account. It is convenient to use when accepting only one type of price.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('When enabled, work with images based on CommerceML files will be allowed.', 'wc1c'),
+				__('Available images in CommerceML files for products will be populated for future use.', 'wc1c'),
+				__('In this case, the image files themselves must first be added to the WordPress media library. If they are not included, their use will be skipped.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
-		$fields['products_price_from_name'] =
+		$fields['products_images_by_cml_max'] =
 		[
-			'title' => __('WooCommerce base price: name in 1C', 'wc1c'),
+			'title' => __('Images based on CommerceML files: maximum quantity', 'wc1c'),
 			'type' => 'text',
-			'description' => __('Specify the name of the base price in 1C, which is used for uploading to WooCommerce as the base price.', 'wc1c'),
-			'default' => '',
-			'css' => 'min-width: 370px;',
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('The maximum number of images to be processed. The excess number will be ignored. To remove the limit, specify - 0. The limit is necessary for weak systems.', 'wc1c'),
+				__('If you specify one image, it will be uploaded as the main one without adding the rest to the product gallery.', 'wc1c')
+			),
+			'default' => '10',
+			'css' => 'min-width: 60px;',
 		];
 
-		$fields['products_sale_price_from_name'] =
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: media library
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsMediaLibrary($fields)
+	{
+		$fields['title_media_library'] =
 		[
-			'title' => __('WooCommerce sale price: name in 1C', 'wc1c'),
-			'type' => 'text',
-			'description' => __('Specify the name of the base price in 1C, which is used for uploading to WooCommerce as the sale price.', 'wc1c'),
-			'default' => '',
-			'css' => 'min-width: 370px;',
+			'title' => __('Media library', 'wc1c'),
+			'type' => 'title',
+			'description' => __('Regulation of algorithms for working with WordPress media library.', 'wc1c'),
+		];
+
+		$fields['media_library'] =
+		[
+			'title' => __('Using the media library', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('All file handling capabilities available to the library will be enabled. If disabled, no actions will be performed on files in the library through the schema.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		$fields['media_library_images_by_receiver'] =
+		[
+			'title' => __('Images based on Receiver', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('All image files sent to Receiver files will be added to the WordPress media library.', 'wc1c'),
+				__('These images can later be used to populate product images.', 'wc1c'),
+				__('When adding an image, it will be assigned the identifier of the current configuration, as well as the identifier of the scheme and the path of being in 1C.', 'wc1c')
+			),
+			'default' => 'yes'
 		];
 
 		return $fields;
@@ -539,7 +910,7 @@ class Admin
 		[
 			'title' => __('Products (goods): inventories', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Matching inventories for 1C and Woocommerce products.', 'wc1c'),
+			'description' => __('Comprehensive settings for updating inventories based on data from the offer package.', 'wc1c'),
 		];
 
 		$fields['products_inventories_by_offers_quantity'] =
@@ -549,6 +920,70 @@ class Admin
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('It will be allowed to fill in the quantity of product stocks in WooCommerce based on the quantity received in 1C offers.', 'wc1c'),
 			'default' => 'no'
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products dimensions
+	 *
+	 * @param $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsDimensions($fields)
+	{
+		$fields['title_products_dimensions'] =
+		[
+			'title' => __('Products (goods): dimensions', 'wc1c'),
+			'type' => 'title',
+			'description' => __('The main settings for filling in the dimensions of products (goods) according to data from 1C. Dimensions include: weight, length, width, height.', 'wc1c'),
+		];
+
+		$fields['products_dimensions_by_requisites'] =
+		[
+			'title' => __('Filling dimensions based on requisites', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('Filling in the dimensions will be performed from the given details of the products. For the setting to work, you must specify the correspondence of the details in the fields below.', 'wc1c'),
+			'default' => 'yes'
+		];
+
+		$fields['products_dimensions_by_requisites_weight_from_name'] =
+		[
+			'title' => __('Dimensions based on requisites: weight', 'wc1c'),
+			'type' => 'text',
+			'description' => __('Specify the requisite name of the weight in 1C, which is used for filling to WooCommerce as the weight.', 'wc1c'),
+			'default' => __('Weight', 'wc1c'),
+			'css' => 'min-width: 370px;',
+		];
+
+		$fields['products_dimensions_by_requisites_length_from_name'] =
+		[
+			'title' => __('Dimensions based on requisites: length', 'wc1c'),
+			'type' => 'text',
+			'description' => __('Specify the requisite name of the length in 1C, which is used for filling to WooCommerce as the length.', 'wc1c'),
+			'default' => __('Length', 'wc1c'),
+			'css' => 'min-width: 370px;',
+		];
+
+		$fields['products_dimensions_by_requisites_width_from_name'] =
+		[
+			'title' => __('Dimensions based on requisites: width', 'wc1c'),
+			'type' => 'text',
+			'description' => __('Specify the requisite name of the width in 1C, which is used for filling to WooCommerce as the width.', 'wc1c'),
+			'default' => __('Width', 'wc1c'),
+			'css' => 'min-width: 370px;',
+		];
+
+		$fields['products_dimensions_by_requisites_height_from_name'] =
+		[
+			'title' => __('Dimensions based on requisites: height', 'wc1c'),
+			'type' => 'text',
+			'description' => __('Specify the requisite name of the height in 1C, which is used for filling to WooCommerce as the height.', 'wc1c'),
+			'default' => __('Height', 'wc1c'),
+			'css' => 'min-width: 370px;',
 		];
 
 		return $fields;
