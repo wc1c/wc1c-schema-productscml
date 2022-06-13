@@ -6,7 +6,7 @@ use Wc1c\Exceptions\Exception;
 use Wc1c\Traits\SingletonTrait;
 use Wc1c\Traits\UtilityTrait;
 use Wc1c\Wc\Contracts\ImagesStorageContract;
-use Wc1c\Wc\Image;
+use Wc1c\Wc\Entities\Image;
 use Wc1c\Wc\Storage;
 
 /**
