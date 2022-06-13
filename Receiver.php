@@ -169,8 +169,15 @@ final class Receiver
 	 */
 	public function sendResponseByType($type = 'failure', $description = '')
 	{
-		$type = apply_filters('wc1c_schema_productscml_receiver_send_response_type', $type, $this);
-		$description = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_description', $description, $this, $type);
+		if(has_filter('wc1c_schema_productscml_receiver_send_response_type'))
+		{
+			$type = apply_filters('wc1c_schema_productscml_receiver_send_response_type', $type, $this);
+		}
+
+		if(has_filter('wc1c_schema_productscml_receiver_send_response_by_type_description'))
+		{
+			$description = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_description', $description, $this, $type);
+		}
 
 		$this->core()->log()->info(__('In 1C was send a response of the type:', 'wc1c') . ' ' . $type);
 
