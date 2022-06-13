@@ -454,7 +454,12 @@ class Admin
 		[
 			'title' => __('Attributes: classifier properties', 'wc1c'),
 			'type' => 'title',
-			'description' => __('Adding and updating global attributes for products from classifier properties.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s %s',
+				__('Adding and updating global attributes for products from classifier properties.', 'wc1c'),
+				__('The properties are contained both in the classifier of the offer package and the product catalog.', 'wc1c')
+			),
 		];
 
 		$fields['attributes_create_by_classifier_properties'] =
@@ -462,16 +467,26 @@ class Admin
 			'title' => __('Creating attributes from classifier properties', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('The creation will occur when processing the properties of the classifier. Creation occurs only if there is no attribute with the specified name or associated identifier.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('The creation will occur when processing the properties of the classifier. Creation occurs only if there is no attribute with the specified name or associated identifier.', 'wc1c'),
+				__('If disable the creation of attributes and create some attributes manually, it is possible to adding values to them.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
-		$fields['attributes_update_by_classifier_properties'] =
+		$fields['attributes_values_by_classifier_properties'] =
 		[
-			'title' => __('Updating attributes from classifier properties', 'wc1c'),
+			'title' => __('Adding values to attributes from classifier properties', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('Adding product attribute values based on classifier property values will be allowed. The value is added only if it is absent: by name.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Adding product attribute values based on classifier property values.', 'wc1c'),
+				__('The value is added only if it is absent: by name.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
