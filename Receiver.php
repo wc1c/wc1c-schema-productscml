@@ -482,6 +482,8 @@ final class Receiver
 			$upload_directory = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_directory', $upload_directory);
 		}
 
+		$upload_directory = wp_normalize_path($upload_directory);
+
 		wc1c()->filesystem()->ensureDirectoryExists($upload_directory);
 
 		if(!wc1c()->filesystem()->exists($upload_directory))
@@ -506,7 +508,7 @@ final class Receiver
 			$this->sendResponseByType('failure', $response_description);
 		}
 
-		$upload_file_path = $upload_directory . $filename;
+		$upload_file_path = wp_normalize_path($upload_directory . $filename);
 
 		$this->core()->log()->info('Saving data to a file named:' . ' ' . $filename, ['file_path' => $upload_file_path]);
 
@@ -643,7 +645,7 @@ final class Receiver
 			$this->sendResponseByType('failure', $response_description);
 		}
 
-		$file = $this->core()->getUploadDirectory() . DIRECTORY_SEPARATOR . $filename;
+		$file = wp_normalize_path($this->core()->getUploadDirectory() . DIRECTORY_SEPARATOR . $filename);
 
 		if(!wc1c()->filesystem()->exists($file))
 		{
