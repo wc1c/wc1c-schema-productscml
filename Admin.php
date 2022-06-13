@@ -433,7 +433,7 @@ class Admin
 			(
 				'%s<hr>%s',
 				__('It will be allowed to update common attributes for products based on characteristics, properties and other data according to the other setting sections.', 'wc1c'),
-				__('It will be allowed to add products attribute values based on characteristics, properties and other data specified in the settings. If you disable the feature, work will only occur with existing attribute values.', 'wc1c')
+				__('Attribute updating refers to adding product attribute values based on product characteristics, classifier properties, and other data specified in the settings. If you disable this feature, work will only occur with existing attribute values without updating attribute data. In some cases, updating refers to sorting and renaming the attributes themselves.', 'wc1c')
 			),
 			'default' => 'no'
 		];
@@ -500,14 +500,14 @@ class Admin
 
 		$fields['product_sync_by_id'] =
 		[
-			'title' => __('By ID from 1C', 'wc1c'),
+			'title' => __('By external ID from 1C', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable. Enabled by default.', 'wc1c'),
 			'description' => sprintf
 			(
-				'%s<br /> %s',
+				'%s<hr> %s',
 				__('When creating new products based on data from 1C, a universal global identifier from 1C is filled in for them. Can also fill in global identifiers manually for manually created products.', 'wc1c'),
-				__('Enabling the option allows you to use the filled GUID to mark products (goods) as existing, and thereby run algorithms to update them.', 'wc1c')
+				__('Enabling the option allows you to use the filled External ID to mark products (goods) as existing, and thereby run algorithms to update them.', 'wc1c')
 			),
 			'default' => 'yes'
 		];
