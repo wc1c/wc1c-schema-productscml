@@ -490,6 +490,21 @@ class Admin
 			'default' => 'no'
 		];
 
+		$fields['attributes_values_by_product_properties'] =
+		[
+			'title' => __('Adding values to attributes from product properties', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('Classifier properties do not always contain values in the reference. When the setting is enabled, values will be added based on the values of the product properties.', 'wc1c'),
+				__('The value is added only if it is absent: by name.', 'wc1c'),
+				__('The value is added only if it is missing. If do not add a value, the attribute will be skipped.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
 		return $fields;
 	}
 
