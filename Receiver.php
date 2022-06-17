@@ -517,7 +517,7 @@ final class Receiver
 
 		$upload_file_path = wp_normalize_path($upload_directory . $filename);
 
-		$this->core()->log()->info('Saving data to a file named:' . ' ' . $filename, ['file_path' => $upload_file_path]);
+		$this->core()->log()->info(__('Saving data to a file named:', 'wc1c') . ' ' . $filename, ['file_path' => $upload_file_path]);
 
 		if(strpos($filename, 'import_files') !== false)
 		{
