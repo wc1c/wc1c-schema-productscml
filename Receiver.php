@@ -6,7 +6,7 @@ use Wc1c\Exceptions\Exception;
 use Wc1c\Traits\SingletonTrait;
 use Wc1c\Traits\UtilityTrait;
 use Wc1c\Wc\Contracts\ImagesStorageContract;
-use Wc1c\Wc\Image;
+use Wc1c\Wc\Entities\Image;
 use Wc1c\Wc\Storage;
 
 /**
@@ -169,8 +169,15 @@ final class Receiver
 	 */
 	public function sendResponseByType($type = 'failure', $description = '')
 	{
-		$type = apply_filters('wc1c_schema_productscml_receiver_send_response_type', $type, $this);
-		$description = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_description', $description, $this, $type);
+		if(has_filter('wc1c_schema_productscml_receiver_send_response_type'))
+		{
+			$type = apply_filters('wc1c_schema_productscml_receiver_send_response_type', $type, $this);
+		}
+
+		if(has_filter('wc1c_schema_productscml_receiver_send_response_by_type_description'))
+		{
+			$description = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_description', $description, $this, $type);
+		}
 
 		$this->core()->log()->info(__('In 1C was send a response of the type:', 'wc1c') . ' ' . $type);
 
@@ -510,7 +517,7 @@ final class Receiver
 
 		$upload_file_path = wp_normalize_path($upload_directory . $filename);
 
-		$this->core()->log()->info('Saving data to a file named:' . ' ' . $filename, ['file_path' => $upload_file_path]);
+		$this->core()->log()->info(__('Saving data to a file named:', 'wc1c') . ' ' . $filename, ['file_path' => $upload_file_path]);
 
 		if(strpos($filename, 'import_files') !== false)
 		{

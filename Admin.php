@@ -369,20 +369,18 @@ class Admin
 			'default' => 'no'
 		];
 
-		$fields['products_with_characteristics_parent_create'] =
+		$fields['products_with_characteristics_use_attributes'] =
 		[
-			'title' => __('Creating a parent based on the first characteristic', 'wc1c'),
+			'title' => __('Using global attributes for products', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => sprintf
 			(
-				'%s %s<br /><hr>%s %s',
-				__('In some cases, the parent product is missing from the CommerceML files. Therefore, it is possible to create parent products based on data from the first characteristic.', 'wc1c'),
-				__('If the parent product is not created, all products with characteristics will be created as simple, and not as variations in a variable product.', 'wc1c'),
-				__('It is recommended not to enable this setting because the name of the main product will be filled in incorrectly in most cases.', 'wc1c'),
-				__('In addition, if the parent product is not unloaded from 1C, then most likely it should be. It was decided to unload the products with characteristics as simple products.', 'wc1c')
+				'%s<br /><hr>%s',
+				__('It will be allowed to create global attributes and then add values based on product characteristics.', 'wc1c'),
+				__('If the setting is disabled, either existing attributes or attributes at the product level will be used.', 'wc1c')
 			),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		return $fields;
@@ -486,6 +484,21 @@ class Admin
 				'%s<hr>%s',
 				__('Adding product attribute values based on classifier property values.', 'wc1c'),
 				__('The value is added only if it is absent: by name.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
+		$fields['attributes_values_by_product_properties'] =
+		[
+			'title' => __('Adding values to attributes from product properties', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('Classifier properties do not always contain values in the reference. When the setting is enabled, values will be added based on the values of the product properties.', 'wc1c'),
+				__('The value is added only if it is absent: by name.', 'wc1c'),
+				__('The value is added only if it is missing. If do not add a value, the attribute will be skipped.', 'wc1c')
 			),
 			'default' => 'no'
 		];
