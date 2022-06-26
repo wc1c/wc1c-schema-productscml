@@ -2280,13 +2280,14 @@ class Core extends SchemaAbstract
 		 *
 		 * @param int $product_id Идентификатор найденного продукта
 		 * @param ProductDataContract $external_product Данные продукта в CML
+		 * @param SchemaAbstract $this
 		 * @param Reader $reader Текущий итератор
 		 *
 		 * @return int|false
 		 */
 		if(has_filter('wc1c_schema_productscml_processing_products_search'))
 		{
-			$product_id = apply_filters('wc1c_schema_productscml_processing_products_search', $product_id, $external_product, $reader);
+			$product_id = apply_filters('wc1c_schema_productscml_processing_products_search', $product_id, $external_product, $this, $reader);
 
 			$this->log()->debug(__('Product search result by external algorithms.', 'wc1c'), ['product_ids' => $product_id]);
 
