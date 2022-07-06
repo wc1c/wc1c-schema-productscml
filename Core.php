@@ -200,7 +200,6 @@ class Core extends SchemaAbstract
 			catch(Exception $e)
 			{
 				$this->log()->error(__('Import file processing not completed. ReaderCML threw an exception.', 'wc1c'), ['exception' => $e]);
-				break;
 			}
 		}
 
@@ -1822,7 +1821,7 @@ class Core extends SchemaAbstract
 		{
 			$this->log()->info(__('Processing of product properties.', 'wc1c'));
 
-			$classifier_properties = maybe_unserialize($this->configuration()->getMeta('classifier-properties:' . $reader->getFiletype() . ':' . $reader->catalog->getClassifierId()));
+			$classifier_properties = maybe_unserialize($this->configuration()->getMeta('classifier-properties:' . $reader->getFiletype() . ':' . $reader->offers_package->getClassifierId()));
 
 			foreach($external_product->getPropertyValues() as $property_id => $property_value)
 			{
