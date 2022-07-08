@@ -748,7 +748,7 @@ class Core extends SchemaAbstract
 		$classifier_properties = $classifier->getProperties();
 		if(!empty($classifier_properties))
 		{
-			$this->configuration()->updateMetaData('classifier-properties:' . $reader->getFiletype() . ':'. $classifier->getId(), maybe_serialize($classifier_properties), true);
+			$this->configuration()->updateMetaData('classifier-properties:' . $reader->getFiletype() . ':' . $classifier->getId(), maybe_serialize($classifier_properties));
 			$this->configuration()->saveMetaData();
 		}
 
