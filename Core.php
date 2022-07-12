@@ -1821,6 +1821,12 @@ class Core extends SchemaAbstract
 		{
 			$this->log()->info(__('Processing of product properties.', 'wc1c'));
 
+			$property_values_from_characteristics = [];
+			if($external_product->hasCharacteristics())
+			{
+				$property_values_from_characteristics = $external_product->getCharacteristics();
+			}
+
 			$classifier_properties = maybe_unserialize($this->configuration()->getMeta('classifier-properties:' . $reader->getFiletype() . ':' . $reader->offers_package->getClassifierId()));
 
 			foreach($external_product->getPropertyValues() as $property_id => $property_value)
@@ -1848,6 +1854,13 @@ class Core extends SchemaAbstract
 				if($property_value['value'] === '00000000-0000-0000-0000-000000000000')
 				{
 					$this->log()->info(__('The attribute contains an empty value identifier.', 'wc1c'), ['property_id' => $property_id, 'value' => $property_value]);
+					continue;
+				}
+
+				$found_key = array_search($property_id, array_column($property_values_from_characteristics, 'id'), true);
+				if($found_key)
+				{
+					$this->log()->info(__('The attribute contains in products characteristics.', 'wc1c'), ['property_id' => $property_id, 'found_key' => $found_key]);
 					continue;
 				}
 
@@ -1880,8 +1893,6 @@ class Core extends SchemaAbstract
 
 						$global->assignValue($property_value['value']);
 					}
-
-					$value[] = $property_value['value'];
 				}
 
 				$raw_attributes[$attribute_name] =
