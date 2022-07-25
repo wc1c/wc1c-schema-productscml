@@ -427,7 +427,7 @@ final class Receiver
 
 		$this->core()->log()->debug(__('Session for receiving requests.', 'wc1c'), ['session'=> $_SESSION]);
 
-		if(wc1c()->filesystem()->cleanDirectory($this->core()->getUploadDirectory()))
+		if(wc1c()->filesystem()->cleanDirectory($this->core()->getUploadDirectory())) // todo: создание папки
 		{
 			$this->core()->log()->info(__('The directory for temporary files was successfully cleared of old files.', 'wc1c'), ['directory' => $this->core()->getUploadDirectory()]);
 		}
