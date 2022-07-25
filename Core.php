@@ -1677,7 +1677,7 @@ class Core extends SchemaAbstract
 		/*
 		 * Значения характеристик
 		 */
-		if($external_product->hasCharacteristics() && !empty($external_product->getCharacteristicId()))
+		if($external_product->hasCharacteristics())
 		{
 			$this->log()->info(__('Processing of product characteristics.', 'wc1c'));
 
@@ -1685,13 +1685,17 @@ class Core extends SchemaAbstract
 			 * Значения других вариаций
 			 */
 			$old_characteristics = [];
-			$parent_characteristics = (new Factory())->getProduct($internal_product->get_parent_id());
-			if($parent_characteristics instanceof VariableProduct)
+
+			if(!empty($external_product->getCharacteristicId()))
 			{
-				$old_characteristics = maybe_unserialize($parent_characteristics->get_meta('_wc1c_characteristics', true));
-				if(empty($old_characteristics))
+				$parent_characteristics = (new Factory())->getProduct($internal_product->get_parent_id());
+				if($parent_characteristics instanceof VariableProduct)
 				{
-					$old_characteristics = [];
+					$old_characteristics = maybe_unserialize($parent_characteristics->get_meta('_wc1c_characteristics', true));
+					if(empty($old_characteristics))
+					{
+						$old_characteristics = [];
+					}
 				}
 			}
 
@@ -1747,7 +1751,7 @@ class Core extends SchemaAbstract
 				];
 			}
 
-			if($parent_characteristics instanceof VariableProduct)
+			if(!empty($external_product->getCharacteristicId()) && $parent_characteristics instanceof VariableProduct)
 			{
 				$parent_characteristics->update_meta_data('_wc1c_characteristics', $old_characteristics);
 				$parent_characteristics->save();
