@@ -87,7 +87,7 @@ class Core extends SchemaAbstract
 	public function init()
 	{
 		$this->setOptions($this->configuration()->getOptions());
-		$this->setUploadDirectory($this->configuration()->getUploadDirectory() . '/catalog');
+		$this->setUploadDirectory($this->configuration()->getUploadDirectory() . DIRECTORY_SEPARATOR . 'catalog');
 
 		if(true === wc1c()->context()->isAdmin('plugin'))
 		{
