@@ -453,9 +453,8 @@ final class Receiver
 		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_init_session'))
 		{
 			$_SESSION = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_session', $_SESSION, $this);
+			$this->core()->log()->debug(__('Session for receiving requests is changed by external algorithms.', 'wc1c'), ['session'=> $_SESSION]);
 		}
-
-		$this->core()->log()->debug(__('Session for receiving requests.', 'wc1c'), ['session'=> $_SESSION]);
 
 		$data['zip'] = 'zip=no' . PHP_EOL;
 
