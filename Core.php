@@ -2423,7 +2423,7 @@ class Core extends SchemaAbstract
 		/*
 		 * Пропуск продуктов созданных из других конфигураций
 		 */
-		if('yes' === $this->getOptions('products_update_only_configuration', 'no') && $update_product->getConfigurationId() !== $this->configuration()->getId())
+		if('yes' === $this->getOptions('products_update_only_configuration', 'no') && (int)$update_product->getConfigurationId() !== $this->configuration()->getId())
 		{
 			$this->log()->info(__('The product is created from a different configuration. Update skipped.', 'wc1c'), ['product_id' => $product_id]);
 			return;
@@ -2432,7 +2432,7 @@ class Core extends SchemaAbstract
 		/*
 		 * Пропуск продуктов созданных из других схем
 		 */
-		if('yes' === $this->getOptions('products_update_only_schema', 'no') && $update_product->getSchemaId() !== $this->getId())
+		if('yes' === $this->getOptions('products_update_only_schema', 'no') && (string)$update_product->getSchemaId() !== $this->getId())
 		{
 			$this->log()->info(__('The product is created from a different schema. Update skipped.', 'wc1c'), ['product_id' => $product_id]);
 			return;
