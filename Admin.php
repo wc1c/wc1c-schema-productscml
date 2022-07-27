@@ -1266,6 +1266,24 @@ class Admin
 			'options' => $stock_statuses
 		];
 
+		$fields['products_update_categories'] =
+		[
+			'title' => __('Product categories update when requesting product updates', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('If the setting is disabled, new categories will not be assigned to old products. Categories can be edited manually and the data will remain unchanged.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		$fields['products_update_attributes'] =
+		[
+			'title' => __('Product attributes update when requesting product updates', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('Existing synced products will have their attributes updated based on their attribute settings. Attribute settings in a separate block.', 'wc1c'),
+			'default' => 'no'
+		];
+
 		$fields['products_update_name'] =
 		[
 			'title' => __('Product name update when requesting product updates', 'wc1c'),
@@ -1311,15 +1329,6 @@ class Admin
 			'default' => 'no'
 		];
 
-		$fields['products_update_categories'] =
-		[
-			'title' => __('Product categories update when requesting product updates', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('If the setting is disabled, new categories will not be assigned to old products. Categories can be edited manually and the data will remain unchanged.', 'wc1c'),
-			'default' => 'no'
-		];
-
 		$fields['products_update_categories_fill_parent'] =
 		[
 			'title' => __('Filling the parent categories when requesting product updates', 'wc1c'),
@@ -1327,15 +1336,6 @@ class Admin
 			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c'),
 			'description' => __('Fill in the categories that are higher in level for the product? It is recommended to enable this setting.', 'wc1c'),
 			'default' => 'yes'
-		];
-
-		$fields['products_update_attributes'] =
-		[
-			'title' => __('Product attributes update when requesting product updates', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('Existing synced products will have their attributes updated based on their attribute settings. Attribute settings in a separate block.', 'wc1c'),
-			'default' => 'no'
 		];
 
 		return $fields;
