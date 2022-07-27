@@ -1257,11 +1257,11 @@ class Admin
 
 		$stock_statuses = array_merge($stock_statuses, wc_get_product_stock_status_options());
 
-		$fields['product_update_stock_status'] =
+		$fields['products_update_stock_status'] =
 		[
 			'title' => __('Product stock status update when requesting product updates', 'wc1c'),
 			'type' => 'select',
-			'description' => __('Обновляемые продукты будут изменять статус остатка на выбранный вариант из списка. Рекомендуется выбрать статус: Нет в наличии. Остатки в этом случае восстановятся при дальнейшей обработке остатков.', 'productscml'),
+			'description' => __('Upgradable products will change the balance status to the selected option from the list. It is recommended to select the status: Out of stock. Residues in this case will be restored with further processing of the residues.', 'wc1c'),
 			'default' => '',
 			'options' => $stock_statuses
 		];
