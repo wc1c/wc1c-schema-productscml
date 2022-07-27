@@ -463,9 +463,9 @@ class Core extends SchemaAbstract
 					$this->log()->info(__('The category exists. Started updating the data of an existing category.', 'wc1c'));
 
 					/**
-					 * Пропуск не созданных категорий под текущей конфигурацией
+					 * Пропуск созданных категорий не под текущей конфигурацией
 					 */
-					if('yes' === $update_categories_only_configuration && $category->getConfigurationId() !== $this->configuration()->getId())
+					if('yes' === $update_categories_only_configuration && (int)$category->getConfigurationId() !== $this->configuration()->getId())
 					{
 						$this->log()->warning(__('Category update skipped. The category was created from a different configuration.', 'wc1c'));
 						continue;
