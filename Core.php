@@ -1644,6 +1644,16 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemAttributes($internal_product, $external_product, $mode, $reader)
 	{
+		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_attributes', 'yes'))
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && 'yes' !== $this->getOptions('products_update_attributes', 'no'))
+		{
+			return $internal_product;
+		}
+
 		$this->log()->debug(__('Assigning attributes to a product based on the properties of the product catalog.', 'wc1c'), ['mode' => $mode, 'filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId(), 'external_product_id' => $external_product->getId()]);
 
 		if($reader->getFiletype() !== 'import')
