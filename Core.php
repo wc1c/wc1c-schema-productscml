@@ -117,6 +117,7 @@ class Core extends SchemaAbstract
 			add_action('wc1c_schema_productscml_processing_products_item', [$this, 'processingProductsItem'], 10, 2);
 			add_action('wc1c_schema_productscml_processing_offers_item', [$this, 'processingOffersItem'], 10, 2);
 
+			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemStatus'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemSku'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemName'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemDescriptions'], 10, 4);
@@ -948,6 +949,35 @@ class Core extends SchemaAbstract
 		catch(Exception $e)
 		{
 			$this->log()->notice(__('Failed to set SKU for product.', 'wc1c'), ['exception' => $e, 'sku' => $product->getSku()]);
+		}
+
+		return $new_product;
+	}
+
+	/**
+	 * Назначение данных продукта исходя из режима: статус
+	 *
+	 * @param ProductContract $new_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $product Данные продукта из XML
+	 * @param string $mode Режим - create или update
+	 * @param Reader $reader Текущий итератор
+	 *
+	 * @return ProductContract
+	 */
+	public function assignProductsItemStatus($new_product, $product, $mode, $reader)
+	{
+		if($mode === 'create')
+		{
+			$new_product->set_status($this->getOptions('products_create_status', 'draft'));
+
+			return $new_product;
+		}
+
+		$update_status = $this->getOptions('products_update_status', '');
+
+		if($update_status !== '')
+		{
+			$new_product->set_status($update_status);
 		}
 
 		return $new_product;
