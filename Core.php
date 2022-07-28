@@ -1112,6 +1112,16 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemCategories($new_product, $product, $mode, $reader)
 	{
+		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_category', 'yes'))
+		{
+			return $new_product;
+		}
+
+		if('update' === $mode && 'yes' !== $this->getOptions('products_update_categories', 'no'))
+		{
+			return $new_product;
+		}
+
 		if($new_product->isType('variation'))
 		{
 			return $new_product;
