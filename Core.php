@@ -894,6 +894,11 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
+		if('update' === $mode && 'yes' !== $this->getOptions('products_update_name', 'no'))
+		{
+			return $internal_product;
+		}
+
 		$name = '';
 
 		switch($source)
