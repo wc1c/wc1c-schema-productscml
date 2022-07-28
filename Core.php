@@ -118,6 +118,7 @@ class Core extends SchemaAbstract
 			add_action('wc1c_schema_productscml_processing_offers_item', [$this, 'processingOffersItem'], 10, 2);
 
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemStatus'], 10, 4);
+			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemStockStatus'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemSku'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemName'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemDescriptions'], 10, 4);
@@ -978,6 +979,35 @@ class Core extends SchemaAbstract
 		if($update_status !== '')
 		{
 			$new_product->set_status($update_status);
+		}
+
+		return $new_product;
+	}
+
+	/**
+	 * Назначение данных продукта исходя из режима: статус остатка
+	 *
+	 * @param ProductContract $new_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $product Данные продукта из XML
+	 * @param string $mode Режим - create или update
+	 * @param Reader $reader Текущий итератор
+	 *
+	 * @return ProductContract
+	 */
+	public function assignProductsItemStockStatus($new_product, $product, $mode, $reader)
+	{
+		if($mode === 'create')
+		{
+			$new_product->set_stock_status($this->getOptions('products_create_stock_status', 'outofstock'));
+
+			return $new_product;
+		}
+
+		$update_status = $this->getOptions('products_update_stock_status', '');
+
+		if($update_status !== '')
+		{
+			$new_product->set_stock_status($update_status);
 		}
 
 		return $new_product;
