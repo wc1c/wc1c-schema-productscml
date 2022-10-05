@@ -59,14 +59,15 @@ final class Receiver
 	}
 
 	/**
-	 * Handler
+	 * @return array
 	 */
-	public function handler()
+	public function getModeAndType()
 	{
-		$this->core()->log()->info(__('Received new request for Receiver.', 'wc1c'));
-
-		$mode = '';
-		$type = '';
+		$data =
+		[
+			'mode' => '',
+			'type' => ''
+		];
 
 		if(wc1c()->getVar($_GET['get_param'], '') !== '' || wc1c()->getVar($_GET['get_param?type'], '') !== '')
 		{
@@ -79,27 +80,41 @@ final class Receiver
 
 			if(array_key_exists('mode', $output))
 			{
-				$mode = $output['mode'];
+				$data['mode'] = $output['mode'];
 			}
 			elseif(isset($_GET['mode']))
 			{
-				$mode = $_GET['mode'];
+				$data['mode'] = $_GET['mode'];
 			}
 
 			if(array_key_exists('type', $output))
 			{
-				$type = $output['type'];
+				$data['type'] = $output['type'];
 			}
 			elseif(isset($_GET['type']))
 			{
-				$type = $_GET['type'];
+				$data['type'] = $_GET['type'];
 			}
 
-			if($type === '')
+			if($data['type'] === '')
 			{
-				$type = $_GET['get_param?type'];
+				$data['type'] = $_GET['get_param?type'];
 			}
 		}
+
+		return $data;
+	}
+
+	/**
+	 * Handler
+	 */
+	public function handler()
+	{
+		$this->core()->log()->info(__('Received new request for Receiver.', 'wc1c'));
+
+		$mode_and_type = $this->getModeAndType();
+		$mode = $mode_and_type['mode'];
+		$type = $mode_and_type['type'];
 
 		$this->core()->log()->debug(__('Received request params.', 'wc1c'), ['type' => $type, 'mode=' => $mode]);
 
