@@ -2384,7 +2384,7 @@ class Core extends SchemaAbstract
 		 *
 		 * @return int|false
 		 */
-		if(has_filter('wc1c_schema_productscml_processing_products_search'))
+		if($product_id === 0 && has_filter('wc1c_schema_productscml_processing_products_search'))
 		{
 			$product_id = apply_filters('wc1c_schema_productscml_processing_products_search', $product_id, $external_product, $this, $reader);
 
@@ -2611,7 +2611,7 @@ class Core extends SchemaAbstract
 		 *
 		 * @return int|false
 		 */
-		if(has_filter('wc1c_schema_productscml_processing_offers_search'))
+		if($internal_offer_id === 0 && has_filter('wc1c_schema_productscml_processing_offers_search'))
 		{
 			$internal_offer_id = apply_filters('wc1c_schema_productscml_processing_offers_search', $internal_offer_id, $external_offer, $reader);
 
