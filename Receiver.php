@@ -588,7 +588,7 @@ final class Receiver
 			/*
 			 * Adding to media library
 			 */
-			if(is_file($upload_file_path) && 'yes' === $this->core()->getOptions('media_library_images_by_receiver', 'no'))
+			if(wc1c()->filesystem()->extension($upload_file_path) !== 'xml' && 'yes' === $this->core()->getOptions('media_library_images_by_receiver', 'no'))
 			{
 				if('yes' !== $this->core()->getOptions('media_library', 'no'))
 				{
