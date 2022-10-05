@@ -394,7 +394,7 @@ final class Receiver
 
 		if(session_status() === PHP_SESSION_NONE)
 		{
-			$this->core()->log()->debug(__('PHP session none, start new PHP session.', 'wc1c'));
+			$this->core()->log()->info(__('PHP session none, start new PHP session.', 'wc1c'));
 			session_start();
 		}
 
