@@ -992,30 +992,30 @@ class Core extends SchemaAbstract
 	/**
 	 * Назначение данных продукта исходя из режима: статус остатка
 	 *
-	 * @param ProductContract $new_product Экземпляр продукта - либо существующий, либо новый
-	 * @param ProductDataContract $product Данные продукта из XML
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
 	 * @param string $mode Режим - create или update
 	 * @param Reader $reader Текущий итератор
 	 *
 	 * @return ProductContract
 	 */
-	public function assignProductsItemStockStatus($new_product, $product, $mode, $reader)
+	public function assignProductsItemStockStatus($internal_product, $external_product, $mode, $reader)
 	{
 		if($mode === 'create')
 		{
-			$new_product->set_stock_status($this->getOptions('products_create_stock_status', 'outofstock'));
+			$internal_product->set_stock_status($this->getOptions('products_create_stock_status', 'outofstock'));
 
-			return $new_product;
+			return $internal_product;
 		}
 
 		$update_status = $this->getOptions('products_update_stock_status', '');
 
 		if($update_status !== '')
 		{
-			$new_product->set_stock_status($update_status);
+			$internal_product->set_stock_status($update_status);
 		}
 
-		return $new_product;
+		return $internal_product;
 	}
 
 	/**
