@@ -30,8 +30,12 @@ final class Receiver
 	public function initHandler()
 	{
 		add_action('wc1c_receiver_' . $this->core()->getId(), [$this, 'handler'], 10, 0);
+
 		add_action('wc1c_schema_productscml_catalog_handler_checkauth', [$this, 'handlerCheckauth'], 10, 0);
+
+		add_action('wc1c_schema_productscml_catalog_handler_init', [$this, 'handlerCatalogDirectoryClean'], 10, 0);
 		add_action('wc1c_schema_productscml_catalog_handler_init', [$this, 'handlerCatalogModeInit'], 10, 0);
+
 		add_action('wc1c_schema_productscml_catalog_handler_file', [$this, 'handlerCatalogModeFile'], 10, 0);
 		add_action('wc1c_schema_productscml_catalog_handler_import', [$this, 'handlerCatalogModeImport'], 10, 0);
 		add_action('wc1c_schema_productscml_catalog_handler_deactivate', [$this, 'handlerCatalogModeDeactivate'], 10, 0);
@@ -55,14 +59,15 @@ final class Receiver
 	}
 
 	/**
-	 * Handler
+	 * @return array
 	 */
-	public function handler()
+	public function getModeAndType()
 	{
-		$this->core()->log()->info(__('Received new request for Receiver.', 'wc1c'));
-
-		$mode = '';
-		$type = '';
+		$data =
+		[
+			'mode' => '',
+			'type' => ''
+		];
 
 		if(wc1c()->getVar($_GET['get_param'], '') !== '' || wc1c()->getVar($_GET['get_param?type'], '') !== '')
 		{
@@ -75,27 +80,41 @@ final class Receiver
 
 			if(array_key_exists('mode', $output))
 			{
-				$mode = $output['mode'];
+				$data['mode'] = $output['mode'];
 			}
 			elseif(isset($_GET['mode']))
 			{
-				$mode = $_GET['mode'];
+				$data['mode'] = $_GET['mode'];
 			}
 
 			if(array_key_exists('type', $output))
 			{
-				$type = $output['type'];
+				$data['type'] = $output['type'];
 			}
 			elseif(isset($_GET['type']))
 			{
-				$type = $_GET['type'];
+				$data['type'] = $_GET['type'];
 			}
 
-			if($type === '')
+			if($data['type'] === '')
 			{
-				$type = $_GET['get_param?type'];
+				$data['type'] = $_GET['get_param?type'];
 			}
 		}
+
+		return $data;
+	}
+
+	/**
+	 * Handler
+	 */
+	public function handler()
+	{
+		$this->core()->log()->info(__('Received new request for Receiver.', 'wc1c'));
+
+		$mode_and_type = $this->getModeAndType();
+		$mode = $mode_and_type['mode'];
+		$type = $mode_and_type['type'];
 
 		$this->core()->log()->debug(__('Received request params.', 'wc1c'), ['type' => $type, 'mode=' => $mode]);
 
@@ -296,14 +315,18 @@ final class Receiver
 
 		$lines = [];
 
+		$session_name = session_name();
+
 		if(session_status() === PHP_SESSION_NONE)
 		{
 			$this->core()->log()->debug(__('PHP session none, start new PHP session.', 'wc1c'));
 			session_start();
 		}
 
-		$session_name = session_name();
 		$session_id = session_id();
+
+		$this->core()->configuration()->addMetaData('session_id', maybe_serialize($session_id), true);
+		$this->core()->configuration()->saveMetaData();
 
 		$this->core()->log()->debug(__('Request authorization from 1C successfully completed.', 'wc1c'), ['session_name' => $session_name, 'session_id' => $session_id]);
 
@@ -337,40 +360,33 @@ final class Receiver
 	 */
 	public function handlerCheckauthKey($send_response = false)
 	{
-		if($this->core()->getOptions('receiver_check_auth_key_disabled', 'no') === 'yes')
+		if(!isset($_GET['lazysign']))
 		{
-			$this->core()->log()->info(__('Authorization key verification is disabled. Lazy signature verification activated.', 'wc1c'));
+			$warning = __('Authorization key verification failed. 1C did not send the name of the lazy signature.', 'wc1c');
+			$this->core()->log()->warning($warning);
 
-			if(!isset($_GET['lazysign']))
+			if($send_response)
 			{
-				$warning = __('Authorization key verification failed. 1C did not send the name of the lazy signature.', 'wc1c');
-				$this->core()->log()->warning($warning);
-
-				if($send_response)
-				{
-					$this->sendResponseByType('failure', $warning);
-				}
-
-				return false;
+				$this->sendResponseByType('failure', $warning);
 			}
 
-			$lazy_sign = $_GET['lazysign'];
-			$lazy_sign_store = $this->core()->configuration()->getMeta('receiver_lazy_sign');
+			return false;
+		}
 
-			if($lazy_sign_store !== $lazy_sign)
+		$lazy_sign = $_GET['lazysign'];
+		$lazy_sign_store = $this->core()->configuration()->getMeta('receiver_lazy_sign');
+
+		if($lazy_sign_store !== $lazy_sign)
+		{
+			$warning = __('Authorization key verification failed. 1C sent an incorrect lazy signature.', 'wc1c');
+			$this->core()->log()->warning($warning);
+
+			if($send_response)
 			{
-				$warning = __('Authorization key verification failed. 1C sent an incorrect lazy signature.', 'wc1c');
-				$this->core()->log()->warning($warning);
-
-				if($send_response)
-				{
-					$this->sendResponseByType('failure', $warning);
-				}
-
-				return false;
+				$this->sendResponseByType('failure', $warning);
 			}
 
-			return true;
+			return false;
 		}
 
 		$session_name = session_name();
@@ -388,13 +404,7 @@ final class Receiver
 			return false;
 		}
 
-		if(session_status() === PHP_SESSION_NONE)
-		{
-			$this->core()->log()->debug(__('PHP session none, start new PHP session.', 'wc1c'));
-			session_start();
-		}
-
-		$session_id = session_id();
+		$session_id = $this->core()->configuration()->getMeta('session_id');
 
 		if($_COOKIE[$session_name] !== $session_id)
 		{
@@ -414,6 +424,32 @@ final class Receiver
 	}
 
 	/**
+	 * Cleaning the directory for temporary files.
+	 *
+	 * @return void
+	 */
+	public function handlerCatalogDirectoryClean()
+	{
+		$directory = $this->core()->getUploadDirectory();
+
+		$this->core()->log()->info(__('Cleaning the directory for temporary files.', 'wc1c'), ['directory' => $directory]);
+
+		wc1c()->filesystem()->ensureDirectoryExists($directory);
+
+		if(wc1c()->filesystem()->cleanDirectory($directory))
+		{
+			$this->core()->log()->info(__('The directory for temporary files was successfully cleared of old files.', 'wc1c'), ['directory' => $this->core()->getUploadDirectory()]);
+		}
+		else
+		{
+			$error = __('Failed to clear the temp directory of old files.', 'wc1c');
+
+			$this->core()->log()->error($error, ['directory' => $directory]);
+			$this->sendResponseByType('failure', $error);
+		}
+	}
+
+	/**
 	 * Init
 	 */
 	public function handlerCatalogModeInit()
@@ -423,19 +459,7 @@ final class Receiver
 		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_init_session'))
 		{
 			$_SESSION = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_session', $_SESSION, $this);
-		}
-
-		$this->core()->log()->debug(__('Session for receiving requests.', 'wc1c'), ['session'=> $_SESSION]);
-
-		if(wc1c()->filesystem()->cleanDirectory($this->core()->getUploadDirectory()))
-		{
-			$this->core()->log()->info(__('The directory for temporary files was successfully cleared of old files.', 'wc1c'), ['directory' => $this->core()->getUploadDirectory()]);
-		}
-		else
-		{
-			$error = __('Failed to clear the temp directory of old files.', 'wc1c');
-			$this->core()->log()->error($error, ['directory' => $this->core()->getUploadDirectory()]);
-			$this->sendResponseByType('failure', $error);
+			$this->core()->log()->debug(__('Session for receiving requests is changed by external algorithms.', 'wc1c'), ['session'=> $_SESSION]);
 		}
 
 		$data['zip'] = 'zip=no' . PHP_EOL;
@@ -570,7 +594,7 @@ final class Receiver
 			/*
 			 * Adding to media library
 			 */
-			if(is_file($upload_file_path) && 'yes' === $this->core()->getOptions('media_library_images_by_receiver', 'no'))
+			if(wc1c()->filesystem()->extension($upload_file_path) !== 'xml' && 'yes' === $this->core()->getOptions('media_library_images_by_receiver', 'no'))
 			{
 				if('yes' !== $this->core()->getOptions('media_library', 'no'))
 				{
