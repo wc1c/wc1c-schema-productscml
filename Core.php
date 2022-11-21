@@ -82,9 +82,9 @@ class Core extends SchemaAbstract
 	/**
 	 * Initialize
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
-	public function init()
+	public function init(): bool
 	{
 		$this->setOptions($this->configuration()->getOptions());
 		$this->setUploadDirectory($this->configuration()->getUploadDirectory() . DIRECTORY_SEPARATOR . 'catalog');
@@ -139,7 +139,7 @@ class Core extends SchemaAbstract
 	/**
 	 * @return string
 	 */
-	public function getUploadDirectory()
+	public function getUploadDirectory(): string
 	{
 		return $this->upload_directory;
 	}
@@ -159,7 +159,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return boolean true - success, false - error
 	 */
-	public function fileProcessing($file_path)
+	public function fileProcessing(string $file_path): bool
 	{
 		try
 		{
@@ -217,7 +217,7 @@ class Core extends SchemaAbstract
 	 * @return void
 	 * @throws Exception
 	 */
-	public function processingTimer($reader)
+	public function processingTimer(Reader $reader)
 	{
 		if(!wc1c()->timer()->isRemainingBiggerThan(5))
 		{
@@ -1168,9 +1168,9 @@ class Core extends SchemaAbstract
 	 * @return ProductContract
 	 * @throws Exception
 	 */
-	public function assignProductsItemImages($internal_product, $external_product, $mode, $reader)
+	public function assignProductsItemImages(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-		if($internal_product->isType('variation')) // todo: назначение одного изображения для вариаации
+		if($internal_product->isType('variation')) // todo: назначение одного изображения для вариации
 		{
 			return $internal_product;
 		}
@@ -1513,7 +1513,7 @@ class Core extends SchemaAbstract
 	 * @return ProductContract
 	 * @throws Exception If data cannot be set.
 	 */
-	protected function setVariationAttributes(&$variation, $raw_attributes)
+	protected function setVariationAttributes(ProductContract $variation, array $raw_attributes): ProductContract
 	{
 		$this->log()->debug(__('Assigning attributes for variation.', 'wc1c'), ['variation_id' => $variation->getId(), 'raw_attributes' => $raw_attributes]);
 
@@ -1522,7 +1522,7 @@ class Core extends SchemaAbstract
 
 		$parent = (new Factory)->getProduct($variation->get_parent_id()); // todo: cache
 
-		// Stop if parent does not exists.
+		// Stop if parent does not exist.
 		if(!$parent)
 		{
 			$this->log()->warning(__('The parent product was not found. Skipped.', 'wc1c'), ['parent_id' => $variation->get_parent_id()]);
@@ -1648,7 +1648,7 @@ class Core extends SchemaAbstract
 	 * @return ProductContract
 	 * @throws Exception
 	 */
-	public function assignProductsItemAttributes($internal_product, $external_product, $mode, $reader)
+	public function assignProductsItemAttributes(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
 		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_attributes', 'yes'))
 		{
@@ -1884,7 +1884,7 @@ class Core extends SchemaAbstract
 	 * @return ProductContract
 	 * @throws Exception
 	 */
-	public function assignOffersItemAttributes($internal_product, $external_product, $reader)
+	public function assignOffersItemAttributes(ProductContract $internal_product, ProductDataContract $external_product, Reader $reader): ProductContract
 	{
 		$this->log()->debug(__('Assigning attributes to a product based on the properties of the offers package.', 'wc1c'), ['filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId()]);
 
@@ -2352,7 +2352,7 @@ class Core extends SchemaAbstract
 	 * @return void
 	 * @throws Exception
 	 */
-	public function processingProductsItem($external_product, $reader)
+	public function processingProductsItem(ProductDataContract $external_product, Reader $reader)
 	{
 		$this->log()->info(__('Processing a product from a catalog of products.', 'wc1c'), ['product_id' => $external_product->getId(), 'product_characteristic_id' => $external_product->getCharacteristicId()]);
 
@@ -2582,7 +2582,7 @@ class Core extends SchemaAbstract
 	 * @return void
 	 * @throws Exception
 	 */
-	public function processingOffersItem($external_offer, $reader)
+	public function processingOffersItem(ProductDataContract $external_offer, Reader $reader)
 	{
 		$this->log()->info(__('Processing an offer from a package of offers.', 'wc1c'), ['offer_id' => $external_offer->getId(), 'offer_characteristic_id' => $external_offer->getCharacteristicId()]);
 
@@ -2755,7 +2755,7 @@ class Core extends SchemaAbstract
 	 * @return void
 	 * @throws Exception
 	 */
-	public function processingOffers($reader)
+	public function processingOffers(Reader $reader)
 	{
 		$types =
 		[
