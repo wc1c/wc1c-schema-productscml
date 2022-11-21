@@ -202,6 +202,7 @@ class Core extends SchemaAbstract
 			catch(Exception $e)
 			{
 				$this->log()->error(__('Import file processing not completed. ReaderCML threw an exception.', 'wc1c'), ['exception' => $e]);
+				break;
 			}
 		}
 
