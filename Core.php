@@ -219,7 +219,7 @@ class Core extends SchemaAbstract
 	 */
 	public function processingTimer(Reader $reader)
 	{
-		if(!wc1c()->timer()->isRemainingBiggerThan(5))
+		if(wc1c()->timer()->getMaximum() !== 0 && !wc1c()->timer()->isRemainingBiggerThan(5))
 		{
 			throw new Exception(__('There was not enough time to load all the data.', 'wc1c'));
 		}
