@@ -233,7 +233,7 @@ class Core extends SchemaAbstract
 	 * @return void
 	 * @throws \Exception
 	 */
-	public function processingClassifier($reader)
+	public function processingClassifier(Reader $reader)
 	{
 		if($reader->filetype !== 'import' && $reader->filetype !== 'offers')
 		{
