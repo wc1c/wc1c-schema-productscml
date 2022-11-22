@@ -2232,10 +2232,10 @@ class Core extends SchemaAbstract
 					$regular_value = $first_value['price'];
 					unset($prices[$first_value['price_type_id']]);
 			}
-		}
 
-		$this->log()->debug(__('Assign the regular price.', 'wc1c'), ['regular_value' => $regular_value]);
-		$internal_product->set_regular_price($regular_value);
+			$this->log()->debug(__('Assign the regular price.', 'wc1c'), ['regular_value' => $regular_value]);
+			$internal_product->set_regular_price($regular_value);
+		}
 
 		if('no' !== $sale)
 		{
@@ -2265,20 +2265,32 @@ class Core extends SchemaAbstract
 					$first_value = reset($prices);
 					$sale_value = $first_value['price'];
 			}
+
+			$this->log()->debug(__('Assign the sale price.', 'wc1c'), ['sale_value' => $sale_value]);
+			$internal_product->set_sale_price($sale_value);
 		}
 
-		$this->log()->debug(__('Assign the sale price.', 'wc1c'), ['sale_value' => $sale_value]);
-		$internal_product->set_sale_price($sale_value);
-
-		if(!empty($sale_value) && $sale_value < $regular_value)
+		if($regular !== 'no' || $sale !== 'no')
 		{
-			$this->log()->debug(__('Assign the current price from sale price.', 'wc1c'), ['sale_value' => $sale_value]);
-			$internal_product->set_price($sale_value);
+			if(!empty($sale_value) && $sale_value < $regular_value)
+			{
+				$this->log()->debug(__('Assign the current price from sale price.', 'wc1c'), ['sale_value' => $sale_value]);
+				$internal_product->set_price($sale_value);
+			}
+			else
+			{
+				$this->log()->debug(__('Assign the current price from regular price.', 'wc1c'), ['regular_value' => $regular_value]);
+				$internal_product->set_price($regular_value);
+			}
+		}
+
+		if($regular === 'no' && $sale === 'no')
+		{
+			$this->log()->info(__('Prices processing is off. Assigning is skip.', 'wc1c'));
 		}
 		else
 		{
-			$this->log()->debug(__('Assign the current price from regular price.', 'wc1c'), ['regular_value' => $regular_value]);
-			$internal_product->set_price($regular_value);
+			$this->log()->debug(__('Prices processing is successful.', 'wc1c'), ['regular_value' => $regular_value, 'sale_value' => $sale_value]);
 		}
 
 		return $internal_product;
