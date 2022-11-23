@@ -1065,7 +1065,13 @@ class Admin
 		[
 			'title' => __('Status of the created product', 'wc1c'),
 			'type' => 'select',
-			'description' => __('Newly created products will have selected status. It is recommended to select the status: Draft.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('Newly created products will have selected status. It is recommended to select the status: Draft.', 'wc1c'),
+				__('The product catalog comes without prices and balances. Publication is best done at the stage of filling in this data.', 'wc1c'),
+				__('If a product is marked for deletion in 1C, it will be placed in the trash, regardless of the current setting.', 'wc1c')
+			),
 			'default' => 'draft',
 			'options' => $product_statuses
 		];
