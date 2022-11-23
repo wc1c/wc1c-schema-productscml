@@ -1022,7 +1022,7 @@ class Core extends SchemaAbstract
 
 		$update_status = $this->getOptions('products_update_stock_status', '');
 
-		if($update_status !== '')
+		if(!empty($update_status))
 		{
 			$internal_product->set_stock_status($update_status);
 		}

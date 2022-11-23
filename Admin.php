@@ -1080,7 +1080,12 @@ class Admin
 		[
 			'title' => __('The stock status of product created', 'wc1c'),
 			'type' => 'select',
-			'description' => __('Newly created products will have the selected stock status. It is recommended to select the status: Out of stock.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Newly created products will have the selected stock status. It is recommended to select the status: Out of stock.', 'wc1c'),
+				__('The product catalog comes without quantities. When creating new products, it is better not to expose their availability.', 'wc1c')
+			),
 			'default' => 'outofstock',
 			'options' => wc_get_product_stock_status_options()
 		];
