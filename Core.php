@@ -288,7 +288,7 @@ class Core extends SchemaAbstract
 	 * @return void
 	 * @throws Exception
 	 */
-	public function processingClassifierGroups($classifier, $reader)
+	public function processingClassifierGroups(ClassifierDataContract $classifier, Reader $reader)
 	{
 		if($reader->filetype !== 'import')
 		{
@@ -606,7 +606,7 @@ class Core extends SchemaAbstract
 	 * @return void
 	 * @throws Exception
 	 */
-	public function processingClassifierProperties($classifier, $reader)
+	public function processingClassifierProperties(ClassifierDataContract $classifier, Reader $reader)
 	{
 		if($reader->getFiletype() !== 'import' && $reader->getFiletype() !== 'offers')
 		{
@@ -734,11 +734,11 @@ class Core extends SchemaAbstract
 	 * Save classifier
 	 *
 	 * @param ClassifierDataContract $classifier
-	 * @param $reader
+	 * @param Reader $reader
 	 *
 	 * @return void
 	 */
-	public function processingClassifierItem($classifier, $reader)
+	public function processingClassifierItem(ClassifierDataContract $classifier, $reader)
 	{
 		if($reader->getFiletype() !== 'import' && $reader->getFiletype() !== 'offers')
 		{
@@ -766,7 +766,7 @@ class Core extends SchemaAbstract
 	 * @return void
 	 * @throws \Exception
 	 */
-	public function processingCatalog($reader)
+	public function processingCatalog(Reader $reader)
 	{
 		if($reader->getFiletype() !== 'import')
 		{
@@ -881,7 +881,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return ProductContract
 	 */
-	public function assignProductsItemName($internal_product, $external_product, $mode, $reader)
+	public function assignProductsItemName(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
 		if($internal_product->isType('variation'))
 		{
@@ -947,7 +947,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return ProductContract
 	 */
-	public function assignProductsItemSku($new_product, $product, $mode, $reader)
+	public function assignProductsItemSku(ProductContract $new_product, ProductDataContract $product, string $mode, Reader $reader): ProductContract
 	{
 		try
 		{
@@ -971,7 +971,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return ProductContract
 	 */
-	public function assignProductsItemStatus($internal_product, $external_product, $mode, $reader)
+	public function assignProductsItemStatus(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
 		if($mode === 'create')
 		{
@@ -1000,7 +1000,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return ProductContract
 	 */
-	public function assignProductsItemStockStatus($internal_product, $external_product, $mode, $reader)
+	public function assignProductsItemStockStatus(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
 		if($mode === 'create')
 		{
@@ -1029,7 +1029,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return ProductContract
 	 */
-	public function assignProductsItemDescriptions($new_product, $product, $mode, $reader)
+	public function assignProductsItemDescriptions(ProductContract $new_product, ProductDataContract $product, string $mode, Reader $reader): ProductContract
 	{
 		$short = $this->getOptions('products_descriptions_short_by_cml', 'no');
 		$full = $this->getOptions('products_descriptions_by_cml', 'no');
@@ -1116,7 +1116,7 @@ class Core extends SchemaAbstract
 	 * @return ProductContract
 	 * @throws Exception
 	 */
-	public function assignProductsItemCategories($new_product, $product, $mode, $reader)
+	public function assignProductsItemCategories(ProductContract $new_product, ProductDataContract $product, string $mode, Reader $reader): ProductContract
 	{
 		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_category', 'yes'))
 		{
@@ -1248,7 +1248,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return ProductContract
 	 */
-	public function assignProductsItemDimensions($internal_product, $external_product, $mode, $reader)
+	public function assignProductsItemDimensions(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
 		if('yes' !== $this->getOptions('products_dimensions_by_requisites', 'no'))
 		{
@@ -1355,7 +1355,7 @@ class Core extends SchemaAbstract
 	 * @return ProductContract
 	 * @throws Exception If data cannot be set.
 	 */
-	protected function setProductAttributes(&$product, $raw_attributes)
+	protected function setProductAttributes(&$product, array $raw_attributes): ProductContract
 	{
 		$this->log()->debug(__('Assigning attributes for product.', 'wc1c'), ['product_id' => $product->getId(), 'product_type' => $product->get_type(), 'raw_attributes' => $raw_attributes]);
 
@@ -1595,7 +1595,7 @@ class Core extends SchemaAbstract
 	 * @return array
 	 * @throws Exception
 	 */
-	protected function getVariationParentAttributes($attributes, $parent)
+	protected function getVariationParentAttributes(array $attributes, ProductContract $parent): array
 	{
 		/** @var AttributesStorageContract $attributes_storage */
 		$attributes_storage = Storage::load('attribute');
@@ -2183,7 +2183,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return ProductContract
 	 */
-	public function assignOffersItemPrices($internal_product, $external_product, $reader)
+	public function assignOffersItemPrices(ProductContract $internal_product, ProductDataContract $external_product, Reader $reader): ProductContract
 	{
 		$this->log()->debug(__('Prices processing.', 'wc1c'), ['filetype' => $reader->getFiletype(), 'product_id' => $internal_product->getId(), 'offer_id' => $external_product->getId(), 'offer_characteristic_id' => $external_product->getCharacteristicId()]);
 
@@ -2305,7 +2305,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return ProductContract
 	 */
-	public function assignOffersItemInventories($internal_product, $external_product, $reader)
+	public function assignOffersItemInventories(ProductContract $internal_product, ProductDataContract $external_product, Reader $reader): ProductContract
 	{
 		$this->log()->debug(__('Inventories processing.', 'wc1c'), ['filetype' => $reader->getFiletype(), 'product_id' => $internal_product->getId(), 'offer_id' => $external_product->getId(), 'offer_characteristic_id' => $external_product->getCharacteristicId()]);
 
