@@ -1218,12 +1218,22 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemImages(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
+		if('create' === $mode && false === $external_product->hasImages())
+		{
+			return $internal_product;
+		}
+
 		if($internal_product->isType('variation')) // todo: назначение одного изображения для вариации
 		{
 			return $internal_product;
 		}
 
-		if('create' === $mode && false === $external_product->hasImages())
+		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_images', 'no'))
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && 'yes' !== $this->getOptions('products_update_images', 'no'))
 		{
 			return $internal_product;
 		}

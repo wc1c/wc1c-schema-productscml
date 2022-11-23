@@ -1145,7 +1145,7 @@ class Admin
 			'description' => sprintf
 			(
 				'%s<hr>%s %s',
-				__('The data received from 1C may contain full descriptions of products that will be placed in the full description', 'wc1c'),
+				__('The data received from 1C may contain full descriptions of products that will be placed in the full description.', 'wc1c'),
 				__('If there are no brief full descriptions in 1C, you can turn off the filling and edit the data directly on the site.', 'wc1c'),
 				__('The choice of a source for a brief full description in 1C is in a separate settings block - Products (goods): descriptions.', 'wc1c')
 			),
@@ -1157,7 +1157,12 @@ class Admin
 			'title' => __('Adding the images of the created product', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
-			'description' => __('If the setting is disabled, new products will not be assigned images that come from 1C.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Products in 1C can have images. When this setting is enabled, they will be added to newly created products on the site.', 'wc1c'),
+				__('The choice of a source for a brief images from 1C is in a separate settings block - Products (goods): images.', 'wc1c')
+			),
 			'default' => 'yes'
 		];
 
@@ -1344,7 +1349,12 @@ class Admin
 			'title' => __('Product images update when requesting product updates', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('If the setting is disabled, new images will not be assigned to old products and the old ones will not be deleted either. In this case, you can edit images from WooCommerce.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('If the setting is disabled, new images will not be assigned to old products and the old ones will not be deleted either. In this case, you can edit images from WooCommerce.', 'wc1c'),
+				__('The choice of a source for a brief images from 1C is in a separate settings block - Products (goods): images.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
