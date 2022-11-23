@@ -117,6 +117,7 @@ class Core extends SchemaAbstract
 			add_action('wc1c_schema_productscml_processing_products_item', [$this, 'processingProductsItem'], 10, 2);
 			add_action('wc1c_schema_productscml_processing_offers_item', [$this, 'processingOffersItem'], 10, 2);
 
+			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemFeatured'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemStatus'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemStockStatus'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemSku'], 10, 4);
@@ -962,6 +963,37 @@ class Core extends SchemaAbstract
 		}
 
 		return $new_product;
+	}
+
+
+	/**
+	 * Назначение данных продукта исходя из режима: рекомендуемый
+	 *
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
+	 * @param string $mode Режим - create или update
+	 * @param Reader $reader Текущий итератор
+	 *
+	 * @return ProductContract
+	 */
+	public function assignProductsItemFeatured(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
+	{
+		if($mode === 'create')
+		{
+			if('yes' === $this->getOptions('products_create_set_featured', 'no'))
+			{
+				$internal_product->set_featured(true);
+			}
+
+			return $internal_product;
+		}
+
+		if('yes' === $this->getOptions('products_update_set_featured', 'no'))
+		{
+			$internal_product->set_featured(true);
+		}
+
+		return $internal_product;
 	}
 
 	/**

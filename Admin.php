@@ -1104,6 +1104,20 @@ class Admin
 			'default' => 'yes'
 		];
 
+		$fields['products_create_adding_category_fill_parent'] =
+		[
+			'title' => __('Filling the parent categories of the created product', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('If the category assigned to a product is a child category of other categories, then the parent categories will also be assigned to the product being created.', 'wc1c'),
+				__('It is recommended to enable this setting.', 'wc1c')
+			),
+			'default' => 'yes'
+		];
+
 		$fields['products_create_adding_attributes'] =
 		[
 			'title' => __('Assigning attributes of the created product', 'wc1c'),
@@ -1163,15 +1177,6 @@ class Admin
 				__('Products in 1C can have images. When this setting is enabled, they will be added to newly created products on the site.', 'wc1c'),
 				__('The choice of a source for a brief images from 1C is in a separate settings block - Products (goods): images.', 'wc1c')
 			),
-			'default' => 'yes'
-		];
-
-		$fields['products_create_adding_category_fill_parent'] =
-		[
-			'title' => __('Filling the parent categories of the created product', 'wc1c'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('Fill in the categories that are higher in level for the product? It is recommended to enable this setting.', 'wc1c'),
 			'default' => 'yes'
 		];
 
@@ -1365,6 +1370,15 @@ class Admin
 			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c'),
 			'description' => __('Fill in the categories that are higher in level for the product? It is recommended to enable this setting.', 'wc1c'),
 			'default' => 'yes'
+		];
+
+		$fields['products_update_set_featured'] =
+		[
+			'title' => __('Featured product', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('The updated product will be marked as recommended.', 'wc1c'),
+			'default' => 'no'
 		];
 
 		return $fields;
