@@ -2397,22 +2397,17 @@ class Core extends SchemaAbstract
 		 *
 		 * @return int|false
 		 */
-		if($product_id === 0 && has_filter('wc1c_schema_productscml_processing_products_search'))
+		if(empty($product_id) && has_filter('wc1c_schema_productscml_processing_products_search'))
 		{
 			$product_id = apply_filters('wc1c_schema_productscml_processing_products_search', $product_id, $external_product, $this, $reader);
 
 			$this->log()->debug(__('Product search result by external algorithms.', 'wc1c'), ['product_ids' => $product_id]);
-
-			if(empty($product_id))
-			{
-				$product_id = 0;
-			}
 		}
 
 		/**
 		 * Ни один продукт не найден
 		 */
-		if(0 === $product_id)
+		if(empty($product_id))
 		{
 			$this->log()->info(__('Product is not found.', 'wc1c'));
 
@@ -2624,14 +2619,9 @@ class Core extends SchemaAbstract
 		 *
 		 * @return int|false
 		 */
-		if($internal_offer_id === 0 && has_filter('wc1c_schema_productscml_processing_offers_search'))
+		if(empty($internal_offer_id) && has_filter('wc1c_schema_productscml_processing_offers_search'))
 		{
 			$internal_offer_id = apply_filters('wc1c_schema_productscml_processing_offers_search', $internal_offer_id, $external_offer, $reader);
-
-			if(empty($internal_offer_id))
-			{
-				$internal_offer_id = 0;
-			}
 		}
 
 		/*
@@ -2645,7 +2635,7 @@ class Core extends SchemaAbstract
 		 * -- если не найден, и включено создание на основе первой характеристики - создаем
 		 */
 
-		if(0 === $internal_offer_id && empty($external_offer->getCharacteristicId()))
+		if(empty($internal_offer_id) && empty($external_offer->getCharacteristicId()))
 		{
 			$this->log()->notice(__('Product not found. Offer update skipped.', 'wc1c'), ['offer' => $external_offer]);
 			return;
@@ -2697,7 +2687,7 @@ class Core extends SchemaAbstract
 		}
 		else
 		{
-			if(0 === $internal_parent_offer_id)
+			if(empty($internal_parent_offer_id))
 			{
 				$this->log()->warning(__('The parent product was not found. The creation of the variation is skipped.', 'wc1c'), ['offer_id' => $internal_offer_id]);
 				return;
