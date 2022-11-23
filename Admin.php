@@ -1381,6 +1381,15 @@ class Admin
 			'default' => 'no'
 		];
 
+		$fields['products_update_set_sold_individually'] =
+		[
+			'title' => __('Individual sale', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('Enable to have the product sold individually in one order. Two units of a product in one order will be impossible to order.', 'wc1c'),
+			'default' => 'no'
+		];
+
 		return $fields;
 	}
 }
