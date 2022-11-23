@@ -132,6 +132,7 @@ class Core extends SchemaAbstract
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemDimensions'], 15, 4);
 
 			add_filter('wc1c_schema_productscml_processing_products_item_after_save', [$this, 'assignProductsItemImages'], 10, 4);
+			add_filter('wc1c_schema_productscml_processing_products_item_after_save', [$this, 'assignProductsItemStatusTrash'], 200, 4);
 
 			add_filter('wc1c_schema_productscml_processing_offers_item_before_save', [$this, 'assignOffersItemAttributes'], 10, 3);
 			add_filter('wc1c_schema_productscml_processing_offers_item_before_save', [$this, 'assignOffersItemPrices'], 10, 3);
@@ -865,6 +866,16 @@ class Core extends SchemaAbstract
 				return;
 			}
 
+			/*
+			 * Пропуск продуктов помеченных к удалению в 1С
+			 */
+			$raw = $product->getData();
+			if(isset($raw['delete_mark']) && $raw['delete_mark'] === 'yes' && 'yes' !== $this->getOptions('products_create_delete_mark', 'no'))
+			{
+				$this->log()->info(__('The use of products delete mark is disabled. Processing skipped.', 'wc1c'));
+				return;
+			}
+
 			try
 			{
 				do_action('wc1c_schema_productscml_processing_products_item', $product, $reader, $this);
@@ -1123,6 +1134,31 @@ class Core extends SchemaAbstract
 		if(!empty($update_status))
 		{
 			$internal_product->set_status($update_status);
+		}
+
+		return $internal_product;
+	}
+
+	/**
+	 * Назначение данных продукта исходя из режима: статус корзины
+	 *
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
+	 * @param string $mode Режим - create или update
+	 * @param Reader $reader Текущий итератор
+	 *
+	 * @return ProductContract
+	 */
+	public function assignProductsItemStatusTrash(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
+	{
+		if($internal_product->isType('variation'))
+		{
+			return $internal_product;
+		}
+
+		if($mode === 'create'&& 'yes' === $this->getOptions('products_create_delete_mark_trash', 'no'))
+		{
+			$internal_product->set_status('trash');
 		}
 
 		return $internal_product;

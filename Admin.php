@@ -1218,6 +1218,34 @@ class Admin
 			'default' => 'no'
 		];
 
+		$fields['products_create_delete_mark'] =
+		[
+			'title' => __('Создание продуктов помеченных к удалению в 1С', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Если продукт помечен в 1С на удаление, то при включении настройки он все равно будет создан на сайте и заполнен данными.', 'wc1c'),
+				__('При этом имеется возможность помещения таких продуктов сразу в корзину. Для этого имеется отдельная настройка.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
+		$fields['products_create_delete_mark_trash'] =
+		[
+			'title' => __('Помещение продуктов помеченных к удалению в 1С в корзину', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Если продукт помечен в 1С на удаление, то при включении настройки он будет помещен в корзину.', 'wc1c'),
+				__('Восстановить помещенные в корзину продукты возможно как в ручную, так и при помощи настроек для обновления продуктов.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
 		return $fields;
 	}
 
