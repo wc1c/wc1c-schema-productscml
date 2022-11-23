@@ -1390,6 +1390,26 @@ class Admin
 			'default' => 'no'
 		];
 
+		$options = wc_get_product_visibility_options();
+
+		$fields['products_update_set_catalog_visibility'] =
+		[
+			'title' => __('Product visibility', 'wc1c'),
+			'type' => 'select',
+			'description' => __('This setting determines which pages products will be displayed on.', 'wc1c'),
+			'default' => 'visible',
+			'options' => $options
+		];
+
+		$fields['products_update_set_reviews_allowed'] =
+		[
+			'title' => __('Allow reviews', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
+			'description' => __('It will be allowed to leave reviews for updated products.', 'wc1c'),
+			'default' => 'no'
+		];
+
 		return $fields;
 	}
 }

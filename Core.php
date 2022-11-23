@@ -117,6 +117,8 @@ class Core extends SchemaAbstract
 			add_action('wc1c_schema_productscml_processing_products_item', [$this, 'processingProductsItem'], 10, 2);
 			add_action('wc1c_schema_productscml_processing_offers_item', [$this, 'processingOffersItem'], 10, 2);
 
+			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemCatalogVisibility'], 10, 4);
+			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemReviews'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemSoldIndividually'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemFeatured'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemStatus'], 10, 4);
@@ -967,6 +969,70 @@ class Core extends SchemaAbstract
 	}
 
 	/**
+	 * Назначение данных продукта исходя из режима: видимост ьв каталоге
+	 *
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
+	 * @param string $mode Режим - create или update
+	 * @param Reader $reader Текущий итератор
+	 *
+	 * @return ProductContract
+	 */
+	public function assignProductsItemCatalogVisibility(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
+	{
+		if($internal_product->isType('variation'))
+		{
+			return $internal_product;
+		}
+
+		if($mode === 'create')
+		{
+			$internal_product->set_catalog_visibility($this->getOptions('products_create_set_catalog_visibility', 'visible'));
+			return $internal_product;
+		}
+
+		$internal_product->set_catalog_visibility($this->getOptions('products_update_set_catalog_visibility', 'visible'));
+
+		return $internal_product;
+	}
+
+	/**
+	 * Назначение данных продукта исходя из режима: отзывы
+	 *
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
+	 * @param string $mode Режим - create или update
+	 * @param Reader $reader Текущий итератор
+	 *
+	 * @return ProductContract
+	 */
+	public function assignProductsItemReviews(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
+	{
+		if($internal_product->isType('variation'))
+		{
+			return $internal_product;
+		}
+
+		if($mode === 'create')
+		{
+			$internal_product->set_reviews_allowed(false);
+			if('yes' === $this->getOptions('products_create_set_reviews_allowed', 'no'))
+			{
+				$internal_product->set_reviews_allowed(true);
+			}
+
+			return $internal_product;
+		}
+
+		if('yes' === $this->getOptions('products_update_set_reviews_allowed', 'no'))
+		{
+			$internal_product->set_reviews_allowed(true);
+		}
+
+		return $internal_product;
+	}
+
+	/**
 	 * Назначение данных продукта исходя из режима: индивидуальная продажа
 	 *
 	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
@@ -1008,6 +1074,11 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemFeatured(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
+		if($internal_product->isType('variation'))
+		{
+			return $internal_product;
+		}
+
 		if($mode === 'create')
 		{
 			if('yes' === $this->getOptions('products_create_set_featured', 'no'))
@@ -1218,41 +1289,41 @@ class Core extends SchemaAbstract
 	/**
 	 * Назначение данных продукта исходя из режима: категории
 	 *
-	 * @param ProductContract $new_product Экземпляр продукта - либо существующий, либо новый
-	 * @param ProductDataContract $product Данные продукта из XML
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
 	 * @param string $mode Режим - create или update
 	 * @param Reader $reader Текущий итератор
 	 *
 	 * @return ProductContract
 	 * @throws Exception
 	 */
-	public function assignProductsItemCategories(ProductContract $new_product, ProductDataContract $product, string $mode, Reader $reader): ProductContract
+	public function assignProductsItemCategories(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
 		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_category', 'yes'))
 		{
-			return $new_product;
+			return $internal_product;
 		}
 
 		if('update' === $mode && 'yes' !== $this->getOptions('products_update_categories', 'no'))
 		{
-			return $new_product;
+			return $internal_product;
 		}
 
-		if($new_product->isType('variation'))
+		if($internal_product->isType('variation'))
 		{
-			return $new_product;
+			return $internal_product;
 		}
 
-		if('create' === $mode && false === $product->hasClassifierGroups())
+		if('create' === $mode && false === $external_product->hasClassifierGroups())
 		{
-			return $new_product;
+			return $internal_product;
 		}
 
 		/** @var CategoriesStorageContract $categories_storage */
 		$categories_storage = Storage::load('category');
 
 		$cats = [];
-		foreach($product->getClassifierGroups() as $classifier_group)
+		foreach($external_product->getClassifierGroups() as $classifier_group)
 		{
 			$cat = $categories_storage->getByExternalId($classifier_group);
 
@@ -1262,9 +1333,9 @@ class Core extends SchemaAbstract
 			}
 		}
 
-		$new_product->set_category_ids($cats);
+		$internal_product->set_category_ids($cats);
 
-		return $new_product;
+		return $internal_product;
 	}
 
 	/**
