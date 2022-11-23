@@ -1095,7 +1095,12 @@ class Admin
 			'title' => __('Assigning categories of the created product', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
-			'description' => __('When this setting is enabled, the processing of categories based on classifier groups must be enabled and configured.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Products in 1C have their own hierarchy. Thanks to this hierarchy, it is possible to automatically assign categories to products on the site.', 'wc1c'),
+				__('For the correct operation of filling in categories, you must first configure them in a separate settings block.', 'wc1c')
+			),
 			'default' => 'yes'
 		];
 
