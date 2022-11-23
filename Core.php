@@ -174,6 +174,7 @@ class Core extends SchemaAbstract
 		if(has_filter('wc1c_schema_productscml_file_processing_decoder'))
 		{
 			$decoder = apply_filters('wc1c_schema_productscml_file_processing_decoder', $decoder, $this);
+			$this->log()->info(__('DecoderCML has been overridden by external algorithms.', 'wc1c'));
 		}
 
 		try
@@ -191,6 +192,7 @@ class Core extends SchemaAbstract
 		if(has_filter('wc1c_schema_productscml_file_processing_reader'))
 		{
 			$reader = apply_filters('wc1c_schema_productscml_file_processing_reader', $reader, $this);
+			$this->log()->info(__('ReaderCML has been overridden by external algorithms.', 'wc1c'));
 		}
 
 		while($reader->read())
