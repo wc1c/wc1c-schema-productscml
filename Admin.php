@@ -1127,7 +1127,13 @@ class Admin
 			'title' => __('Filling the description of the created product', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('In the data that came from 1C, there may be descriptions of products that will be placed in a short description.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('In the data that came from 1C, there may be descriptions of products that will be placed in a short description.', 'wc1c'),
+				__('If there are no brief descriptions in 1C, you can turn off the filling and edit the data directly on the site.', 'wc1c'),
+				__('The choice of a source for a brief description in 1C is in a separate settings block - Products (goods): descriptions.', 'wc1c')
+			),
 			'default' => 'yes'
 		];
 
@@ -1136,7 +1142,13 @@ class Admin
 			'title' => __('Filling a full description of the created product', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
-			'description' => __('The data received from 1C may contain full descriptions of products that will be placed in the full description.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('The data received from 1C may contain full descriptions of products that will be placed in the full description', 'wc1c'),
+				__('If there are no brief full descriptions in 1C, you can turn off the filling and edit the data directly on the site.', 'wc1c'),
+				__('The choice of a source for a brief full description in 1C is in a separate settings block - Products (goods): descriptions.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 

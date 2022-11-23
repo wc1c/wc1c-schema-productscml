@@ -122,6 +122,7 @@ class Core extends SchemaAbstract
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemSku'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemName'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemDescriptions'], 10, 4);
+			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemDescriptionsFull'], 10, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemCategories'], 15, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemAttributes'], 15, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemDimensions'], 15, 4);
@@ -1033,17 +1034,26 @@ class Core extends SchemaAbstract
 	/**
 	 * Назначение данных продукта исходя из режима: описания
 	 *
-	 * @param ProductContract $new_product Экземпляр продукта - либо существующий, либо новый
-	 * @param ProductDataContract $product Данные продукта из XML
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
 	 * @param string $mode Режим - create или update
 	 * @param Reader $reader Текущий итератор
 	 *
 	 * @return ProductContract
 	 */
-	public function assignProductsItemDescriptions(ProductContract $new_product, ProductDataContract $product, string $mode, Reader $reader): ProductContract
+	public function assignProductsItemDescriptions(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
+		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_description', 'yes'))
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && 'yes' !== $this->getOptions('products_update_description', 'no'))
+		{
+			return $internal_product;
+		}
+
 		$short = $this->getOptions('products_descriptions_short_by_cml', 'no');
-		$full = $this->getOptions('products_descriptions_by_cml', 'no');
 
 		if('no' !== $short)
 		{
@@ -1052,9 +1062,9 @@ class Core extends SchemaAbstract
 			{
 				case 'yes_html':
 					$requisite = 'ОписаниеВФорматеHTML';
-					if($product->hasRequisites($requisite))
+					if($external_product->hasRequisites($requisite))
 					{
-						$requisite_data = $product->getRequisites($requisite);
+						$requisite_data = $external_product->getRequisites($requisite);
 						if(!empty($requisite_data['value']))
 						{
 							$short_description = html_entity_decode($requisite_data['value']);
@@ -1063,9 +1073,9 @@ class Core extends SchemaAbstract
 					break;
 				case 'yes_requisites':
 					$requisite = $this->getOptions('products_descriptions_short_from_requisites_name', '');
-					if($product->hasRequisites($requisite))
+					if($external_product->hasRequisites($requisite))
 					{
-						$requisite_data = $product->getRequisites($requisite);
+						$requisite_data = $external_product->getRequisites($requisite);
 						if(!empty($requisite_data['value']))
 						{
 							$short_description = html_entity_decode($requisite_data['value']);
@@ -1073,11 +1083,38 @@ class Core extends SchemaAbstract
 					}
 					break;
 				default:
-					$short_description = $product->getDescription();
+					$short_description = $external_product->getDescription();
 			}
 
-			$new_product->set_short_description($short_description);
+			$internal_product->set_short_description($short_description);
 		}
+
+		return $internal_product;
+	}
+
+	/**
+	 * Назначение данных продукта исходя из режима: описания
+	 *
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
+	 * @param string $mode Режим - create или update
+	 * @param Reader $reader Текущий итератор
+	 *
+	 * @return ProductContract
+	 */
+	public function assignProductsItemDescriptionsFull(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
+	{
+		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_description_full', 'no'))
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && 'yes' !== $this->getOptions('products_update_description_full', 'no'))
+		{
+			return $internal_product;
+		}
+
+		$full = $this->getOptions('products_descriptions_by_cml', 'no');
 
 		if('no' !== $full)
 		{
@@ -1086,9 +1123,9 @@ class Core extends SchemaAbstract
 			{
 				case 'yes_html':
 					$requisite = 'ОписаниеВФорматеHTML';
-					if($product->hasRequisites($requisite))
+					if($external_product->hasRequisites($requisite))
 					{
-						$requisite_data = $product->getRequisites($requisite);
+						$requisite_data = $external_product->getRequisites($requisite);
 						if(!empty($requisite_data['value']))
 						{
 							$full_description = html_entity_decode($requisite_data['value']);
@@ -1097,9 +1134,9 @@ class Core extends SchemaAbstract
 					break;
 				case 'yes_requisites':
 					$requisite = $this->getOptions('products_descriptions_from_requisites_name', '');
-					if($product->hasRequisites($requisite))
+					if($external_product->hasRequisites($requisite))
 					{
-						$requisite_data = $product->getRequisites($requisite);
+						$requisite_data = $external_product->getRequisites($requisite);
 						if(!empty($requisite_data['value']))
 						{
 							$full_description = html_entity_decode($requisite_data['value']);
@@ -1107,13 +1144,13 @@ class Core extends SchemaAbstract
 					}
 					break;
 				default:
-					$full_description = $product->getDescription();
+					$full_description = $external_product->getDescription();
 			}
 
-			$new_product->set_description($full_description);
+			$internal_product->set_description($full_description);
 		}
 
-		return $new_product;
+		return $internal_product;
 	}
 
 	/**
