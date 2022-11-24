@@ -866,16 +866,6 @@ class Core extends SchemaAbstract
 				return;
 			}
 
-			/*
-			 * Пропуск продуктов помеченных к удалению в 1С
-			 */
-			$raw = $product->getData();
-			if(isset($raw['delete_mark']) && $raw['delete_mark'] === 'yes' && 'yes' !== $this->getOptions('products_create_delete_mark', 'no'))
-			{
-				$this->log()->info(__('The use of products delete mark is disabled. Processing skipped.', 'wc1c'));
-				return;
-			}
-
 			try
 			{
 				do_action('wc1c_schema_productscml_processing_products_item', $product, $reader, $this);
@@ -1156,9 +1146,24 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		if($mode === 'create'&& 'yes' === $this->getOptions('products_create_delete_mark_trash', 'no'))
+		$raw = $external_product->getData(); // todo: вынести в метод
+
+		if($mode === 'create'&& isset($raw['delete_mark']) && $raw['delete_mark'] === 'yes' && 'yes' === $this->getOptions('products_create_delete_mark_trash', 'no'))
 		{
 			$internal_product->set_status('trash');
+		}
+
+		if($mode === 'update'&& 'yes' === $this->getOptions('products_update_delete_mark_trash', 'no'))
+		{
+			if(isset($raw['delete_mark']) && $raw['delete_mark'] === 'yes')
+			{
+				$internal_product->set_status('trash');
+			}
+			else
+			{
+				$update_status = $this->getOptions('products_update_status', '');
+				$internal_product->set_status($update_status);
+			}
 		}
 
 		return $internal_product;
@@ -2632,6 +2637,17 @@ class Core extends SchemaAbstract
 			$this->log()->info(__('Product is not found.', 'wc1c'));
 
 			/*
+			 * Пропуск создания продуктов помеченных к удалению в 1С
+			 */
+			$raw = $external_product->getData(); // todo: вынести в метод
+			if(isset($raw['delete_mark']) && $raw['delete_mark'] === 'yes' && 'yes' !== $this->getOptions('products_create_delete_mark', 'no'))
+			{
+				$this->log()->info(__('The use of products delete mark is disabled. Processing skipped.', 'wc1c'));
+				return;
+			}
+			unset($raw);
+
+			/*
 			 * Создание продуктов отключено
 			 */
 			if('yes' !== $this->getOptions('products_create', 'no'))
@@ -2750,6 +2766,22 @@ class Core extends SchemaAbstract
 			$this->log()->info(__('The product is created from a different schema. Update skipped.', 'wc1c'), ['product_id' => $product_id]);
 			return;
 		}
+
+		/*
+		 * Пропуск обновления продуктов из корзины, не помеченных к удалению в 1С
+		 */
+		$raw = $external_product->getData(); // todo: вынести в метод
+		if
+		(
+			'trash' === $update_product->get_status() &&
+			isset($raw['delete_mark']) && $raw['delete_mark'] === 'no'
+		   && 'yes' !== $this->getOptions('products_update_use_delete_mark', 'no')
+		)
+		{
+			$this->log()->info(__('The use of products from trash is disabled. Processing skipped.', 'wc1c'));
+			return;
+		}
+		unset($raw);
 
 		/**
 		 * Назначение данных обновляемого продукта по внешним алгоритмам перед сохранением
