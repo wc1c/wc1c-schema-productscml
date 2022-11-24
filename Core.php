@@ -2775,7 +2775,7 @@ class Core extends SchemaAbstract
 		(
 			'trash' === $update_product->get_status() &&
 			isset($raw['delete_mark']) && $raw['delete_mark'] === 'no'
-		   && 'yes' !== $this->getOptions('products_update_use_delete_mark', 'no')
+		   && 'yes' === $this->getOptions('products_update_use_delete_mark', 'no')
 		)
 		{
 			$this->log()->info(__('The use of products from trash is disabled. Processing skipped.', 'wc1c'));
