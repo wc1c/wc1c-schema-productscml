@@ -130,9 +130,9 @@ class Core extends SchemaAbstract
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemCategories'], 15, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemAttributes'], 15, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemDimensions'], 15, 4);
+			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemStatusTrash'], 100, 4);
 
 			add_filter('wc1c_schema_productscml_processing_products_item_after_save', [$this, 'assignProductsItemImages'], 10, 4);
-			add_filter('wc1c_schema_productscml_processing_products_item_after_save', [$this, 'assignProductsItemStatusTrash'], 200, 4);
 
 			add_filter('wc1c_schema_productscml_processing_offers_item_before_save', [$this, 'assignOffersItemAttributes'], 10, 3);
 			add_filter('wc1c_schema_productscml_processing_offers_item_before_save', [$this, 'assignOffersItemPrices'], 10, 3);
@@ -1162,7 +1162,11 @@ class Core extends SchemaAbstract
 			else
 			{
 				$update_status = $this->getOptions('products_update_status', '');
-				$internal_product->set_status($update_status);
+
+				if(!empty($update_status))
+				{
+					$internal_product->set_status($update_status);
+				}
 			}
 		}
 
@@ -2775,7 +2779,7 @@ class Core extends SchemaAbstract
 		(
 			'trash' === $update_product->get_status() &&
 			isset($raw['delete_mark']) && $raw['delete_mark'] === 'no'
-		   && 'yes' === $this->getOptions('products_update_use_delete_mark', 'no')
+		   && 'yes' !== $this->getOptions('products_update_use_delete_mark', 'no')
 		)
 		{
 			$this->log()->info(__('The use of products from trash is disabled. Processing skipped.', 'wc1c'));
