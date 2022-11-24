@@ -1218,6 +1218,34 @@ class Admin
 			'default' => 'no'
 		];
 
+		$fields['products_create_delete_mark'] =
+		[
+			'title' => __('Создание продуктов из 1С помеченных к удалению', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Если продукт помечен в 1С на удаление, то при включении настройки он все равно будет создан на сайте и заполнен данными.', 'wc1c'),
+				__('При этом имеется возможность помещения таких продуктов сразу в корзину. Для этого имеется отдельная настройка.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
+		$fields['products_create_delete_mark_trash'] =
+		[
+			'title' => __('Помещение продуктов из 1С помеченных к удалению в корзину', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Если продукт помечен в 1С на удаление, то при включении настройки он будет помещен в корзину.', 'wc1c'),
+				__('Восстановить помещенные в корзину продукты возможно как в ручную, так и при помощи настроек для обновления продуктов.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
 		return $fields;
 	}
 
@@ -1407,6 +1435,34 @@ class Admin
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c'),
 			'description' => __('It will be allowed to leave reviews for updated products.', 'wc1c'),
+			'default' => 'no'
+		];
+
+		$fields['products_update_use_delete_mark'] =
+		[
+			'title' => __('Восстановление продуктов из корзины снятых с удаления в 1С', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Если продукт не помечен в 1С на удаление, а на сайте он находиться в корзине, то при включении настройки, он будет возвращен из корзины и заполнен данными согласно настройкам обновления.', 'wc1c'),
+				__('При отключенной настройке все помещенные в корзину продукты будут находиться там постоянно. Создание новых таких же продуктов будет невозможно.', 'wc1c')
+			),
+			'default' => 'no'
+		];
+
+		$fields['products_update_delete_mark_trash'] =
+		[
+			'title' => __('Помещение продуктов из 1С помеченных к удалению в корзину', 'wc1c'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Если продукт помечен в 1С на удаление, то при включении настройки он будет помещен в корзину.', 'wc1c'),
+				__('Восстановить помещенные в корзину продукты возможно как в ручную, так и при помощи настроек для обновления продуктов.', 'wc1c')
+			),
 			'default' => 'no'
 		];
 
