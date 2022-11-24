@@ -1220,7 +1220,7 @@ class Admin
 
 		$fields['products_create_delete_mark'] =
 		[
-			'title' => __('Создание продуктов помеченных к удалению в 1С', 'wc1c'),
+			'title' => __('Создание продуктов из 1С помеченных к удалению', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
 			'description' => sprintf
