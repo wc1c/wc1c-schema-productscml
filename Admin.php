@@ -1234,7 +1234,7 @@ class Admin
 
 		$fields['products_create_delete_mark_trash'] =
 		[
-			'title' => __('Помещение продуктов помеченных к удалению в 1С в корзину', 'wc1c'),
+			'title' => __('Помещение продуктов из 1С помеченных к удалению в корзину', 'wc1c'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c'),
 			'description' => sprintf
