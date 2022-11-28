@@ -2641,6 +2641,15 @@ class Core extends SchemaAbstract
 			$this->log()->info(__('Product is not found.', 'wc1c'));
 
 			/*
+			 * Создание продуктов отключено
+			 */
+			if('yes' !== $this->getOptions('products_create', 'no'))
+			{
+				$this->log()->info(__('Products create is disabled. Product create skipped.', 'wc1c'));
+				return;
+			}
+
+			/*
 			 * Пропуск создания продуктов помеченных к удалению в 1С
 			 */
 			$raw = $external_product->getData(); // todo: вынести в метод
@@ -2650,15 +2659,6 @@ class Core extends SchemaAbstract
 				return;
 			}
 			unset($raw);
-
-			/*
-			 * Создание продуктов отключено
-			 */
-			if('yes' !== $this->getOptions('products_create', 'no'))
-			{
-				$this->log()->info(__('Products create is disabled. Product create skipped.', 'wc1c'));
-				return;
-			}
 
 			/*
 			 * Продукт с характеристикой
