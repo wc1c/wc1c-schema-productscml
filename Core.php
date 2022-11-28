@@ -2849,21 +2849,14 @@ class Core extends SchemaAbstract
 	{
 		$this->log()->info(__('Processing an offer from a package of offers.', 'wc1c'), ['offer_id' => $external_offer->getId(), 'offer_characteristic_id' => $external_offer->getCharacteristicId()]);
 
-		$internal_offer_id = 0;
 		$product_factory = new Factory();
 
-		/*
-		 * Поиск продукта по идентификатору 1С
-		 */
-		if('yes' === $this->getOptions('product_sync_by_id', 'yes'))
-		{
-			$internal_offer_id = $product_factory->findIdsByExternalIdAndCharacteristicId($external_offer->getId(), $external_offer->getCharacteristicId());
+		$internal_offer_id = $product_factory->findIdsByExternalIdAndCharacteristicId($external_offer->getId(), $external_offer->getCharacteristicId());
 
-			if(is_array($internal_offer_id)) // todo: обработка нескольких?
-			{
-				$this->log()->notice(__('Several identical products were found. The first one is selected.', 'wc1c'), ['product_ids' => $internal_offer_id]);
-				$internal_offer_id = reset($internal_offer_id);
-			}
+		if(is_array($internal_offer_id)) // todo: обработка нескольких?
+		{
+			$this->log()->notice(__('Several identical products were found. The first one is selected.', 'wc1c'), ['product_ids' => $internal_offer_id]);
+			$internal_offer_id = reset($internal_offer_id);
 		}
 
 		/**
