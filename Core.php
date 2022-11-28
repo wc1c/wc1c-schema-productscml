@@ -948,29 +948,29 @@ class Core extends SchemaAbstract
 	/**
 	 * Назначение данных продукта исходя из режима: артикул
 	 *
-	 * @param ProductContract $new_product Экземпляр продукта - либо существующий, либо новый
-	 * @param ProductDataContract $product Данные продукта из XML
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
 	 * @param string $mode Режим - create или update
 	 * @param Reader $reader Текущий итератор
 	 *
 	 * @return ProductContract
 	 */
-	public function assignProductsItemSku(ProductContract $new_product, ProductDataContract $product, string $mode, Reader $reader): ProductContract
+	public function assignProductsItemSku(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
 		try
 		{
-			$new_product->setSku($product->getSku());
+			$internal_product->setSku($external_product->getSku());
 		}
 		catch(Exception $e)
 		{
-			$this->log()->notice(__('Failed to set SKU for product.', 'wc1c'), ['exception' => $e, 'sku' => $product->getSku()]);
+			$this->log()->notice(__('Failed to set SKU for product.', 'wc1c'), ['exception' => $e, 'sku' => $external_product->getSku()]);
 		}
 
-		return $new_product;
+		return $internal_product;
 	}
 
 	/**
-	 * Назначение данных продукта исходя из режима: видимост ьв каталоге
+	 * Назначение данных продукта исходя из режима: видимость в каталоге
 	 *
 	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
 	 * @param ProductDataContract $external_product Данные продукта из XML
