@@ -86,6 +86,11 @@ class Core extends SchemaAbstract
 	 */
 	public function init(): bool
 	{
+		if($this->isInitialized())
+		{
+			return true;
+		}
+
 		$this->setOptions($this->configuration()->getOptions());
 		$this->setUploadDirectory($this->configuration()->getUploadDirectory() . DIRECTORY_SEPARATOR . 'catalog');
 
