@@ -95,33 +95,41 @@ class Admin
 			$this->core()->configuration()->saveMetaData();
 		}
 
-		$url_raw = get_site_url(null, '/?wc1c-receiver=' . $this->core()->configuration()->getId() . '&lazysign=' . $lazy_sign . '&get_param');
-		$url_raw = '<p class="input-text p-2 bg-light regular-input wc1c_urls">' . esc_html($url_raw) . '</p>';
+		$url_raw = trim(get_site_url(null, '/?wc1c-receiver=' . $this->core()->configuration()->getId() . '&lazysign=' . $lazy_sign . '&get_param'));
+		$url_raw = '<span class="d-block input-text mt-0 p-2 bg-light regular-input wc1c_urls">' . esc_url($url_raw) . '</span>';
 
 		$fields['url_requests'] =
 		[
 			'title' => __('Website address', 'wc1c'),
 			'type' => 'raw',
 			'raw' => $url_raw,
-			'description' => __('Specified in the exchange settings on the 1C side. The Recipient is located at this address, which will receive requests from 1C. When copying, you need to get rid of whitespace characters, if they are present.', 'wc1c'),
+			'description' => sprintf(
+				'%s<hr>%s',
+				__('Specified in the exchange settings on the 1C side. The Recipient is located at this address, which will receive requests from 1C.', 'wc1c'),
+				__('When copying, you need to get rid of whitespace characters, if they are present.', 'wc1c')
+			)
 		];
 
 		$fields['user_login'] =
 		[
 			'title' => __('Username', 'wc1c'),
 			'type' => 'text',
-			'description' => __('Specified in 1C when setting up an exchange with a site on the 1C side. At the same time, work with data on the site is performed on behalf of the configuration owner, and not on behalf of the specified username.', 'wc1c'),
+			'description' => sprintf(
+				'%s<hr>%s',
+				__('Specified when setting up an exchange with a site on the 1C side. Any name can be specified, except for an empty value.', 'wc1c'),
+				__('Work with data on the site is performed on behalf of the configuration owner, and not on behalf of the specified username.', 'wc1c')
+			),
 			'default' => '',
-			'css' => 'min-width: 350px;',
+			'css' => 'min-width: 377px;',
 		];
 
 		$fields['user_password'] =
 		[
 			'title' => __('User password', 'wc1c'),
 			'type' => 'password',
-			'description' => __('Specified in 1C paired with a username when setting up an exchange with a site on the 1C side. It is advisable not to specify the password for the current WordPress user.', 'wc1c'),
+			'description' => __('Specified in pair with the username when setting up on the 1C side. It is advisable not to specify a password for the current WordPress user.', 'wc1c'),
 			'default' => '',
-			'css' => 'min-width: 350px;',
+			'css' => 'min-width: 377px;',
 		];
 
 		return $fields;
