@@ -157,7 +157,7 @@ class Admin
 			'type' => 'text',
 			'description' => sprintf
 			(
-				'%s<br />%s <b>%s</b><br />%s',
+				'%s<br />%s <b>%s</b><hr>%s',
 				__('Enter the maximum size of accepted requests from 1C at a time in bytes. May be specified with a dimension suffix, such as 7M, where M = megabyte, K = kilobyte, G - gigabyte.', 'wc1c'),
 				__('Current WC1C limit:', 'wc1c'),
 				wc1c()->settings()->get('php_post_max_size', wc1c()->environment()->get('php_post_max_size')),
