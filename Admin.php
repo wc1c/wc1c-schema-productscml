@@ -567,8 +567,9 @@ class Admin
 			'label' => __('Check the box to enable the creation of new products upon request from 1C. Disabled by default.', 'wc1c'),
 			'description' => sprintf
 			(
-				'%s<br /><hr>%s',
+				'%s<br />%s<br /><hr>%s',
 				__('The products is only created if it is not found in WooCommerce when searching by criteria for synchronization.', 'wc1c'),
+				__('To create, the products parameters from the current configuration are used.', 'wc1c'),
 				__('The option works only with automatic creation of products. When disabled, it is still possible to manually create products through ManualCML and similar extensions.', 'wc1c')
 			),
 			'default' => 'no'
@@ -581,8 +582,9 @@ class Admin
 			'label' => __('Check the box to enable product updates on demand from 1C. Disabled by default.', 'wc1c'),
 			'description' => sprintf
 			(
-				'%s<br /><hr>%s',
+				'%s<br />%s<br /><hr>%s',
 				__('Products are updated only if they were found using the product synchronization keys.', 'wc1c'),
+				__('To update, the products parameters from the current configuration are used.', 'wc1c'),
 				__('The option works only with automatic updating of products. When disabled, it is still possible to manually update products through ManualCML and similar extensions.', 'wc1c')
 			),
 			'default' => 'no'
