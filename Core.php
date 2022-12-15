@@ -53,7 +53,7 @@ class Core extends SchemaAbstract
 	public function __construct()
 	{
 		$this->setId('productscml');
-		$this->setVersion('0.3.0');
+		$this->setVersion('0.4.0');
 
 		$this->setName(__('Products data exchange via CommerceML', 'wc1c'));
 		$this->setDescription(__('Creation and updating of products (goods) in WooCommerce according to data from 1C using the CommerceML protocol of various versions.', 'wc1c'));
@@ -751,7 +751,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return void
 	 */
-	public function processingClassifierItem(ClassifierDataContract $classifier, $reader)
+	public function processingClassifierItem(ClassifierDataContract $classifier, Reader $reader)
 	{
 		if($reader->getFiletype() !== 'import' && $reader->getFiletype() !== 'offers')
 		{
@@ -1421,7 +1421,7 @@ class Core extends SchemaAbstract
 
 		$max_images = $this->getOptions('products_images_by_cml_max', 10);
 
-		/** @var ImagesStorageContract */
+		/** @var ImagesStorageContract $images_storage */
 		$images_storage = Storage::load('image');
 
 		$images = $external_product->getImages();
@@ -1616,34 +1616,16 @@ class Core extends SchemaAbstract
 				}
 
 				// Set attribute visibility.
-				if(isset($attribute['visible']))
-				{
-					$is_visible = $attribute['visible'];
-				}
-				else
-				{
-					$is_visible = 1;
-				}
+				$is_visible = $attribute['visible'] ?? 1;
 
 				// Set attribute position.
-				if(isset($attribute['position']))
-				{
-					$position = $attribute['position'];
-				}
-				else
-				{
-					$position = $raw_attributes_counter;
-				}
+				$position = $attribute['position'] ?? $raw_attributes_counter;
 
 				// Get name.
 				$attribute_name = $attribute_id ? $attribute_exist->getTaxonomyName() : $attribute['name'];
 
 				// Set if is a variation attribute based on existing attributes if possible so updates via CSV do not change this.
-				$is_variation = 0;
-				if(isset($attribute['variation']))
-				{
-					$is_variation = $attribute['variation'];
-				}
+				$is_variation = $attribute['variation'] ?? 0;
 
 				if($existing_attributes)
 				{
@@ -1953,11 +1935,7 @@ class Core extends SchemaAbstract
 				$global = $attributes_storage->getByLabel($property['name']);
 				$attribute_name = $global ? $global->getName() : $property['name'];
 
-				$value = [];
-				if(isset($raw_attributes[$attribute_name]['value']))
-				{
-					$value = $raw_attributes[$attribute_name]['value'];
-				}
+				$value = $raw_attributes[$attribute_name]['value'] ?? [];
 
 				if(isset($property['values_variants'][$property_value['value']]))
 				{
@@ -2032,13 +2010,7 @@ class Core extends SchemaAbstract
 				$global = $attributes_storage->getByLabel($characteristic_value['name']);
 				$attribute_name = $global ? $global->getName() : $characteristic_value['name'];
 
-				$value = [];
-
-				// атрибут уже имеется, надо добавлять к существующим значениям
-				if(isset($raw_attributes[$attribute_name]['value']))
-				{
-					$value = $raw_attributes[$attribute_name]['value'];
-				}
+				$value = $raw_attributes[$attribute_name]['value'] ?? [];
 
 				// значение отсутствует в атрибутах
 				if(!in_array($characteristic_value['value'], $value, true))
@@ -2192,11 +2164,7 @@ class Core extends SchemaAbstract
 				$global = $attributes_storage->getByLabel($property['name']);
 				$attribute_name = $global ? $global->getName() : $property['name'];
 
-				$value = [];
-				if(isset($raw_attributes[$attribute_name]['value']))
-				{
-					$value = $raw_attributes[$attribute_name]['value'];
-				}
+				$value = $raw_attributes[$attribute_name]['value'] ?? [];
 
 				if(isset($property['values_variants'][$property_value['value']]))
 				{
@@ -2263,13 +2231,7 @@ class Core extends SchemaAbstract
 				$global = $attributes_storage->getByLabel($characteristic_value['name']);
 				$attribute_name = $global ? $global->getName() : $characteristic_value['name'];
 
-				$value = [];
-
-				// атрибут уже имеется, надо добавлять к существующим значениям
-				if(isset($raw_attributes[$attribute_name]['value']))
-				{
-					$value = $raw_attributes[$attribute_name]['value'];
-				}
+				$value = $raw_attributes[$attribute_name]['value'] ?? [];
 
 				// значение отсутствует в атрибутах
 				if(!in_array($characteristic_value['value'], $value, true))
@@ -2323,13 +2285,7 @@ class Core extends SchemaAbstract
 					$global = $attributes_storage->getByLabel($characteristic_value['name']);
 					$attribute_name = $global ? $global->getName() : $characteristic_value['name'];
 
-					$value = [];
-
-					// атрибут уже имеется, надо добавлять к существующим значениям
-					if(isset($parent_attr[$attribute_name]['value']))
-					{
-						$value = $parent_attr[$attribute_name]['value'];
-					}
+					$value = $parent_attr[$attribute_name]['value'] ?? [];
 
 					// значение отсутствует в атрибутах
 					if(!in_array($characteristic_value['value'], $value, true))
