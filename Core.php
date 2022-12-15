@@ -303,7 +303,7 @@ class Core extends SchemaAbstract
 	 */
 	public function processingClassifierGroups(ClassifierDataContract $classifier, Reader $reader)
 	{
-		if($reader->filetype !== 'import')
+		if($reader->getFiletype() !== 'import')
 		{
 			return;
 		}
