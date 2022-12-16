@@ -1,4 +1,4 @@
-<?php namespace Wc1c\Schemas\Productscml;
+<?php namespace Wc1c\Main\Schemas\Productscml;
 
 defined('ABSPATH') || exit;
 
@@ -10,8 +10,8 @@ use Wc1c\Cml\Decoder;
 use Wc1c\Cml\Entities\Catalog;
 use Wc1c\Cml\Entities\OffersPackage;
 use Wc1c\Cml\Reader;
-use Wc1c\Exceptions\Exception;
-use Wc1c\Schemas\Abstracts\SchemaAbstract;
+use Wc1c\Main\Exceptions\Exception;
+use Wc1c\Main\Schemas\Abstracts\SchemaAbstract;
 use Wc1c\Wc\Contracts\AttributeContract;
 use Wc1c\Wc\Contracts\AttributesStorageContract;
 use Wc1c\Wc\Contracts\CategoriesStorageContract;

@@ -1,9 +1,9 @@
-<?php namespace Wc1c\Schemas\Productscml;
+<?php namespace Wc1c\Main\Schemas\Productscml;
 
 defined('ABSPATH') || exit;
 
-use Wc1c\Traits\SingletonTrait;
-use Wc1c\Traits\UtilityTrait;
+use Wc1c\Main\Traits\SingletonTrait;
+use Wc1c\Main\Traits\UtilityTrait;
 
 /**
  * Admin
