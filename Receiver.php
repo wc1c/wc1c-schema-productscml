@@ -12,7 +12,7 @@ use Wc1c\Wc\Storage;
 /**
  * Receiver
  *
- * @package Wc1c\Schemas\Productscml
+ * @package Wc1c\Main\Schemas\Productscml
  */
 final class Receiver
 {

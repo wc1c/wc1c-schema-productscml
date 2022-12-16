@@ -8,7 +8,7 @@ use Wc1c\Main\Traits\UtilityTrait;
 /**
  * Admin
  *
- * @package Wc1c\Schemas\Productscml
+ * @package Wc1c\Main\Schemas\Productscml
  */
 class Admin
 {

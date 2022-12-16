@@ -28,7 +28,7 @@ use Wc1c\Wc\Storage;
 /**
  * Core
  *
- * @package Wc1c\Schemas\Productscml
+ * @package Wc1c\Main\Schemas\Productscml
  */
 class Core extends SchemaAbstract
 {
