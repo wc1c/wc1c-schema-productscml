@@ -1441,6 +1441,12 @@ class Core extends SchemaAbstract
 
 				$image_current = $images_storage->getByExternalName(reset($file));
 
+				if(false === $image_current)
+				{
+					$this->log()->notice(__('The image assignment for the product is missing. It is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+					continue;
+				}
+
 				if(is_array($image_current))
 				{
 					$image_current = reset($image_current);
