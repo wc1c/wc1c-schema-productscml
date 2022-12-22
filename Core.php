@@ -2540,6 +2540,11 @@ class Core extends SchemaAbstract
 
 		$product_quantity = $external_product->getQuantity();
 
+		if($product_quantity < $this->getOptions('products_inventories_quantities_min', 1))
+		{
+			$product_quantity = 0;
+		}
+
 		$stock_status = $product_quantity > 0 ? 'instock' : 'outofstock';
 
 		wc_update_product_stock($internal_product, $product_quantity, 'set');
