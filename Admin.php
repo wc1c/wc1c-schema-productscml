@@ -997,7 +997,7 @@ class Admin
 			'type' => 'text',
 			'description' => __('Specify the minimum quantity of goods in 1C to calculate the availability on the site. If there are fewer balances in 1C, then the product will be on the site with a balance of 0, i.e. with the status not available.', 'wc1c-main'),
 			'default' => '1',
-			'css' => 'min-width: 370px;',
+			'css' => 'min-width: 70px;',
 		];
 
 		return $fields;
