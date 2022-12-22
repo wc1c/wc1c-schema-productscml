@@ -2532,10 +2532,17 @@ class Core extends SchemaAbstract
 			}
 		}
 
-		if(false === $internal_product->get_manage_stock())
+		if($internal_product->get_stock_status() !== 'instock'
+		   && $internal_product->get_stock_status() !== 'outofstock'
+		   && $internal_product->get_stock_status() !==  'onbackorder')
 		{
-			$this->log()->debug(__('Inventory management at the product level is disabled. Enabling.', 'wc1c-main'));
-			$internal_product->set_manage_stock(true);
+			return $internal_product;
+		}
+
+		$internal_product->set_manage_stock(true);
+		if('yes' !== get_option('woocommerce_manage_stock'))
+		{
+			$internal_product->set_manage_stock(false);
 		}
 
 		$product_quantity = $external_product->getQuantity();
@@ -2547,7 +2554,10 @@ class Core extends SchemaAbstract
 
 		$stock_status = $product_quantity > 0 ? 'instock' : 'outofstock';
 
-		wc_update_product_stock($internal_product, $product_quantity, 'set');
+		if($internal_product->managing_stock())
+		{
+			wc_update_product_stock($internal_product, $product_quantity, 'set');
+		}
 
 		$internal_product->set_stock_status($stock_status);
 
