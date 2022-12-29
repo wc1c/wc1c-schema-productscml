@@ -48,6 +48,11 @@ class Core extends SchemaAbstract
 	public $receiver;
 
 	/**
+	 * @var bool
+	 */
+	private $processing_classifier_item = false;
+
+	/**
 	 * Core constructor.
 	 */
 	public function __construct()
@@ -90,6 +95,7 @@ class Core extends SchemaAbstract
 		{
 			return true;
 		}
+		$this->setInitialized(true);
 
 		$this->setOptions($this->configuration()->getOptions());
 		$this->setUploadDirectory($this->configuration()->getUploadDirectory() . DIRECTORY_SEPARATOR . 'catalog');
@@ -253,12 +259,19 @@ class Core extends SchemaAbstract
 			return;
 		}
 
+		if(!is_null($reader->classifier))
+		{
+			return;
+		}
+
 		if($reader->nodeName === 'Классификатор' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
 		{
 			/**
 			 * Декодируем данные классификатора из XML в объект
 			 */
 			$classifier = $reader->decoder()->process('classifier', $reader->xml_reader->readOuterXml());
+
+			$this->log('schemas')->critical('Отработка processingClassifier.', ['id' => $classifier->getId(), 'name' => $classifier->getName(), 'filetype' => $reader->getFiletype(), 'pos' => $reader->dump(false)]);
 
 			/**
 			 * Внешняя обработка классификатора
@@ -758,17 +771,44 @@ class Core extends SchemaAbstract
 			return;
 		}
 
-		$this->configuration()->updateMetaData('classifier:' . $reader->getFiletype() . ':' . $classifier->getId(), maybe_serialize($classifier));
-		$this->configuration()->saveMetaData();
+		if($this->processing_classifier_item)
+		{
+			return;
+		}
+
+		$classifier_push = true;
+		$all_classifiers = $this->configuration()->getMeta('classifier:' . $reader->getFiletype(), false, 'edit');
+
+		if(!empty($all_classifiers) && is_array($all_classifiers))
+		{
+			$all_classifiers_keys = wp_list_pluck($all_classifiers, 'value');
+
+			foreach($all_classifiers_keys as $key => $value)
+			{
+				if($value['id'] === $classifier->getId())
+				{
+					$classifier_push = false;
+					break;
+				}
+			}
+		}
+
+		if($classifier_push)
+		{
+			$this->configuration()->addMetaData('classifier:' . $reader->getFiletype(), ['id' => $classifier->getId(), 'name' => $classifier->getName()]);
+			$this->configuration()->addMetaData('classifier', ['id' => $classifier->getId(), 'name' => $classifier->getName(), 'filetype' => $reader->getFiletype()]);
+		}
+
+		$this->configuration()->updateMetaData('classifier:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier);
 
 		$classifier_properties = $classifier->getProperties();
 		if(!empty($classifier_properties))
 		{
-			$this->configuration()->updateMetaData('classifier-properties:' . $reader->getFiletype() . ':' . $classifier->getId(), maybe_serialize($classifier_properties));
-			$this->configuration()->saveMetaData();
+			$this->configuration()->updateMetaData('classifier-properties:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_properties);
 		}
 
-		$this->configuration()->readMetaData();
+		$this->configuration()->save();
+		$this->processing_classifier_item = true;
 	}
 
 	/**
