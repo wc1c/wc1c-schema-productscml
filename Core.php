@@ -2132,12 +2132,12 @@ class Core extends SchemaAbstract
 	 */
 	public function assignOffersItemAttributes(ProductContract $internal_product, ProductDataContract $external_product, Reader $reader): ProductContract
 	{
-		$this->log()->debug(__('Assigning attributes to a product based on the properties of the offers package.', 'wc1c-main'), ['filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId()]);
-
 		if($reader->getFiletype() !== 'offers')
 		{
 			return $internal_product;
 		}
+
+		$this->log()->info(__('Assigning attributes to a product based on the properties of the offers package.', 'wc1c-main'), ['filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId()]);
 
 		/** @var AttributesStorageContract $attributes_storage */
 		$attributes_storage = Storage::load('attribute');
