@@ -204,9 +204,10 @@ class Admin
 			 __('The categories will be linked when the names match without any other data matching.', 'wc1c-main'),
 			 __('Name matching, with the match of the parent category', 'wc1c-main'),
 			 __('The categories will be linked only if they have the same name and parent category.', 'wc1c-main'),
-			 __('The found categories will be updated according to 1C data according to the update settings. If not want to refresh the data, must enable refresh based on the configuration.', 'wc1c-main')
+			 __('When using existing categories, the creation of found categories will be skipped and the update settings will be applied for them.', 'wc1c-main')
 			),
 			'default' => 'no',
+			'css' => 'min-width:100%',
 			'options' => $merge_options
 		];
 
@@ -215,7 +216,12 @@ class Admin
 			'title' => __('Creating categories', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('Categories are only created if they are recognized as new. New categories are those that are not related according to 1C data and are not in an identical hierarchy.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Categories are only created if they are recognized as new. New categories are those that are not related according to 1C data and are not in an identical hierarchy.', 'wc1c-main'),
+				__('To create categories, you must also set up category sources. The current setting is just a global flag to allow creation.', 'wc1c-main')
+			),
 			'default' => 'no'
 		];
 
@@ -224,7 +230,12 @@ class Admin
 			'title' => __('Updating categories', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('If the category created earlier was linked to 1C data, then when you change any category data in 1C, the data will also change in WooCommerce.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('If the category created earlier was linked to 1C data, then when you change any category data in 1C, the data will also change in WooCommerce.', 'wc1c-main'),
+				__('To update categories, you must also configure category sources. The current setting is just a global checkbox that allows updates.', 'wc1c-main')
+			),
 			'default' => 'no'
 		];
 
