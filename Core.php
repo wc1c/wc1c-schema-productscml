@@ -314,13 +314,13 @@ class Core extends SchemaAbstract
 			return;
 		}
 
-		$classifier_groups = $classifier->getGroups();
-
-		if(empty($classifier_groups))
+		if(!$classifier->hasGroups())
 		{
 			$this->log()->info(__('Classifier groups is empty.', 'wc1c-main'));
 			return;
 		}
+
+		$classifier_groups = $classifier->getGroups();
 
 		$create_categories = $this->getOptions('categories_classifier_groups_create', 'no');
 		$update_categories = $this->getOptions('categories_classifier_groups_update', 'no');
