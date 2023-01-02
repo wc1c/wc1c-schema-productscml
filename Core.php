@@ -632,13 +632,13 @@ class Core extends SchemaAbstract
 			return;
 		}
 
-		$classifier_properties = $classifier->getProperties();
-
-		if(empty($classifier_properties))
+		if(!$classifier->hasProperties())
 		{
 			$this->log()->info(__('Classifier properties is empty.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
 			return;
 		}
+
+		$classifier_properties = $classifier->getProperties();
 
 		$create_attributes = $this->getOptions('attributes_create_by_classifier_properties', 'no');
 		$update_attributes_values = $this->getOptions('attributes_values_by_classifier_properties', 'no');
