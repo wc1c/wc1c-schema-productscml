@@ -1906,6 +1906,11 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemAttributes(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
+		if($reader->getFiletype() !== 'import')
+		{
+			return $internal_product;
+		}
+
 		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_attributes', 'yes'))
 		{
 			return $internal_product;
@@ -1916,12 +1921,7 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		$this->log()->debug(__('Assigning attributes to a product based on the properties of the product catalog.', 'wc1c-main'), ['mode' => $mode, 'filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId(), 'external_product_id' => $external_product->getId()]);
-
-		if($reader->getFiletype() !== 'import')
-		{
-			return $internal_product;
-		}
+		$this->log()->info(__('Assigning attributes to a product based on the properties of the product catalog.', 'wc1c-main'), ['mode' => $mode, 'filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId(), 'external_product_id' => $external_product->getId()]);
 
 		if($internal_product->isType('variable') && empty($external_product->getCharacteristicId()))
 		{
