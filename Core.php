@@ -48,11 +48,6 @@ class Core extends SchemaAbstract
 	public $receiver;
 
 	/**
-	 * @var bool
-	 */
-	private $processing_classifier_item = false;
-
-	/**
 	 * Core constructor.
 	 */
 	public function __construct()
@@ -270,8 +265,6 @@ class Core extends SchemaAbstract
 			 * Декодируем данные классификатора из XML в объект
 			 */
 			$classifier = $reader->decoder()->process('classifier', $reader->xml_reader->readOuterXml());
-
-			$this->log('schemas')->critical('Отработка processingClassifier.', ['id' => $classifier->getId(), 'name' => $classifier->getName(), 'filetype' => $reader->getFiletype(), 'pos' => $reader->dump(false)]);
 
 			/**
 			 * Внешняя обработка классификатора
@@ -771,11 +764,6 @@ class Core extends SchemaAbstract
 			return;
 		}
 
-		if($this->processing_classifier_item)
-		{
-			return;
-		}
-
 		$classifier_push = true;
 		$all_classifiers = $this->configuration()->getMeta('classifier:' . $reader->getFiletype(), false, 'edit');
 
@@ -808,7 +796,6 @@ class Core extends SchemaAbstract
 		}
 
 		$this->configuration()->save();
-		$this->processing_classifier_item = true;
 	}
 
 	/**
