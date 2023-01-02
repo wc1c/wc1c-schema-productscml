@@ -848,6 +848,11 @@ class Core extends SchemaAbstract
 				case 'Описание':
 					$reader->catalog->setDescription($reader->xml_reader->readString());
 					break;
+				case 'Склады':
+					$warehouses = $reader->decoder()->process('warehouses', $reader->xml_reader->readOuterXml());
+					$reader->catalog->setWarehouses($warehouses);
+					$reader->next();
+					break;
 			}
 		}
 
@@ -866,6 +871,8 @@ class Core extends SchemaAbstract
 
 		if($reader->parentNodeName === 'Товары' && $reader->nodeName === 'Товар' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
 		{
+			// todo: сохранение каталога
+
 			/**
 			 * Декодирование данных продукта из XML в объект реализующий ProductDataContract
 			 */
@@ -3069,11 +3076,18 @@ class Core extends SchemaAbstract
 					$reader->offers_package->setPriceTypes($price_types);
 					$reader->next();
 					break;
+				case 'Склады':
+					$warehouses = $reader->decoder()->process('warehouses', $reader->xml_reader->readOuterXml());
+					$reader->offers_package->setWarehouses($warehouses);
+					$reader->next();
+					break;
 			}
 		}
 
 		if($reader->parentNodeName === 'Предложения' && $reader->nodeName === 'Предложение' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
 		{
+			// todo: сохранение пакета предложений
+
 			$offer = $reader->decoder->process('offer', $reader->xml_reader->readOuterXml());
 
 			if(has_filter('wc1c_schema_productscml_processing_offers'))
