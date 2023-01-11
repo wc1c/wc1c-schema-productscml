@@ -821,6 +821,7 @@ class Admin
 			'yes' => __('From the standard description', 'wc1c-main'),
 			'yes_html' => __('From the HTML description', 'wc1c-main'),
 			'yes_requisites' => __('From requisite with the specified name', 'wc1c-main'),
+			'yes_specification' => __('From the specification', 'wc1c-main'),
 		];
 
 		$fields['products_descriptions_short_by_cml'] =
@@ -829,7 +830,7 @@ class Admin
 			'type' => 'select',
 			'description' => sprintf
 			(
-				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
 				__('The setting works when creating and updating products (goods).', 'wc1c-main'),
 				__('Do not use', 'wc1c-main'),
 				__('Populating the short description data from CommerceML data will be skipped. If a product is updating, then its current short description will not be updated.', 'wc1c-main'),
@@ -838,7 +839,9 @@ class Admin
 				__('From the HTML description', 'wc1c-main'),
 				__('Standard description, in HTML format only. Unloaded in a short description if there is a checkmark in 1C - Description in HTML format.', 'wc1c-main'),
 				__('From requisite with the specified name', 'wc1c-main'),
-				__('The short description data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c-main')
+				__('The short description data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c-main'),
+				__('From the specification', 'wc1c-main'),
+				__('The short description will be filled in from the item specification in 1C.', 'wc1c-main')
 			),
 			'default' => 'yes',
 			'options' => $products_descriptions_by_cml_options
@@ -859,7 +862,7 @@ class Admin
 			'type' => 'select',
 			'description' => sprintf
 			(
-				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
 				__('The setting works when creating and updating products (goods).', 'wc1c-main'),
 				__('Do not use', 'wc1c-main'),
 				__('Filling in full description data from CommerceML data will be skipped. If a product is updating, then its current full description will not be updated.', 'wc1c-main'),
@@ -868,7 +871,9 @@ class Admin
 				__('From the HTML description', 'wc1c-main'),
 				__('Standard description, in HTML format only. It is unloaded when there is a checkmark in 1C - Description in HTML format.', 'wc1c-main'),
 				__('From requisite with the specified name', 'wc1c-main'),
-				__('The full description data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c-main')
+				__('The full description data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c-main'),
+				__('From the specification', 'wc1c-main'),
+				__('The full description will be filled in from the item specification in 1C.', 'wc1c-main')
 			),
 			'default' => 'yes_html',
 			'options' => $products_descriptions_by_cml_options

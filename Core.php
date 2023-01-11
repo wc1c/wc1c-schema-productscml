@@ -1292,6 +1292,10 @@ class Core extends SchemaAbstract
 						}
 					}
 					break;
+				case 'yes_specification':
+					$data = $external_product->getData();
+					$short_description = $data['specification'] ?? '';
+					break;
 				default:
 					$short_description = $external_product->getDescription();
 			}
@@ -1352,6 +1356,10 @@ class Core extends SchemaAbstract
 							$full_description = html_entity_decode($requisite_data['value']);
 						}
 					}
+					break;
+				case 'yes_specification':
+					$data = $external_product->getData();
+					$full_description = $data['specification'] ?? '';
 					break;
 				default:
 					$full_description = $external_product->getDescription();
