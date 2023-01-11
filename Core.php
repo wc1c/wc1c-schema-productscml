@@ -996,9 +996,55 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemSku(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
+		if('update' === $mode && 'yes' !== $this->getOptions('products_update_sku', 'no'))
+		{
+			return $internal_product;
+		}
+
+		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_sku', 'no'))
+		{
+			return $internal_product;
+		}
+
+		$source = $this->getOptions('products_sku_by_cml', 'sku');
+
+		if('no' === $source)
+		{
+			return $internal_product;
+		}
+
+		$sku = '';
+		switch($source)
+		{
+			case 'code':
+				$requisite = 'Код';
+				if($external_product->hasRequisites($requisite))
+				{
+					$requisite_data = $external_product->getRequisites($requisite);
+					if(!empty($requisite_data['value']))
+					{
+						$sku = $requisite_data['value'];
+					}
+				}
+				break;
+			case 'yes_requisites':
+				$requisite = $this->getOptions('products_sku_from_requisites_name', '');
+				if($external_product->hasRequisites($requisite))
+				{
+					$requisite_data = $external_product->getRequisites($requisite);
+					if(!empty($requisite_data['value']))
+					{
+						$sku = $requisite_data['value'];
+					}
+				}
+				break;
+			default:
+				$sku = $external_product->getSku();
+		}
+
 		try
 		{
-			$internal_product->setSku($external_product->getSku());
+			$internal_product->setSku($sku);
 		}
 		catch(Exception $e)
 		{

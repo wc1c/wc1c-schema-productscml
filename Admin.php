@@ -48,6 +48,7 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsCreate'], 40, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsUpdate'], 50, 1);
 
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSku'], 60, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsNames'], 60, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDescriptions'], 60, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsImages'], 60, 1);
@@ -735,6 +736,63 @@ class Admin
 			'title' => __('Prices based on CommerceML data: sale - name in 1C', 'wc1c-main'),
 			'type' => 'text',
 			'description' => __('Specify the name of the sale price in 1C, which is used for filling to WooCommerce as the sale price.', 'wc1c-main'),
+			'default' => '',
+			'css' => 'min-width: 370px;',
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products sku
+	 *
+	 * @param array $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsSku(array $fields): array
+	{
+		$fields['title_products_sku'] =
+		[
+			'title' => __('Products (goods): SKU', 'wc1c-main'),
+			'type' => 'title',
+			'description' => __('Sources and algorithms for filling out product SKU.', 'wc1c-main'),
+		];
+
+		$products_sku_by_cml_options =
+		[
+			'no' => __('Do not use', 'wc1c-main'),
+			'sku' => __('From the standard SKU', 'wc1c-main'),
+			'code' => __('From the code', 'wc1c-main'),
+			'yes_requisites' => __('From requisite with the specified name', 'wc1c-main'),
+		];
+
+		$fields['products_sku_by_cml'] =
+		[
+			'title' => __('SKU based on CommerceML data', 'wc1c-main'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods).', 'wc1c-main'),
+				__('Do not use', 'wc1c-main'),
+				__('Populating the SKU data from CommerceML data will be skipped. If a product is updating, then its current SKU will not be updated.', 'wc1c-main'),
+				__('From the standard SKU', 'wc1c-main'),
+				__('This SKU is contained in the standard SKU of 1C products. It is located in the conditional tag - sku.', 'wc1c-main'),
+				__('From the code', 'wc1c-main'),
+				__('In 1C it is presented in the form of the code of the nomenclature. Unloaded as a requisite with the appropriate name.', 'wc1c-main'),
+				__('From requisite with the specified name', 'wc1c-main'),
+				__('The SKU data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c-main')
+			),
+			'default' => 'name',
+			'options' => $products_sku_by_cml_options
+		];
+
+		$fields['products_sku_from_requisites_name'] =
+		[
+			'title' => __('SKU based on CommerceML data: name for requisite', 'wc1c-main'),
+			'type' => 'text',
+			'description' => __('The name of the requisite of the product (goods) which contains a SKU of the product.', 'wc1c-main'),
 			'default' => '',
 			'css' => 'min-width: 370px;',
 		];
