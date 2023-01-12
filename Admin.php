@@ -177,7 +177,7 @@ class Admin
 			'description' => sprintf
 			(
 				'%s <br /> %s <b>%s</b> <br /> %s',
-				__('Value is seconds. WC1C will run until a time limit is set.', 'wc1c-main'),
+				__('Value is seconds. Algorithms of current configuration will run until a time limit is set.', 'wc1c-main'),
 				__('Current WC1C limit:', 'wc1c-main'),
 				wc1c()->settings()->get('php_max_execution_time', wc1c()->environment()->get('php_max_execution_time')),
 				__('If specify 0, the time limit will be disabled. Specifying 0 is not recommended, it is recommended not to exceed the WC1C limit.', 'wc1c-main')
