@@ -45,17 +45,19 @@ class Admin
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProducts'], 20, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSync'], 30, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsCreate'], 40, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsUpdate'], 50, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSku'], 60, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsNames'], 60, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDescriptions'], 60, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsImages'], 60, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsAttributes'], 60, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrices'], 70, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 72, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDimensions'], 74, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsCategories'], 76, 1);
+
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsOther'], 79, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsWithCharacteristics'], 80, 1);
 
@@ -165,6 +167,22 @@ class Admin
 				__('Can only decrease the value, because it must not exceed the limits from the WC1C settings.', 'wc1c-main')
 			),
 			'default' => wc1c()->settings()->get('php_post_max_size', wc1c()->environment()->get('php_post_max_size')),
+			'css' => 'min-width: 100px;',
+		];
+
+		$fields['php_max_execution_time'] =
+		[
+			'title' => __('Maximum time for execution PHP', 'wc1c-main'),
+			'type' => 'text',
+			'description' => sprintf
+			(
+				'%s <br /> %s <b>%s</b> <br /> %s',
+				__('Value is seconds. WC1C will run until a time limit is set.', 'wc1c-main'),
+				__('Current WC1C limit:', 'wc1c-main'),
+				wc1c()->settings()->get('php_max_execution_time', wc1c()->environment()->get('php_max_execution_time')),
+				__('If specify 0, the time limit will be disabled. Specifying 0 is not recommended, it is recommended not to exceed the WC1C limit.', 'wc1c-main')
+			),
+			'default' => wc1c()->settings()->get('php_max_execution_time', wc1c()->environment()->get('php_max_execution_time')),
 			'css' => 'min-width: 100px;',
 		];
 
@@ -501,19 +519,72 @@ class Admin
 			'default' => 'no'
 		];
 
-		$fields['attributes_values_by_product_properties'] =
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products categories
+	 *
+	 * @param array $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsCategories(array $fields): array
+	{
+		$fields['products_categories'] =
 		[
-			'title' => __('Adding values to attributes from product properties', 'wc1c-main'),
+			'title' => __('Products (goods): categories', 'wc1c-main'),
+			'type' => 'title',
+			'description' => sprintf
+			('%s',
+			    __('Algorithms for product categories when creating and updating.', 'wc1c-main')
+			),
+		];
+
+		$fields['products_create_adding_category'] =
+		[
+			'title' => __('Assigning categories of the created product', 'wc1c-main'),
 			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
 			'description' => sprintf
 			(
-				'%s<hr>%s %s',
-				__('Classifier properties do not always contain values in the reference. When the setting is enabled, values will be added based on the values of the product properties.', 'wc1c-main'),
-				__('The value is added only if it is absent: by name.', 'wc1c-main'),
-				__('The value is added only if it is missing. If do not add a value, the attribute will be skipped.', 'wc1c-main')
+				'%s<hr>%s',
+				__('Products in 1C have their own hierarchy. Thanks to this hierarchy, it is possible to automatically assign categories to products on the site.', 'wc1c-main'),
+				__('For the correct operation of filling in categories, you must first configure them in a separate settings block.', 'wc1c-main')
 			),
+			'default' => 'yes'
+		];
+
+		$fields['products_create_adding_category_fill_parent'] =
+		[
+			'title' => __('Filling the parent categories of the created product', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('If the category assigned to a product is a child category of other categories, then the parent categories will also be assigned to the product being created.', 'wc1c-main'),
+				__('It is recommended to enable this setting.', 'wc1c-main')
+			),
+			'default' => 'yes'
+		];
+
+		$fields['products_update_categories'] =
+		[
+			'title' => __('Product categories update when requesting product updates', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('If the setting is disabled, new categories will not be assigned to old products. Categories can be edited manually and the data will remain unchanged.', 'wc1c-main'),
 			'default' => 'no'
+		];
+
+		$fields['products_update_categories_fill_parent'] =
+		[
+			'title' => __('Filling the parent categories when requesting product updates', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c-main'),
+			'description' => __('Fill in the categories that are higher in level for the product? It is recommended to enable this setting.', 'wc1c-main'),
+			'default' => 'yes'
 		];
 
 		return $fields;
@@ -658,6 +729,24 @@ class Admin
 			'default' => 'no'
 		];
 
+		$fields['products_update_only_configuration'] =
+		[
+			'title' => __('Consider configuration when requesting product updates', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('When updating products data, the update will only occur if the product was created through the current configuration.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
+		$fields['products_update_only_schema'] =
+		[
+			'title' => __('Consider schema when requesting product updates', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('When updating products data, the update will only occur if the product was created through the current schema.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
 		return $fields;
 	}
 
@@ -759,6 +848,24 @@ class Admin
 			'description' => __('Sources and algorithms for filling out product SKU.', 'wc1c-main'),
 		];
 
+		$fields['products_create_adding_sku'] =
+		[
+			'title' => __('Filling the SKU of the created product', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
+			'description' => __('The product SKU will be added according to data from 1C. It is recommended to enable this feature.', 'wc1c-main'),
+			'default' => 'yes'
+		];
+
+		$fields['products_update_sku'] =
+		[
+			'title' => __('Product SKU update when requesting product updates', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('When changing the product SKU in 1C, the data will be changed on the site.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
 		$products_sku_by_cml_options =
 		[
 			'no' => __('Do not use', 'wc1c-main'),
@@ -816,6 +923,15 @@ class Admin
 			'description' => __('Sources and algorithms for filling out product names.', 'wc1c-main'),
 		];
 
+		$fields['products_update_name'] =
+		[
+			'title' => __('Product name update when requesting product updates', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('When changing the product name in 1C, the data will be changed on the site.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
 		$products_names_by_cml_options =
 		[
 			'no' => __('Do not use', 'wc1c-main'),
@@ -871,6 +987,54 @@ class Admin
 			'title' => __('Products (goods): descriptions', 'wc1c-main'),
 			'type' => 'title',
 			'description' => __('Sources and algorithms for filling out product descriptions, both short descriptions and full descriptions.', 'wc1c-main'),
+		];
+
+		$fields['products_create_adding_description'] =
+		[
+			'title' => __('Filling the description of the created product', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('In the data that came from 1C, there may be descriptions of products that will be placed in a short description.', 'wc1c-main'),
+				__('If there are no brief descriptions in 1C, you can turn off the filling and edit the data directly on the site.', 'wc1c-main'),
+				__('The choice of a source for a brief description in 1C is in a separate settings block - Products (goods): descriptions.', 'wc1c-main')
+			),
+			'default' => 'yes'
+		];
+
+		$fields['products_update_description'] =
+		[
+			'title' => __('Product description update when requesting product updates', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('When changing the product description in 1C, the data will be changed on the site.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
+		$fields['products_create_adding_description_full'] =
+		[
+			'title' => __('Filling a full description of the created product', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('The data received from 1C may contain full descriptions of products that will be placed in the full description.', 'wc1c-main'),
+				__('If there are no brief full descriptions in 1C, you can turn off the filling and edit the data directly on the site.', 'wc1c-main'),
+				__('The choice of a source for a brief full description in 1C is in a separate settings block - Products (goods): descriptions.', 'wc1c-main')
+			),
+			'default' => 'no'
+		];
+
+		$fields['products_update_description_full'] =
+		[
+			'title' => __('Product full description update when requesting product updates', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('When changing the product full description in 1C, the data will be changed on the site.', 'wc1c-main'),
+			'default' => 'no'
 		];
 
 		$products_descriptions_by_cml_options =
@@ -950,6 +1114,58 @@ class Admin
 	}
 
 	/**
+	 * Configuration fields: products attributes
+	 *
+	 * @param array $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsAttributes(array $fields): array
+	{
+		$fields['title_products_attributes'] =
+		[
+			'title' => __('Products (goods): attributes', 'wc1c-main'),
+			'type' => 'title',
+			'description' => __('Regulation of algorithms for working with attributes of products (goods).', 'wc1c-main'),
+		];
+
+		$fields['products_create_adding_attributes'] =
+		[
+			'title' => __('Assigning attributes of the created product', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
+			'description' => __('Newly created products will have attributes added based on the attribute settings. Attribute settings in a separate block.', 'wc1c-main'),
+			'default' => 'yes'
+		];
+
+		$fields['products_update_attributes'] =
+		[
+			'title' => __('Product attributes update when requesting product updates', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('Existing synced products will have their attributes updated based on their attribute settings. Attribute settings in a separate block.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
+		$fields['attributes_values_by_product_properties'] =
+		[
+			'title' => __('Adding values to attributes from product properties', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('Classifier properties do not always contain values in the reference. When the setting is enabled, values will be added based on the values of the product properties.', 'wc1c-main'),
+				__('The value is added only if it is absent: by name.', 'wc1c-main'),
+				__('The value is added only if it is missing. If do not add a value, the attribute will be skipped.', 'wc1c-main')
+			),
+			'default' => 'no'
+		];
+
+		return $fields;
+	}
+
+	/**
 	 * Configuration fields: products images
 	 *
 	 * @param array $fields
@@ -963,6 +1179,34 @@ class Admin
 			'title' => __('Products (goods): images', 'wc1c-main'),
 			'type' => 'title',
 			'description' => __('Regulation of algorithms for working with images of products (goods).', 'wc1c-main'),
+		];
+
+		$fields['products_create_adding_images'] =
+		[
+			'title' => __('Adding the images of the created product', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Products in 1C can have images. When this setting is enabled, they will be added to newly created products on the site.', 'wc1c-main'),
+				__('The choice of a source for a brief images from 1C is in a separate settings block - Products (goods): images.', 'wc1c-main')
+			),
+			'default' => 'yes'
+		];
+
+		$fields['products_update_images'] =
+		[
+			'title' => __('Product images update when requesting product updates', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('If the setting is disabled, new images will not be assigned to old products and the old ones will not be deleted either. In this case, you can edit images from WooCommerce.', 'wc1c-main'),
+				__('The choice of a source for a brief images from 1C is in a separate settings block - Products (goods): images.', 'wc1c-main')
+			),
+			'default' => 'no'
 		];
 
 		$fields['products_images_by_cml'] =
@@ -992,6 +1236,133 @@ class Admin
 			),
 			'default' => '10',
 			'css' => 'min-width: 60px;',
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products other
+	 *
+	 * @param array $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsOther(array $fields): array
+	{
+		$fields['title_products_other'] =
+		[
+			'title' => __('Products (goods): other', 'wc1c-main'),
+			'type' => 'title',
+			'description' => __('Regulation of other algorithms for working with products (goods).', 'wc1c-main'),
+		];
+
+		$product_statuses = get_post_statuses();
+		unset($product_statuses['private']);
+
+		$fields['products_create_status'] =
+		[
+			'title' => __('Status of the created product', 'wc1c-main'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr>%s %s',
+				__('Newly created products will have selected status. It is recommended to select the status: Draft.', 'wc1c-main'),
+				__('The product catalog comes without prices and balances. Publication is best done at the stage of filling in this data.', 'wc1c-main'),
+				__('If a product is marked for deletion in 1C, it will be placed in the trash, regardless of the current setting.', 'wc1c-main')
+			),
+			'default' => 'draft',
+			'options' => $product_statuses
+		];
+
+		$default_statuses =
+		[
+			'' => __('Do not update', 'wc1c-main')
+		];
+
+		$statuses = array_merge($default_statuses, $product_statuses);
+
+		$fields['products_update_status'] =
+		[
+			'title' => __('Product status update when requesting product updates', 'wc1c-main'),
+			'type' => 'select',
+			'description' => __('The selected status will be assigned to all upgraded products when requesting product upgrades.', 'wc1c-main'),
+			'default' => '',
+			'options' => $statuses
+		];
+
+		$fields['products_create_set_featured'] =
+		[
+			'title' => __('Featured on create products', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('The created product will be marked as recommended.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
+		$fields['products_create_set_sold_individually'] =
+		[
+			'title' => __('Individual sale on create products', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('Enable to have the product sold individually in one order. Two units of a product in one order will be impossible to order.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
+		$options = wc_get_product_visibility_options();
+
+		$fields['products_create_set_catalog_visibility'] =
+		[
+			'title' => __('Product visibility on create products', 'wc1c-main'),
+			'type' => 'select',
+			'description' => __('This setting determines which pages products will be displayed on.', 'wc1c-main'),
+			'default' => 'visible',
+			'options' => $options
+		];
+
+		$fields['products_create_set_reviews_allowed'] =
+		[
+			'title' => __('Allow reviews on create products', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('It will be allowed to leave reviews for created products.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
+		$fields['products_update_set_featured'] =
+		[
+			'title' => __('Featured on update products', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('The updated product will be marked as recommended.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
+		$fields['products_update_set_sold_individually'] =
+		[
+			'title' => __('Individual sale on update products', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('Enable to have the product sold individually in one order. Two units of a product in one order will be impossible to order.', 'wc1c-main'),
+			'default' => 'no'
+		];
+
+		$fields['products_update_set_catalog_visibility'] =
+		[
+			'title' => __('Product visibility on update products', 'wc1c-main'),
+			'type' => 'select',
+			'description' => __('This setting determines which pages products will be displayed on.', 'wc1c-main'),
+			'default' => 'visible',
+			'options' => $options
+		];
+
+		$fields['products_update_set_reviews_allowed'] =
+		[
+			'title' => __('Allow reviews on update products', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => __('It will be allowed to leave reviews for updated products.', 'wc1c-main'),
+			'default' => 'no'
 		];
 
 		return $fields;
@@ -1054,6 +1425,36 @@ class Admin
 			'title' => __('Products (goods): inventories', 'wc1c-main'),
 			'type' => 'title',
 			'description' => __('Comprehensive settings for updating inventories based on data from the offer package.', 'wc1c-main'),
+		];
+
+		$fields['products_create_stock_status'] =
+		[
+			'title' => __('The stock status of product created', 'wc1c-main'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Newly created products will have the selected stock status. It is recommended to select the status: Out of stock.', 'wc1c-main'),
+				__('The product catalog comes without quantities. When creating new products, it is better not to expose their availability.', 'wc1c-main')
+			),
+			'default' => 'outofstock',
+			'options' => wc_get_product_stock_status_options()
+		];
+
+		$stock_statuses =
+		[
+			'' => __('Do not update', 'wc1c-main')
+		];
+
+		$stock_statuses = array_merge($stock_statuses, wc_get_product_stock_status_options());
+
+		$fields['products_update_stock_status'] =
+		[
+			'title' => __('Product stock status update when requesting product updates', 'wc1c-main'),
+			'type' => 'select',
+			'description' => __('Upgradable products will change the balance status to the selected option from the list. It is recommended to select the status: Out of stock. Residues in this case will be restored with further processing of the residues.', 'wc1c-main'),
+			'default' => '',
+			'options' => $stock_statuses
 		];
 
 		$fields['products_inventories_by_offers_quantity'] =
@@ -1181,382 +1582,6 @@ class Admin
 			'description' => __('Log files created daily. This option on the maximum number of stored files. By default saved of the logs are for the last 30 days.', 'wc1c-main'),
 			'default' => 10,
 			'css' => 'min-width: 20px;',
-		];
-
-		return $fields;
-	}
-
-	/**
-	 * Configuration fields: products create
-	 *
-	 * @param array $fields
-	 *
-	 * @return array
-	 */
-	public function configurationsFieldsProductsCreate(array $fields): array
-	{
-		$fields['title_products_create'] =
-		[
-			'title' => __('Products (goods): creating', 'wc1c-main'),
-			'type' => 'title',
-			'description' => sprintf
-			(
-				'%s %s',
-				__('Regulation of algorithms for creating products in WooCommerce according to 1C data.', 'wc1c-main'),
-				__('These settings only apply to the creation of new products, ie. those products that are not found by the keys for product synchronization.', 'wc1c-main')
-			),
-		];
-
-		$product_statuses = get_post_statuses();
-		unset($product_statuses['private']);
-
-		$fields['products_create_status'] =
-		[
-			'title' => __('Status of the created product', 'wc1c-main'),
-			'type' => 'select',
-			'description' => sprintf
-			(
-				'%s<hr>%s %s',
-				__('Newly created products will have selected status. It is recommended to select the status: Draft.', 'wc1c-main'),
-				__('The product catalog comes without prices and balances. Publication is best done at the stage of filling in this data.', 'wc1c-main'),
-				__('If a product is marked for deletion in 1C, it will be placed in the trash, regardless of the current setting.', 'wc1c-main')
-			),
-			'default' => 'draft',
-			'options' => $product_statuses
-		];
-
-		$fields['products_create_stock_status'] =
-		[
-			'title' => __('The stock status of product created', 'wc1c-main'),
-			'type' => 'select',
-			'description' => sprintf
-			(
-				'%s<hr>%s',
-				__('Newly created products will have the selected stock status. It is recommended to select the status: Out of stock.', 'wc1c-main'),
-				__('The product catalog comes without quantities. When creating new products, it is better not to expose their availability.', 'wc1c-main')
-			),
-			'default' => 'outofstock',
-			'options' => wc_get_product_stock_status_options()
-		];
-
-		$fields['products_create_adding_category'] =
-		[
-			'title' => __('Assigning categories of the created product', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
-			'description' => sprintf
-			(
-				'%s<hr>%s',
-				__('Products in 1C have their own hierarchy. Thanks to this hierarchy, it is possible to automatically assign categories to products on the site.', 'wc1c-main'),
-				__('For the correct operation of filling in categories, you must first configure them in a separate settings block.', 'wc1c-main')
-			),
-			'default' => 'yes'
-		];
-
-		$fields['products_create_adding_category_fill_parent'] =
-		[
-			'title' => __('Filling the parent categories of the created product', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => sprintf
-			(
-				'%s<hr>%s',
-				__('If the category assigned to a product is a child category of other categories, then the parent categories will also be assigned to the product being created.', 'wc1c-main'),
-				__('It is recommended to enable this setting.', 'wc1c-main')
-			),
-			'default' => 'yes'
-		];
-
-		$fields['products_create_adding_attributes'] =
-		[
-			'title' => __('Assigning attributes of the created product', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
-			'description' => __('Newly created products will have attributes added based on the attribute settings. Attribute settings in a separate block.', 'wc1c-main'),
-			'default' => 'yes'
-		];
-
-		$fields['products_create_adding_sku'] =
-		[
-			'title' => __('Filling the SKU of the created product', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
-			'description' => __('The product SKU will be added according to data from 1C. It is recommended to enable this feature.', 'wc1c-main'),
-			'default' => 'yes'
-		];
-
-		$fields['products_create_adding_description'] =
-		[
-			'title' => __('Filling the description of the created product', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => sprintf
-			(
-				'%s<hr>%s %s',
-				__('In the data that came from 1C, there may be descriptions of products that will be placed in a short description.', 'wc1c-main'),
-				__('If there are no brief descriptions in 1C, you can turn off the filling and edit the data directly on the site.', 'wc1c-main'),
-				__('The choice of a source for a brief description in 1C is in a separate settings block - Products (goods): descriptions.', 'wc1c-main')
-			),
-			'default' => 'yes'
-		];
-
-		$fields['products_create_adding_description_full'] =
-		[
-			'title' => __('Filling a full description of the created product', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => sprintf
-			(
-				'%s<hr>%s %s',
-				__('The data received from 1C may contain full descriptions of products that will be placed in the full description.', 'wc1c-main'),
-				__('If there are no brief full descriptions in 1C, you can turn off the filling and edit the data directly on the site.', 'wc1c-main'),
-				__('The choice of a source for a brief full description in 1C is in a separate settings block - Products (goods): descriptions.', 'wc1c-main')
-			),
-			'default' => 'no'
-		];
-
-		$fields['products_create_adding_images'] =
-		[
-			'title' => __('Adding the images of the created product', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
-			'description' => sprintf
-			(
-				'%s<hr>%s',
-				__('Products in 1C can have images. When this setting is enabled, they will be added to newly created products on the site.', 'wc1c-main'),
-				__('The choice of a source for a brief images from 1C is in a separate settings block - Products (goods): images.', 'wc1c-main')
-			),
-			'default' => 'yes'
-		];
-
-		$fields['products_create_set_featured'] =
-		[
-			'title' => __('Featured product', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('The created product will be marked as recommended.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_create_set_sold_individually'] =
-		[
-			'title' => __('Individual sale', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('Enable to have the product sold individually in one order. Two units of a product in one order will be impossible to order.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$options = wc_get_product_visibility_options();
-
-		$fields['products_create_set_catalog_visibility'] =
-		[
-			'title' => __('Product visibility', 'wc1c-main'),
-			'type' => 'select',
-			'description' => __('This setting determines which pages products will be displayed on.', 'wc1c-main'),
-			'default' => 'visible',
-			'options' => $options
-		];
-
-		$fields['products_create_set_reviews_allowed'] =
-		[
-			'title' => __('Allow reviews', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('It will be allowed to leave reviews for created products.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		return $fields;
-	}
-
-	/**
-	 * Configuration fields: products update
-	 *
-	 * @param array $fields
-	 *
-	 * @return array
-	 */
-	public function configurationsFieldsProductsUpdate(array $fields): array
-	{
-		$fields['title_products_update'] =
-		[
-			'title' => __('Products (goods): updating', 'wc1c-main'),
-			'type' => 'title',
-			'description' => sprintf
-			(
-				'%s %s',
-				__('Regulation of algorithms for updating products in WooCommerce according to 1C data.', 'wc1c-main'),
-				__('These settings only apply to the updating of old products, ie. those products that are found by the keys for product synchronization.', 'wc1c-main')
-			),
-		];
-
-		$fields['products_update_only_configuration'] =
-		[
-			'title' => __('Consider configuration when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When updating products data, the update will only occur if the product was created through the current configuration.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_update_only_schema'] =
-		[
-			'title' => __('Consider schema when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When updating products data, the update will only occur if the product was created through the current schema.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$default_statuses =
-		[
-			'' => __('Do not update', 'wc1c-main')
-		];
-
-		$post_statuses = get_post_statuses();
-		unset($post_statuses['private']);
-
-		$statuses = array_merge($default_statuses, $post_statuses);
-
-		$fields['products_update_status'] =
-		[
-			'title' => __('Product status update when requesting product updates', 'wc1c-main'),
-			'type' => 'select',
-			'description' => __('The selected status will be assigned to all upgraded products when requesting product upgrades.', 'wc1c-main'),
-			'default' => '',
-			'options' => $statuses
-		];
-
-		$stock_statuses =
-		[
-			'' => __('Do not update', 'wc1c-main')
-		];
-
-		$stock_statuses = array_merge($stock_statuses, wc_get_product_stock_status_options());
-
-		$fields['products_update_stock_status'] =
-		[
-			'title' => __('Product stock status update when requesting product updates', 'wc1c-main'),
-			'type' => 'select',
-			'description' => __('Upgradable products will change the balance status to the selected option from the list. It is recommended to select the status: Out of stock. Residues in this case will be restored with further processing of the residues.', 'wc1c-main'),
-			'default' => '',
-			'options' => $stock_statuses
-		];
-
-		$fields['products_update_categories'] =
-		[
-			'title' => __('Product categories update when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('If the setting is disabled, new categories will not be assigned to old products. Categories can be edited manually and the data will remain unchanged.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_update_attributes'] =
-		[
-			'title' => __('Product attributes update when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('Existing synced products will have their attributes updated based on their attribute settings. Attribute settings in a separate block.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_update_name'] =
-		[
-			'title' => __('Product name update when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When changing the product name in 1C, the data will be changed on the site.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_update_sku'] =
-		[
-			'title' => __('Product SKU update when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When changing the product SKU in 1C, the data will be changed on the site.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_update_description'] =
-		[
-			'title' => __('Product description update when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When changing the product description in 1C, the data will be changed on the site.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_update_description_full'] =
-		[
-			'title' => __('Product full description update when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When changing the product full description in 1C, the data will be changed on the site.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_update_images'] =
-		[
-			'title' => __('Product images update when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => sprintf
-			(
-				'%s<hr>%s',
-				__('If the setting is disabled, new images will not be assigned to old products and the old ones will not be deleted either. In this case, you can edit images from WooCommerce.', 'wc1c-main'),
-				__('The choice of a source for a brief images from 1C is in a separate settings block - Products (goods): images.', 'wc1c-main')
-			),
-			'default' => 'no'
-		];
-
-		$fields['products_update_categories_fill_parent'] =
-		[
-			'title' => __('Filling the parent categories when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c-main'),
-			'description' => __('Fill in the categories that are higher in level for the product? It is recommended to enable this setting.', 'wc1c-main'),
-			'default' => 'yes'
-		];
-
-		$fields['products_update_set_featured'] =
-		[
-			'title' => __('Featured product', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('The updated product will be marked as recommended.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_update_set_sold_individually'] =
-		[
-			'title' => __('Individual sale', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('Enable to have the product sold individually in one order. Two units of a product in one order will be impossible to order.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$options = wc_get_product_visibility_options();
-
-		$fields['products_update_set_catalog_visibility'] =
-		[
-			'title' => __('Product visibility', 'wc1c-main'),
-			'type' => 'select',
-			'description' => __('This setting determines which pages products will be displayed on.', 'wc1c-main'),
-			'default' => 'visible',
-			'options' => $options
-		];
-
-		$fields['products_update_set_reviews_allowed'] =
-		[
-			'title' => __('Allow reviews', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('It will be allowed to leave reviews for updated products.', 'wc1c-main'),
-			'default' => 'no'
 		];
 
 		return $fields;
