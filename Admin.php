@@ -53,6 +53,7 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsAttributes'], 60, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrices'], 70, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsTaxes'], 70, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 72, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDimensions'], 74, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsCategories'], 76, 1);
@@ -1160,6 +1161,97 @@ class Admin
 				__('The value is added only if it is missing. If do not add a value, the attribute will be skipped.', 'wc1c-main')
 			),
 			'default' => 'no'
+		];
+
+		return $fields;
+	}
+
+	/**
+	 * Configuration fields: products taxes
+	 *
+	 * @param array $fields
+	 *
+	 * @return array
+	 */
+	public function configurationsFieldsProductsTaxes(array $fields): array
+	{
+		$fields['title_products_taxes'] =
+		[
+			'title' => __('Products (goods): taxes', 'wc1c-main'),
+			'type' => 'title',
+			'description' => __('Regulation of algorithms for working with taxes of products (goods).', 'wc1c-main'),
+		];
+
+		$taxes_status =
+		[
+			'taxable' => __( 'Taxable', 'wc1c-main' ),
+			'shipping' => __( 'Shipping only', 'wc1c-main' ),
+			'none' => _x( 'None', 'Tax status', 'wc1c-main'),
+		];
+
+		$fields['products_create_taxes_status'] =
+		[
+			'title' => __('Tax status of created products', 'wc1c-main'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Define whether or not the entire product is taxable, or just the cost of shipping it.', 'wc1c-main'),
+				__('The setting works when creating products (goods).', 'wc1c-main')
+			),
+			'default' => 'taxable',
+			'options' => $taxes_status
+		];
+
+		$fields['products_create_taxes_class'] =
+		[
+			'title' => __('Tax class for created products', 'wc1c-main'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Choose a tax class for this product. Tax classes are used to apply different tax rates specific to certain types of product.', 'wc1c-main'),
+				__('The setting works when creating products (goods).', 'wc1c-main')
+			),
+			'default' => 'standard',
+			'options' => wc_get_product_tax_class_options()
+		];
+
+		$products_default_options =
+		[
+			'no' => __('Do not update', 'wc1c-main'),
+		];
+
+		$taxes_status_update = array_merge($products_default_options, $taxes_status);
+
+		$fields['products_update_taxes_status'] =
+		[
+			'title' => __('Tax status for updated products', 'wc1c-main'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Define whether or not the entire product is taxable, or just the cost of shipping it.', 'wc1c-main'),
+				__('The setting works when updating products (goods).', 'wc1c-main')
+			),
+			'default' => 'no',
+			'options' => $taxes_status_update
+		];
+
+		$products_taxes_class_options = array_merge($products_default_options, wc_get_product_tax_class_options());
+
+		$fields['products_update_taxes_class'] =
+		[
+			'title' => __('Tax class for updated products', 'wc1c-main'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('Choose a tax class for this product. Tax classes are used to apply different tax rates specific to certain types of product.', 'wc1c-main'),
+				__('The setting works when updating products (goods).', 'wc1c-main')
+			),
+			'default' => 'standard',
+			'options' => $products_taxes_class_options
 		];
 
 		return $fields;

@@ -137,6 +137,8 @@ class Core extends SchemaAbstract
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemAttributes'], 15, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemDimensions'], 15, 4);
 			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemStatusTrash'], 100, 4);
+			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemTaxesClass'], 100, 4);
+			add_filter('wc1c_schema_productscml_processing_products_item_before_save', [$this, 'assignProductsItemTaxesStatus'], 100, 4);
 
 			add_filter('wc1c_schema_productscml_processing_products_item_after_save', [$this, 'assignProductsItemImages'], 10, 4);
 
@@ -1465,6 +1467,76 @@ class Core extends SchemaAbstract
 		}
 
 		$internal_product->set_category_ids($cats);
+
+		return $internal_product;
+	}
+
+	/**
+	 * Назначение данных продукта исходя из режима: статус налога
+	 *
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
+	 * @param string $mode Режим - create или update
+	 * @param Reader $reader Текущий итератор
+	 *
+	 * @return ProductContract
+	 * @throws Exception
+	 */
+	public function assignProductsItemTaxesStatus(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
+	{
+		if($internal_product->isType('variation')) // todo: назначение налогов для вариации
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && 'no' === $this->getOptions('products_update_taxes_status', 'no'))
+		{
+			return $internal_product;
+		}
+
+		if('create' === $mode)
+		{
+			$internal_product->set_tax_status($this->getOptions('products_create_taxes_status', 'taxable'));
+
+			return $internal_product;
+		}
+
+		$internal_product->set_tax_status($this->getOptions('products_update_taxes_status', 'taxable'));
+
+		return $internal_product;
+	}
+
+	/**
+	 * Назначение данных продукта исходя из режима: класс налога
+	 *
+	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
+	 * @param ProductDataContract $external_product Данные продукта из XML
+	 * @param string $mode Режим - create или update
+	 * @param Reader $reader Текущий итератор
+	 *
+	 * @return ProductContract
+	 * @throws Exception
+	 */
+	public function assignProductsItemTaxesClass(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
+	{
+		if($internal_product->isType('variation')) // todo: назначение налогов для вариации
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && 'no' === $this->getOptions('products_update_taxes_class', 'no'))
+		{
+			return $internal_product;
+		}
+
+		if('create' === $mode)
+		{
+			$internal_product->set_tax_class($this->getOptions('products_create_taxes_class', 'standard'));
+
+			return $internal_product;
+		}
+
+		$internal_product->set_tax_class($this->getOptions('products_update_taxes_class', 'standard'));
 
 		return $internal_product;
 	}
