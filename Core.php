@@ -179,7 +179,7 @@ class Core extends SchemaAbstract
 		{
 			$decoder = new Decoder();
 		}
-		catch(Exception $exception)
+		catch(\Exception $exception)
 		{
 			$this->log()->error(__('The file cannot be processed. DecoderCML threw an exception.', 'wc1c-main'), ['exception' => $exception]);
 			return false;
@@ -187,15 +187,15 @@ class Core extends SchemaAbstract
 
 		if(has_filter('wc1c_schema_productscml_file_processing_decoder'))
 		{
-			$decoder = apply_filters('wc1c_schema_productscml_file_processing_decoder', $decoder, $this);
 			$this->log()->info(__('DecoderCML has been overridden by external algorithms.', 'wc1c-main'));
+			$decoder = apply_filters('wc1c_schema_productscml_file_processing_decoder', $decoder, $this);
 		}
 
 		try
 		{
 			$reader = new Reader($file_path, $decoder);
 		}
-		catch(Exception $exception)
+		catch(\Exception $exception)
 		{
 			$this->log()->error(__('The file cannot be processed. ReaderCML threw an exception.', 'wc1c-main'), ['exception' => $exception]);
 			return false;
@@ -205,8 +205,8 @@ class Core extends SchemaAbstract
 
 		if(has_filter('wc1c_schema_productscml_file_processing_reader'))
 		{
-			$reader = apply_filters('wc1c_schema_productscml_file_processing_reader', $reader, $this);
 			$this->log()->info(__('ReaderCML has been overridden by external algorithms.', 'wc1c-main'));
+			$reader = apply_filters('wc1c_schema_productscml_file_processing_reader', $reader, $this);
 		}
 
 		while($reader->read())
@@ -215,7 +215,7 @@ class Core extends SchemaAbstract
 			{
 				do_action('wc1c_schema_productscml_file_processing_read', $reader, $this);
 			}
-			catch(Exception $e)
+			catch(\Exception $e)
 			{
 				$this->log()->error(__('Import file processing not completed. ReaderCML threw an exception.', 'wc1c-main'), ['exception' => $e]);
 				break;
