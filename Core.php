@@ -179,7 +179,7 @@ class Core extends SchemaAbstract
 		{
 			$decoder = new Decoder();
 		}
-		catch(\Exception $exception)
+		catch(\Throwable $exception)
 		{
 			$this->log()->error(__('The file cannot be processed. DecoderCML threw an exception.', 'wc1c-main'), ['exception' => $exception]);
 			return false;
@@ -195,7 +195,7 @@ class Core extends SchemaAbstract
 		{
 			$reader = new Reader($file_path, $decoder);
 		}
-		catch(\Exception $exception)
+		catch(\Throwable $exception)
 		{
 			$this->log()->error(__('The file cannot be processed. ReaderCML threw an exception.', 'wc1c-main'), ['exception' => $exception]);
 			return false;
@@ -215,7 +215,7 @@ class Core extends SchemaAbstract
 			{
 				do_action('wc1c_schema_productscml_file_processing_read', $reader, $this);
 			}
-			catch(\Exception $e)
+			catch(\Throwable $e)
 			{
 				$this->log()->error(__('Import file processing not completed. ReaderCML threw an exception.', 'wc1c-main'), ['exception' => $e]);
 				break;
@@ -291,7 +291,7 @@ class Core extends SchemaAbstract
 			{
 				do_action('wc1c_schema_productscml_processing_classifier_item', $classifier, $reader, $this);
 			}
-			catch(Exception $e)
+			catch(\Throwable $e)
 			{
 				$this->log()->warning(__('An exception was thrown while saving the classifier.', 'wc1c-main'), ['exception' => $e]);
 			}
