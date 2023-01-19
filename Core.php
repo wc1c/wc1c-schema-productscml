@@ -3027,11 +3027,13 @@ class Core extends SchemaAbstract
 			$update_product = apply_filters('wc1c_schema_productscml_processing_products_item_before_save', $update_product, $external_product, 'update', $reader);
 		}
 
+		$update_product = $this->setProductTimes($update_product);
+
 		try
 		{
 			$update_product->save();
 		}
-		catch(\Exception $e)
+		catch(\Throwable $e)
 		{
 			throw new Exception($e->getMessage());
 		}
@@ -3054,7 +3056,7 @@ class Core extends SchemaAbstract
 			{
 				$update_product->save();
 			}
-			catch(\Exception $e)
+			catch(\Throwable $e)
 			{
 				throw new Exception($e->getMessage());
 			}
