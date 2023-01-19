@@ -1472,13 +1472,41 @@ class Admin
 			'options' => $statuses
 		];
 
+		$products_update_options =
+		[
+			'no' => __('Do not update', 'wc1c-main'),
+			'yes' => __('Check', 'wc1c-main'),
+			'none' => __('Uncheck', 'wc1c-main'),
+		];
+
+		$products_update_options_description = sprintf
+		(
+			'<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<hr>%s',
+			__('Do not update', 'wc1c-main'),
+			__('The current value of the option will remain.', 'wc1c-main'),
+			__('Check', 'wc1c-main'),
+			__('The mark will be set.', 'wc1c-main'),
+			__('Uncheck', 'wc1c-main'),
+			__('The mark will be removed.', 'wc1c-main'),
+			__('The setting works when updating products (goods).', 'wc1c-main')
+		);
+
 		$fields['products_create_set_featured'] =
 		[
 			'title' => __('Featured on create products', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('The created product will be marked as recommended.', 'wc1c-main'),
+			'description' => __('The created product will be marked as featured.', 'wc1c-main'),
 			'default' => 'no'
+		];
+
+		$fields['products_update_set_featured'] =
+		[
+			'title' => __('Featured on update products', 'wc1c-main'),
+			'default' => 'no',
+			'type' => 'select',
+			'description' => $products_update_options_description,
+			'options' => $products_update_options
 		];
 
 		$fields['products_create_set_sold_individually'] =
@@ -1490,7 +1518,16 @@ class Admin
 			'default' => 'no'
 		];
 
-		$options = wc_get_product_visibility_options();
+		$fields['products_update_set_sold_individually'] =
+		[
+			'title' => __('Individual sale on update products', 'wc1c-main'),
+			'default' => 'no',
+			'type' => 'select',
+			'description' => $products_update_options_description,
+			'options' => $products_update_options
+		];
+
+		$visibility_options = wc_get_product_visibility_options();
 
 		$fields['products_create_set_catalog_visibility'] =
 		[
@@ -1498,7 +1535,16 @@ class Admin
 			'type' => 'select',
 			'description' => __('This setting determines which pages products will be displayed on.', 'wc1c-main'),
 			'default' => 'visible',
-			'options' => $options
+			'options' => $visibility_options
+		];
+
+		$fields['products_update_set_catalog_visibility'] =
+		[
+			'title' => __('Product visibility on update products', 'wc1c-main'),
+			'type' => 'select',
+			'description' => __('This setting determines which pages products will be displayed on.', 'wc1c-main'),
+			'default' => '',
+			'options' => array_merge($default_statuses, $visibility_options)
 		];
 
 		$fields['products_create_set_reviews_allowed'] =
@@ -1510,40 +1556,13 @@ class Admin
 			'default' => 'no'
 		];
 
-		$fields['products_update_set_featured'] =
-		[
-			'title' => __('Featured on update products', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('The updated product will be marked as recommended.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_update_set_sold_individually'] =
-		[
-			'title' => __('Individual sale on update products', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('Enable to have the product sold individually in one order. Two units of a product in one order will be impossible to order.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['products_update_set_catalog_visibility'] =
-		[
-			'title' => __('Product visibility on update products', 'wc1c-main'),
-			'type' => 'select',
-			'description' => __('This setting determines which pages products will be displayed on.', 'wc1c-main'),
-			'default' => 'visible',
-			'options' => $options
-		];
-
 		$fields['products_update_set_reviews_allowed'] =
 		[
 			'title' => __('Allow reviews on update products', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('It will be allowed to leave reviews for updated products.', 'wc1c-main'),
-			'default' => 'no'
+			'default' => 'no',
+			'type' => 'select',
+			'description' => $products_update_options_description,
+			'options' => $products_update_options
 		];
 
 		return $fields;

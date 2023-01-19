@@ -1165,7 +1165,12 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		$internal_product->set_catalog_visibility($this->getOptions('products_update_set_catalog_visibility', 'visible'));
+		$visible = $this->getOptions('products_update_set_catalog_visibility', '');
+
+		if(!empty($visible))
+		{
+			$internal_product->set_catalog_visibility($visible);
+		}
 
 		return $internal_product;
 	}
@@ -1198,9 +1203,18 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
+		if('no' === $this->getOptions('products_update_set_reviews_allowed', 'no'))
+		{
+			return $internal_product;
+		}
+
 		if('yes' === $this->getOptions('products_update_set_reviews_allowed', 'no'))
 		{
 			$internal_product->set_reviews_allowed(true);
+		}
+		else
+		{
+			$internal_product->set_reviews_allowed(false);
 		}
 
 		return $internal_product;
@@ -1220,6 +1234,7 @@ class Core extends SchemaAbstract
 	{
 		if($mode === 'create')
 		{
+			$internal_product->set_sold_individually(false);
 			if('yes' === $this->getOptions('products_create_set_sold_individually', 'no'))
 			{
 				$internal_product->set_sold_individually(true);
@@ -1228,9 +1243,18 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
+		if('no' === $this->getOptions('products_update_set_sold_individually', 'no'))
+		{
+			return $internal_product;
+		}
+
 		if('yes' === $this->getOptions('products_update_set_sold_individually', 'no'))
 		{
 			$internal_product->set_sold_individually(true);
+		}
+		else
+		{
+			$internal_product->set_sold_individually(false);
 		}
 
 		return $internal_product;
@@ -1255,6 +1279,7 @@ class Core extends SchemaAbstract
 
 		if($mode === 'create')
 		{
+			$internal_product->set_featured(false);
 			if('yes' === $this->getOptions('products_create_set_featured', 'no'))
 			{
 				$internal_product->set_featured(true);
@@ -1263,9 +1288,18 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
+		if('no' === $this->getOptions('products_update_set_featured', 'no'))
+		{
+			return $internal_product;
+		}
+
 		if('yes' === $this->getOptions('products_update_set_featured', 'no'))
 		{
 			$internal_product->set_featured(true);
+		}
+		else
+		{
+			$internal_product->set_featured(false);
 		}
 
 		return $internal_product;
