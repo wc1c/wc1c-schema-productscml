@@ -1125,7 +1125,7 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		if('update' === $mode && 'yes_yes' === $this->getOptions('products_update_sku', 'no') && empty($internal_product->getSku()) && empty($external_product->getSku()))
+		if('update' === $mode && 'yes_yes' === $this->getOptions('products_update_sku', 'no') && empty($internal_product->getSku()) && empty($sku))
 		{
 			return $internal_product;
 		}
