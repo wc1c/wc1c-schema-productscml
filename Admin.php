@@ -895,13 +895,33 @@ class Admin
 			'default' => 'yes'
 		];
 
+		$products_update_sku_options =
+		[
+			'no' => __('Do not update', 'wc1c-main'),
+			'yes' => __('Update in any case', 'wc1c-main'),
+			'add' => __('Add if not on the site and available in 1C', 'wc1c-main'),
+			'yes_yes' => __('Update if present on the site and in 1C', 'wc1c-main'),
+		];
+
 		$fields['products_update_sku'] =
 		[
 			'title' => __('Product SKU update when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When changing the product SKU in 1C, the data will be changed on the site.', 'wc1c-main'),
-			'default' => 'no'
+			'default' => 'no',
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<hr>%s',
+				__('Do not update', 'wc1c-main'),
+				__('SKUs updates will be skipped in any case.', 'wc1c-main'),
+				__('Update in any case', 'wc1c-main'),
+				__('SKUs will be updated in any case. The same value will always be on the site and in 1C.', 'wc1c-main'),
+				__('Add if not on the site and available in 1C', 'wc1c-main'),
+				__('Existing SKUs will not be affected. There will be a filling of those missing on the site if they are available in 1C.', 'wc1c-main'),
+				__('Update if present on the site and in 1C', 'wc1c-main'),
+				__('SKUs will be updated only if they are filled in 1C and on the site at the same time.', 'wc1c-main'),
+				__('The setting works when updating products (goods).', 'wc1c-main')
+			),
+			'options' => $products_update_sku_options
 		];
 
 		$products_sku_by_cml_options =

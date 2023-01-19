@@ -1074,12 +1074,12 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemSku(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-		if('update' === $mode && 'yes' !== $this->getOptions('products_update_sku', 'no'))
+		if('update' === $mode && 'no' === $this->getOptions('products_update_sku', 'no'))
 		{
 			return $internal_product;
 		}
 
-		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_sku', 'no'))
+		if('create' === $mode && 'no' === $this->getOptions('products_create_adding_sku', 'yes'))
 		{
 			return $internal_product;
 		}
@@ -1120,11 +1120,21 @@ class Core extends SchemaAbstract
 				$sku = $external_product->getSku();
 		}
 
+		if('update' === $mode && 'add' === $this->getOptions('products_update_sku', 'no') && !empty($internal_product->getSku()))
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && 'yes_yes' === $this->getOptions('products_update_sku', 'no') && empty($internal_product->getSku()) && empty($external_product->getSku()))
+		{
+			return $internal_product;
+		}
+
 		try
 		{
 			$internal_product->setSku($sku);
 		}
-		catch(Exception $e)
+		catch(\Throwable $e)
 		{
 			$this->log()->notice(__('Failed to set SKU for product.', 'wc1c-main'), ['exception' => $e, 'sku' => $external_product->getSku()]);
 		}
