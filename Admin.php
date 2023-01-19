@@ -187,6 +187,20 @@ class Admin
 			'css' => 'min-width: 100px;',
 		];
 
+		$fields['browser_debug'] =
+		[
+			'title' => __('Browser debug mode', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('The setting is required only for debugging activities and must be turned off when such activities are completed.', 'wc1c-main'),
+				__('Only used in debug mode.', 'wc1c-main')
+			),
+			'default' => 'no'
+		];
+
 		return $fields;
 	}
 
