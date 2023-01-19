@@ -1505,17 +1505,21 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		/** @var CategoriesStorageContract $categories_storage */
-		$categories_storage = Storage::load('category');
-
 		$cats = [];
-		foreach($external_product->getClassifierGroups() as $classifier_group)
-		{
-			$cat = $categories_storage->getByExternalId($classifier_group);
 
-			if($cat instanceof Category)
+		if($external_product->hasClassifierGroups())
+		{
+			/** @var CategoriesStorageContract $categories_storage */
+			$categories_storage = Storage::load('category');
+
+			foreach($external_product->getClassifierGroups() as $classifier_group)
 			{
-				$cats[] = $cat->getId();
+				$cat = $categories_storage->getByExternalId($classifier_group);
+
+				if($cat instanceof Category)
+				{
+					$cats[] = $cat->getId();
+				}
 			}
 		}
 
