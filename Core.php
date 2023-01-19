@@ -1387,21 +1387,22 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemDescriptions(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_description', 'yes'))
+		if('create' === $mode && 'no' === $this->getOptions('products_create_adding_description', 'yes'))
 		{
 			return $internal_product;
 		}
 
-		if('update' === $mode && 'yes' !== $this->getOptions('products_update_description', 'no'))
+		if('update' === $mode && 'no' === $this->getOptions('products_update_description', 'no'))
 		{
 			return $internal_product;
 		}
 
-		$short = $this->getOptions('products_descriptions_short_by_cml', 'no');
+		$short_description = '';
+
+		$short = $this->getOptions('products_descriptions_short_by_cml', 'yes');
 
 		if('no' !== $short)
 		{
-			$short_description = '';
 			switch($short)
 			{
 				case 'yes_html':
@@ -1433,9 +1434,19 @@ class Core extends SchemaAbstract
 				default:
 					$short_description = $external_product->getDescription();
 			}
-
-			$internal_product->set_short_description($short_description);
 		}
+
+		if('update' === $mode && 'add' === $this->getOptions('products_update_description', 'yes') && !empty($internal_product->get_short_description()))
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && empty($short_description) && 'yes_yes' === $this->getOptions('products_update_description', 'yes') && empty($internal_product->get_short_description()))
+		{
+			return $internal_product;
+		}
+
+		$internal_product->set_short_description($short_description);
 
 		return $internal_product;
 	}
@@ -1452,21 +1463,21 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemDescriptionsFull(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_description_full', 'no'))
+		if('create' === $mode && 'no' === $this->getOptions('products_create_adding_description_full', 'yes'))
 		{
 			return $internal_product;
 		}
 
-		if('update' === $mode && 'yes' !== $this->getOptions('products_update_description_full', 'no'))
+		if('update' === $mode && 'no' === $this->getOptions('products_update_description_full', 'no'))
 		{
 			return $internal_product;
 		}
 
-		$full = $this->getOptions('products_descriptions_by_cml', 'no');
+		$full_description = '';
+		$full = $this->getOptions('products_descriptions_by_cml', 'yes');
 
 		if('no' !== $full)
 		{
-			$full_description = '';
 			switch($full)
 			{
 				case 'yes_html':
@@ -1498,9 +1509,19 @@ class Core extends SchemaAbstract
 				default:
 					$full_description = $external_product->getDescription();
 			}
-
-			$internal_product->set_description($full_description);
 		}
+
+		if('update' === $mode && 'add' === $this->getOptions('products_update_description_full', 'yes') && !empty($internal_product->get_description()))
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && empty($full_description) && 'yes_yes' === $this->getOptions('products_update_description_full', 'yes') && empty($internal_product->get_description()))
+		{
+			return $internal_product;
+		}
+
+		$internal_product->set_description($full_description);
 
 		return $internal_product;
 	}
