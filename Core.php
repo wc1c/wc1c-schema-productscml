@@ -1040,6 +1040,29 @@ class Core extends SchemaAbstract
 	}
 
 	/**
+	 * Назначение данных по времени
+	 *
+	 * @param ProductContract $product Экземпляр продукта - либо существующий, либо новый
+	 *
+	 * @return mixed
+	 */
+	public function setProductTimes(ProductContract $product)
+	{
+		$time = current_time('timestamp');
+
+		/**
+		 * _wc1c_time
+		 * _wc1c_schema_time_{schema_id}
+		 * _wc1c_configuration_time_{configuration_id}
+		 */
+		$product->update_meta_data('_wc1c_time', $time);
+		$product->update_meta_data('_wc1c_schema_time_' . $this->getId(), $time);
+		$product->update_meta_data('_wc1c_configuration_time_' . $this->configuration()->getId(), $time);
+
+		return $product;
+	}
+
+	/**
 	 * Назначение данных продукта исходя из режима: артикул
 	 *
 	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
@@ -2867,7 +2890,8 @@ class Core extends SchemaAbstract
 			 */
 			if($external_product->hasCharacteristicId())
 			{
-				$this->log()->info(__('The product contains the characteristics.', 'wc1c-main')); // todo: реализация
+				$this->log()->notice(__('The product contains the characteristics.', 'wc1c-main')); // todo: реализация
+				return;
 			}
 			else
 			{
@@ -2900,12 +2924,14 @@ class Core extends SchemaAbstract
 				$internal_product = apply_filters('wc1c_schema_productscml_processing_products_item_before_save', $internal_product, $external_product, 'create', $reader);
 			}
 
+			$internal_product = $this->setProductTimes($internal_product);
+
 			try
 			{
 				$id = $internal_product->save();
 				$this->log()->info(__('The product is created.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $internal_product->get_type()]);
 			}
-			catch(\Exception $e)
+			catch(\Throwable $e)
 			{
 				throw new Exception($e->getMessage());
 			}
@@ -2929,7 +2955,7 @@ class Core extends SchemaAbstract
 					$id = $internal_product->save();
 					$this->log()->info(__('The product has been updated using external algorithms.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $internal_product->get_type()]);
 				}
-				catch(\Exception $e)
+				catch(\Throwable $e)
 				{
 					throw new Exception($e->getMessage());
 				}
@@ -3187,11 +3213,13 @@ class Core extends SchemaAbstract
 			$internal_offer = apply_filters('wc1c_schema_productscml_processing_offers_item_before_save', $internal_offer, $external_offer, $reader);
 		}
 
+		$internal_offer = $this->setProductTimes($internal_offer);
+
 		try
 		{
 			$internal_offer->save();
 		}
-		catch(\Exception $e)
+		catch(\Throwable $e)
 		{
 			throw new Exception($e->getMessage());
 		}
@@ -3296,7 +3324,7 @@ class Core extends SchemaAbstract
 			{
 				do_action('wc1c_schema_productscml_processing_offers_item', $offer, $reader, $this);
 			}
-			catch(Exception $e)
+			catch(\Throwable $e)
 			{
 				$this->log()->warning(__('An exception was thrown while processing the offer.', 'wc1c-main'), ['exception' => $e]);
 			}
