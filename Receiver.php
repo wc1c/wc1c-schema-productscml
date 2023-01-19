@@ -33,7 +33,11 @@ final class Receiver
 
 		add_action('wc1c_schema_productscml_catalog_handler_checkauth', [$this, 'handlerCheckauth'], 10, 0);
 
-		add_action('wc1c_schema_productscml_catalog_handler_init', [$this, 'handlerCatalogDirectoryClean'], 10, 0);
+		if('standard' === $this->core()->getOptions('directory_clean_mode', 'standard'))
+		{
+			add_action('wc1c_schema_productscml_catalog_handler_init', [$this, 'handlerCatalogDirectoryClean'], 10, 0);
+		}
+
 		add_action('wc1c_schema_productscml_catalog_handler_init', [$this, 'handlerCatalogModeInit'], 10, 0);
 
 		add_action('wc1c_schema_productscml_catalog_handler_file', [$this, 'handlerCatalogModeFile'], 10, 0);

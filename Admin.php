@@ -201,6 +201,29 @@ class Admin
 			'default' => 'no'
 		];
 
+		$clean_options =
+		[
+			'no' => __('Do not use', 'wc1c-main'),
+			'standard' => __('Standard', 'wc1c-main'),
+		];
+
+		$fields['directory_clean_mode'] =
+		[
+			'title' => __('Cleaning up a directory', 'wc1c-main'),
+			'type' => 'select',
+			'description' => sprintf
+			('<b>%s</b> - %s<br /><b>%s</b> - %s<br /><hr>%s',
+			 __('Do not use', 'wc1c-main'),
+			 __('File deletion steps will be skipped.', 'wc1c-main'),
+			 __('Standard', 'wc1c-main'),
+			 __('The standard cleaning algorithm will be used. Suitable for most users.', 'wc1c-main'),
+			 __('The choice of deletion mode must be taken very seriously.', 'wc1c-main')
+			),
+			'default' => 'standard',
+			'css' => 'min-width:100%',
+			'options' => $clean_options
+		];
+
 		return $fields;
 	}
 
