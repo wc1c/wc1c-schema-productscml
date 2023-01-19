@@ -242,6 +242,59 @@ class Core extends SchemaAbstract
 	}
 
 	/**
+	 * Receiver
+	 *
+	 * @return void
+	 */
+	public function receiver()
+	{
+		if($this->configuration()->isEnabled() === false)
+		{
+			$message = __('Configuration is offline.', 'wc1c-main');
+
+			wc1c()->log('receiver')->warning($message);
+			$this->receiver->sendResponseByType('failure', $message);
+		}
+
+		try
+		{
+			$this->configuration()->setDateActivity(time());
+			$this->configuration()->save();
+		}
+		catch(Exception $e)
+		{
+			$message = __('Error saving configuration.', 'wc1c-main');
+
+			wc1c()->log('receiver')->error($message, ['exception' => $e]);
+			$this->receiver->sendResponseByType('failure', $message);
+		}
+
+		$action = false;
+		$wc1c_receiver_action = 'wc1c_receiver_' . $this->getId();
+
+		if(has_action($wc1c_receiver_action))
+		{
+			$action = true;
+
+			ob_start();
+			nocache_headers();
+
+			wc1c()->log('receiver')->info(__('The request was successfully submitted for processing in the schema for the configuration.', 'wc1c-main'), ['action' => $wc1c_receiver_action]);
+
+			do_action($wc1c_receiver_action);
+			ob_end_clean();
+		}
+
+		if(false === $action)
+		{
+			$message = __('Receiver request is very bad! Action not found.', 'wc1c-main');
+
+			wc1c()->log('receiver')->warning($message, ['action' => $wc1c_receiver_action]);
+			$this->receiver->sendResponseByType('failure', $message);
+		}
+	}
+
+	/**
 	 * Обработка данных классификатора
 	 *
 	 * @param Reader $reader
