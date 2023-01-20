@@ -278,9 +278,6 @@ class Core extends SchemaAbstract
 
 			ob_start();
 			nocache_headers();
-
-			wc1c()->log('receiver')->info(__('The request was successfully submitted for processing in the schema for the configuration.', 'wc1c-main'), ['action' => $wc1c_receiver_action]);
-
 			do_action($wc1c_receiver_action);
 			ob_end_clean();
 		}
