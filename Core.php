@@ -1043,7 +1043,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @return ProductContract
 	 */
-	public function setProductTimes(ProductContract $product)
+	public function setProductTimes(ProductContract $product): ProductContract
 	{
 		$time = current_time('timestamp');
 
