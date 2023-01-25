@@ -1041,7 +1041,7 @@ class Core extends SchemaAbstract
 	 *
 	 * @param ProductContract $product Экземпляр продукта - либо существующий, либо новый
 	 *
-	 * @return mixed
+	 * @return ProductContract
 	 */
 	public function setProductTimes(ProductContract $product)
 	{
