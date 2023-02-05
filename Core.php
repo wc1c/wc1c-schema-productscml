@@ -847,6 +847,12 @@ class Core extends SchemaAbstract
 			$this->configuration()->updateMetaData('classifier-properties:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_properties);
 		}
 
+        $classifier_prices = $classifier->getPriceTypes();
+        if(!empty($classifier_prices))
+        {
+            $this->configuration()->updateMetaData('classifier-prices:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_prices);
+        }
+
 		$this->configuration()->save();
 	}
 
@@ -961,7 +967,7 @@ class Core extends SchemaAbstract
 			{
 				do_action('wc1c_schema_productscml_processing_products_item', $product, $reader, $this);
 			}
-			catch(Exception $e)
+			catch(\Throwable $e)
 			{
 				$this->log()->warning(__('An exception was thrown while saving the product.', 'wc1c-main'), ['exception' => $e]);
 			}
@@ -3362,6 +3368,20 @@ class Core extends SchemaAbstract
 					break;
 			}
 		}
+
+        if($reader->nodeName === 'Предложения' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+        {
+            $this->log()->info(__('Saving the offer package to configuration meta data.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
+
+            $this->configuration()->addMetaData('offers_package:' . $reader->getFiletype() . ':' . $reader->offers_package->getId(), maybe_serialize($reader->offers_package), true);
+            $this->configuration()->saveMetaData();
+
+            $price_types = $this->configuration()->getMeta('classifier-prices:import:' . $reader->offers_package->getClassifierId());
+            if(is_array($price_types))
+            {
+                $reader->offers_package->setPriceTypes($price_types);
+            }
+        }
 
 		if($reader->parentNodeName === 'Предложения' && $reader->nodeName === 'Предложение' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
 		{
