@@ -261,7 +261,7 @@ class Core extends SchemaAbstract
 			$this->configuration()->setDateActivity(time());
 			$this->configuration()->save();
 		}
-		catch(Exception $e)
+		catch(\Throwable $e)
 		{
 			$message = __('Error saving configuration.', 'wc1c-main');
 
