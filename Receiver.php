@@ -3,6 +3,8 @@
 defined('ABSPATH') || exit;
 
 use Wc1c\Main\Exceptions\Exception;
+use Wc1c\Main\Schemas\Abstracts\Cml\ReceiverAbstract;
+use Wc1c\Main\Schemas\Contracts\SchemaContract;
 use Wc1c\Main\Traits\SingletonTrait;
 use Wc1c\Main\Traits\UtilityTrait;
 use Wc1c\Wc\Contracts\ImagesStorageContract;
@@ -14,13 +16,13 @@ use Wc1c\Wc\Storage;
  *
  * @package Wc1c\Main\Schemas\Productscml
  */
-final class Receiver
+final class Receiver extends ReceiverAbstract
 {
 	use SingletonTrait;
 	use UtilityTrait;
 
 	/**
-	 * @var Core Schema core
+	 * @var SchemaContract Core Schema core
 	 */
 	protected $core;
 
@@ -47,66 +49,19 @@ final class Receiver
 	}
 
 	/**
-	 * @return Core
-	 */
-	public function core(): Core
-	{
+	 * @return SchemaContract
+     */
+	public function core(): SchemaContract
+    {
 		return $this->core;
 	}
 
 	/**
-	 * @param Core $core
+	 * @param SchemaContract $core
 	 */
-	public function setCore(Core $core)
+	public function setCore(SchemaContract $core)
 	{
 		$this->core = $core;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getModeAndType(): array
-	{
-		$data =
-		[
-			'mode' => '',
-			'type' => ''
-		];
-
-		if(wc1c()->getVar($_GET['get_param'], '') !== '' || wc1c()->getVar($_GET['get_param?type'], '') !== '')
-		{
-			$output = [];
-			if(isset($_GET['get_param']))
-			{
-				$get_param = ltrim(sanitize_text_field($_GET['get_param']), '?');
-				parse_str($get_param, $output);
-			}
-
-			if(array_key_exists('mode', $output))
-			{
-				$data['mode'] = sanitize_key($output['mode']);
-			}
-			elseif(isset($_GET['mode']))
-			{
-				$data['mode'] = sanitize_key($_GET['mode']);
-			}
-
-			if(array_key_exists('type', $output))
-			{
-				$data['type'] = sanitize_key($output['type']);
-			}
-			elseif(isset($_GET['type']))
-			{
-				$data['type'] = sanitize_key($_GET['type']);
-			}
-
-			if($data['type'] === '')
-			{
-				$data['type'] = sanitize_key($_GET['get_param?type']);
-			}
-		}
-
-		return $data;
 	}
 
 	/**
@@ -116,7 +71,7 @@ final class Receiver
 	{
 		$this->core()->log()->info(__('Received new request for Receiver.', 'wc1c-main'));
 
-		$mode_and_type = $this->getModeAndType();
+		$mode_and_type = $this->detectModeAndType();
 		$mode = $mode_and_type['mode'];
 		$type = $mode_and_type['type'];
 
