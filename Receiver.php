@@ -667,7 +667,8 @@ final class Receiver extends ReceiverAbstract
 		if($filename === '')
 		{
 			$response_description = __('1C sent an empty file name for data import.', 'wc1c-main');
-			$this->core()->log()->warning($response_description);
+
+            $this->core()->log()->warning($response_description);
 			$this->sendResponseByType('failure', $response_description);
 		}
 
@@ -676,7 +677,8 @@ final class Receiver extends ReceiverAbstract
 		if(!wc1c()->filesystem()->exists($file))
 		{
 			$response_description = __('File for import is not exists.', 'wc1c-main');
-			$this->core()->log()->error($response_description);
+
+            $this->core()->log()->error($response_description);
 			$this->sendResponseByType('success', $response_description);
 		}
 
@@ -687,19 +689,22 @@ final class Receiver extends ReceiverAbstract
 			if($result_file_processing)
 			{
 				$response_description = __('Import of data from file completed successfully.', 'wc1c-main');
-				$this->core()->log()->info($response_description, ['file_name' => $filename, 'file_path' => $file]);
+
+                $this->core()->log()->info($response_description, ['file_name' => $filename, 'file_path' => $file]);
 				$this->sendResponseByType('success', $response_description);
 			}
 		}
-		catch(Exception $e)
+		catch(\Throwable $e)
 		{
 			$response_description = __('Importing data from a file ended with an error:', 'wc1c-main') . ' ' . $e->getMessage();
-			$this->core()->log()->error($response_description, ['exception' => $e]);
+
+            $this->core()->log()->error($response_description, ['exception' => $e]);
 			$this->sendResponseByType('failure', $response_description);
 		}
 
 		$response_description = __('Importing data from a file ended with an error.', 'wc1c-main');
-		$this->core()->log()->error($response_description);
+
+        $this->core()->log()->error($response_description);
 		$this->sendResponseByType('failure', $response_description);
 	}
 }
