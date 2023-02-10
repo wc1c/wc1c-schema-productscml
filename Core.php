@@ -1107,6 +1107,12 @@ class Core extends SchemaAbstract
 					}
 				}
 				break;
+            case 'barcode':
+                if($barcode = $external_product->getBarcode())
+                {
+                    $sku = $barcode;
+                }
+                break;
 			case 'yes_requisites':
 				$requisite = $this->getOptions('products_sku_from_requisites_name', '');
 				if($external_product->hasRequisites($requisite))

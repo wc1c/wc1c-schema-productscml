@@ -891,8 +891,13 @@ class Admin
 			'title' => __('Filling the SKU of the created product', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
-			'description' => __('The product SKU will be added according to data from 1C. It is recommended to enable this feature.', 'wc1c-main'),
-			'default' => 'yes'
+			'description' => sprintf
+            (
+                '%s<hr>%s',
+                __('The product SKU will be added according to data from 1C. It is recommended to enable this feature.', 'wc1c-main'),
+                __('The setting works when creating products (goods).', 'wc1c-main')
+            ),
+            'default' => 'yes'
 		];
 
 		$products_update_sku_options =
@@ -929,6 +934,7 @@ class Admin
 			'no' => __('Do not use', 'wc1c-main'),
 			'sku' => __('From the standard SKU', 'wc1c-main'),
 			'code' => __('From the code', 'wc1c-main'),
+            'barcode' => __('From the barcode', 'wc1c-main'),
 			'yes_requisites' => __('From requisite with the specified name', 'wc1c-main'),
 		];
 
@@ -938,7 +944,7 @@ class Admin
 			'type' => 'select',
 			'description' => sprintf
 			(
-				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
 				__('The setting works when creating and updating products (goods).', 'wc1c-main'),
 				__('Do not use', 'wc1c-main'),
 				__('Populating the SKU data from CommerceML data will be skipped. If a product is updating, then its current SKU will not be updated.', 'wc1c-main'),
@@ -946,10 +952,12 @@ class Admin
 				__('This SKU is contained in the standard SKU of 1C products. It is located in the conditional tag - sku.', 'wc1c-main'),
 				__('From the code', 'wc1c-main'),
 				__('In 1C it is presented in the form of the code of the nomenclature. Unloaded as a requisite with the appropriate name.', 'wc1c-main'),
-				__('From requisite with the specified name', 'wc1c-main'),
+                __('From the barcode', 'wc1c-main'),
+                __('The SKUs will be filled in from the product barcode.', 'wc1c-main'),
+                __('From requisite with the specified name', 'wc1c-main'),
 				__('The SKU data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c-main')
 			),
-			'default' => 'name',
+			'default' => 'sku',
 			'options' => $products_sku_by_cml_options
 		];
 
