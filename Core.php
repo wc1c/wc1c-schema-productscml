@@ -917,10 +917,9 @@ class Core extends SchemaAbstract
 		/*
 		 * Пропуск создания и обновления продуктов
 		 */
-		if
-		(
-			$reader->nodeName === 'Товары' && $reader->xml_reader->nodeType === XMLReader::ELEMENT &&
-			'yes' !== $this->getOptions('products_update', 'no') && 'yes' !== $this->getOptions('products_create', 'no')
+		if($reader->nodeName === 'Товары' && $reader->xml_reader->nodeType === XMLReader::ELEMENT
+            && 'yes' !== $this->getOptions('products_update', 'no')
+            && 'yes' !== $this->getOptions('products_create', 'no')
 		)
 		{
 			$this->log()->info(__('Products creation and updating is disabled. The processing of goods was skipped.', 'wc1c-main'));
@@ -1128,7 +1127,7 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		if('update' === $mode && 'yes_yes' === $this->getOptions('products_update_sku', 'no') && empty($internal_product->getSku()) && empty($sku))
+		if('update' === $mode && empty($sku) && 'yes_yes' === $this->getOptions('products_update_sku', 'no') && empty($internal_product->getSku()))
 		{
 			return $internal_product;
 		}
