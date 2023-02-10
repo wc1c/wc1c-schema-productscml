@@ -1377,9 +1377,8 @@ class Admin
 			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
 			'description' => sprintf
 			(
-				'%s<hr>%s',
-				__('Products in 1C can have images. When this setting is enabled, they will be added to newly created products on the site.', 'wc1c-main'),
-				__('The choice of a source for a brief images from 1C is in a separate settings block - Products (goods): images.', 'wc1c-main')
+				'%s',
+				__('Products in 1C can have images. When this setting is enabled, they will be added to newly created products on the site.', 'wc1c-main')
 			),
 			'default' => 'yes'
 		];
