@@ -2,6 +2,7 @@
 
 defined('ABSPATH') || exit;
 
+use SimpleXMLElement;
 use XMLReader;
 use Wc1c\Wc\Products\AttributeProduct;
 use Wc1c\Cml\Contracts\ClassifierDataContract;
@@ -313,20 +314,28 @@ class Core extends SchemaAbstract
 
 		if($reader->nodeName === 'Классификатор' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
 		{
-			/**
-			 * Декодируем данные классификатора из XML в объект
-			 */
-			$classifier = $reader->decoder()->process('classifier', $reader->xml_reader->readOuterXml());
+            $classifier_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+
+            try
+            {
+                $classifier = $reader->decoder()->process('classifier', $classifier_xml);
+            }
+            catch(\Throwable $e)
+            {
+                $this->log()->warning(__('DecoderCML threw an exception while converting the classifier.', 'wc1c-main'), ['exception' => $e]);
+                return;
+            }
 
 			/**
 			 * Внешняя обработка классификатора
 			 *
 			 * @param ClassifierDataContract $classifier
 			 * @param SchemaAbstract $this
+             * @param SimpleXMLElement $classifier_xml
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_classifier'))
 			{
-				$classifier = apply_filters('wc1c_schema_productscml_processing_classifier', $classifier, $this);
+				$classifier = apply_filters('wc1c_schema_productscml_processing_classifier', $classifier, $this, $classifier_xml);
 			}
 
 			if(!$classifier instanceof ClassifierDataContract)
@@ -811,11 +820,6 @@ class Core extends SchemaAbstract
 	 */
 	public function processingClassifierItem(ClassifierDataContract $classifier, Reader $reader)
 	{
-		if($reader->getFiletype() !== 'import' && $reader->getFiletype() !== 'offers')
-		{
-			return;
-		}
-
 		$classifier_push = true;
 		$all_classifiers = $this->configuration()->getMeta('classifier:' . $reader->getFiletype(), false, 'edit');
 
@@ -851,6 +855,18 @@ class Core extends SchemaAbstract
         if(!empty($classifier_prices))
         {
             $this->configuration()->updateMetaData('classifier-prices:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_prices);
+        }
+
+        $classifier_units = $classifier->getUnits();
+        if(!empty($classifier_units))
+        {
+            $this->configuration()->updateMetaData('classifier-units:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_units);
+        }
+
+        $classifier_warehouses = $classifier->getWarehouses();
+        if(!empty($classifier_warehouses))
+        {
+            $this->configuration()->updateMetaData('classifier-warehouses:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_warehouses);
         }
 
 		$this->configuration()->save();
