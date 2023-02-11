@@ -312,7 +312,7 @@ class Core extends SchemaAbstract
 			return;
 		}
 
-		if($reader->nodeName === 'Классификатор' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->nodeName === 'Классификатор' && $reader->isElement())
 		{
             $classifier_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
 
@@ -892,7 +892,7 @@ class Core extends SchemaAbstract
 			$reader->catalog = new Catalog();
 		}
 
-		if($reader->nodeName === 'Каталог' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->nodeName === 'Каталог' && $reader->isElement())
 		{
 			$only_changes = $reader->xml_reader->getAttribute('СодержитТолькоИзменения') ?: true;
 			if($only_changes === 'false')
@@ -902,7 +902,7 @@ class Core extends SchemaAbstract
 			$reader->catalog->setOnlyChanges($only_changes);
 		}
 
-		if($reader->parentNodeName === 'Каталог' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->parentNodeName === 'Каталог' && $reader->isElement())
 		{
 			switch($reader->nodeName)
 			{
@@ -933,7 +933,7 @@ class Core extends SchemaAbstract
 		/*
 		 * Пропуск создания и обновления продуктов
 		 */
-		if($reader->nodeName === 'Товары' && $reader->xml_reader->nodeType === XMLReader::ELEMENT
+		if($reader->nodeName === 'Товары' && $reader->isElement()
             && 'yes' !== $this->getOptions('products_update', 'no')
             && 'yes' !== $this->getOptions('products_create', 'no')
 		)
@@ -942,14 +942,14 @@ class Core extends SchemaAbstract
 			$reader->next();
 		}
 
-		if($reader->parentNodeName === 'Товары' && $reader->nodeName === 'Товар' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->parentNodeName === 'Товары' && $reader->nodeName === 'Товар' && $reader->isElement())
 		{
-			// todo: сохранение каталога
+			$product_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
 
 			/**
 			 * Декодирование данных продукта из XML в объект реализующий ProductDataContract
 			 */
-			$product = $reader->decoder->process('product', $reader->xml_reader->readOuterXml());
+			$product = $reader->decoder->process('product', $product_xml);
 
 			/**
 			 * Внешняя фильтрация перед непосредственной обработкой
@@ -957,10 +957,11 @@ class Core extends SchemaAbstract
 			 * @param ProductDataContract $product
 			 * @param Reader $reader
 			 * @param SchemaAbstract $this
+             * @param SimpleXMLElement $product_xml
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_products'))
 			{
-				$product = apply_filters('wc1c_schema_productscml_processing_products', $product, $reader, $this);
+				$product = apply_filters('wc1c_schema_productscml_processing_products', $product, $reader, $this, $product_xml);
 			}
 
 			if(!$product instanceof ProductDataContract)
@@ -3346,7 +3347,7 @@ class Core extends SchemaAbstract
 			$reader->offers_package = new OffersPackage();
 		}
 
-		if($reader->nodeName === 'ПакетПредложений' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->nodeName === 'ПакетПредложений' && $reader->isElement())
 		{
 			$only_changes = $reader->xml_reader->getAttribute('СодержитТолькоИзменения') ?: true;
 			if($only_changes === 'false')
@@ -3356,7 +3357,7 @@ class Core extends SchemaAbstract
 			$reader->offers_package->setOnlyChanges($only_changes);
 		}
 
-		if($reader->parentNodeName === 'ПакетПредложений' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->parentNodeName === 'ПакетПредложений' && $reader->isElement())
 		{
 			switch($reader->nodeName)
 			{
@@ -3390,7 +3391,7 @@ class Core extends SchemaAbstract
 			}
 		}
 
-        if($reader->nodeName === 'Предложения' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+        if($reader->nodeName === 'Предложения' && $reader->isElement())
         {
             $this->log()->info(__('Saving the offer package to configuration meta data.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
 
@@ -3404,7 +3405,7 @@ class Core extends SchemaAbstract
             }
         }
 
-		if($reader->parentNodeName === 'Предложения' && $reader->nodeName === 'Предложение' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->parentNodeName === 'Предложения' && $reader->nodeName === 'Предложение' && $reader->isElement())
 		{
 			// todo: сохранение пакета предложений
 
