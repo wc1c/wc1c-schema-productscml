@@ -77,6 +77,10 @@ final class Receiver extends ReceiverAbstract
 
 		$this->core()->log()->debug(__('Received request params.', 'wc1c-main'), ['type' => $type, 'mode=' => $mode]);
 
+        $this->core()->configuration()->addMetaData('_receiver_mode', $mode, true);
+        $this->core()->configuration()->addMetaData('_receiver_type', $type, true);
+        $this->core()->configuration()->saveMetaData();
+
 		if($type === 'catalog' && $mode !== '')
 		{
 			do_action('wc1c_schema_productscml_catalog_handler', $mode, $this);
@@ -114,7 +118,8 @@ final class Receiver extends ReceiverAbstract
 
 		do_action('wc1c_schema_productscml_handler_none', $mode, $this);
 
-		$response_description = __('Schema: action not found.', 'wc1c-main');
+		$response_description = __('Action is not found in schema.', 'wc1c-main');
+
 		$this->core()->log()->warning($response_description);
 		$this->sendResponseByType('failure', $response_description);
 	}
@@ -261,14 +266,18 @@ final class Receiver extends ReceiverAbstract
 		{
 			if($credentials['login'] !== $this->core()->getOptions('user_login', ''))
 			{
-				$this->core()->log()->notice(__('Not a valid username.', 'wc1c-main'));
-				$this->sendResponseByType('failure', __('Not a valid username.', 'wc1c-main'));
+                $message = __('Not a valid username.', 'wc1c-main');
+
+				$this->core()->log()->notice($message);
+				$this->sendResponseByType('failure', $message);
 			}
 
 			if($credentials['password'] !== $this->core()->getOptions('user_password', ''))
 			{
-				$this->core()->log()->notice(__('Not a valid user password.', 'wc1c-main'));
-				$this->sendResponseByType('failure', __('Not a valid user password.', 'wc1c-main'));
+                $message = __('Not a valid user password.', 'wc1c-main');
+
+				$this->core()->log()->notice($message);
+				$this->sendResponseByType('failure', $message);
 			}
 		}
 
@@ -389,7 +398,7 @@ final class Receiver extends ReceiverAbstract
 		{
 			session_id($session_id);
 
-			$this->core()->log()->info(__('PHP session none, restart PHP session.', 'wc1c-main'), ['session_id' => $session_id]);
+			$this->core()->log()->info(__('PHP session none, restart last PHP session.', 'wc1c-main'), ['session_id' => $session_id]);
 			session_start();
 		}
 
@@ -534,6 +543,7 @@ final class Receiver extends ReceiverAbstract
 		if(empty($filename))
 		{
 			$response_description = __('Filename is empty.', 'wc1c-main');
+
 			$this->core()->log()->error($response_description);
 			$this->sendResponseByType('failure', $response_description);
 		}
