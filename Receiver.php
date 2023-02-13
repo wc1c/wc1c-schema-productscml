@@ -624,6 +624,7 @@ final class Receiver extends ReceiverAbstract
 						if(false === $image_current)
 						{
 							$new_image = new Image();
+                            $this->core()->setImageTimes($new_image);
 
 							$new_image->setName(__('No name', 'wc1c-main'));
 							$new_image->setExternalName($image_file_name[0]);
@@ -648,6 +649,9 @@ final class Receiver extends ReceiverAbstract
 						}
 						else
 						{
+                            $image_current = $this->core()->setImageTimes($image_current);
+                            $image_current->save();
+
 							$response_description .= '. ' . __('The image has not been added to the media library. It was added earlier, id:', 'wc1c-main') . ' ' . $image_current->getId();
 						}
 					}

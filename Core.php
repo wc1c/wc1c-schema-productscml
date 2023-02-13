@@ -3,6 +3,7 @@
 defined('ABSPATH') || exit;
 
 use SimpleXMLElement;
+use Wc1c\Wc\Entities\Image;
 use XMLReader;
 use Wc1c\Wc\Products\AttributeProduct;
 use Wc1c\Cml\Contracts\ClassifierDataContract;
@@ -1080,6 +1081,29 @@ class Core extends SchemaAbstract
 
 		return $product;
 	}
+
+    /**
+     * Назначение данных по времени для изображений
+     *
+     * @param Image $image Экземпляр продукта - либо существующий, либо новый
+     *
+     * @return Image
+     */
+    public function setImageTimes(Image $image): Image
+    {
+        $time = current_time('timestamp');
+
+        /**
+         * _wc1c_time
+         * _wc1c_schema_time_{schema_id}
+         * _wc1c_configuration_time_{configuration_id}
+         */
+        $image->updateMetaData('_wc1c_time', $time);
+        $image->updateMetaData('_wc1c_schema_time_' . $this->getId(), $time);
+        $image->updateMetaData('_wc1c_configuration_time_' . $this->configuration()->getId(), $time);
+
+        return $image;
+    }
 
 	/**
 	 * Назначение данных продукта исходя из режима: артикул
