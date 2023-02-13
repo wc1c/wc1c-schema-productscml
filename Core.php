@@ -4,7 +4,6 @@ defined('ABSPATH') || exit;
 
 use SimpleXMLElement;
 use Wc1c\Wc\Entities\Image;
-use XMLReader;
 use Wc1c\Wc\Products\AttributeProduct;
 use Wc1c\Cml\Contracts\ClassifierDataContract;
 use Wc1c\Cml\Contracts\ProductDataContract;
