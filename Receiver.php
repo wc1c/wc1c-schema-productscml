@@ -5,6 +5,7 @@ defined('ABSPATH') || exit;
 use Wc1c\Main\Exceptions\Exception;
 use Wc1c\Main\Schemas\Abstracts\Cml\ReceiverAbstract;
 use Wc1c\Main\Schemas\Contracts\SchemaContract;
+use Wc1c\Main\Traits\CoreTrait;
 use Wc1c\Main\Traits\SingletonTrait;
 use Wc1c\Main\Traits\UtilityTrait;
 use Wc1c\Wc\Contracts\ImagesStorageContract;
@@ -20,6 +21,7 @@ final class Receiver extends ReceiverAbstract
 {
 	use SingletonTrait;
 	use UtilityTrait;
+	use CoreTrait;
 
 	/**
 	 * @var SchemaContract Core Schema core
@@ -46,22 +48,6 @@ final class Receiver extends ReceiverAbstract
 		add_action('wc1c_schema_productscml_catalog_handler_import', [$this, 'handlerCatalogModeImport'], 10, 0);
 		add_action('wc1c_schema_productscml_catalog_handler_deactivate', [$this, 'handlerCatalogModeDeactivate'], 10, 0);
 		add_action('wc1c_schema_productscml_catalog_handler_complete', [$this, 'handlerCatalogModeComplete'], 10, 0);
-	}
-
-	/**
-	 * @return SchemaContract
-     */
-	public function core(): SchemaContract
-    {
-		return $this->core;
-	}
-
-	/**
-	 * @param SchemaContract $core
-	 */
-	public function setCore(SchemaContract $core)
-	{
-		$this->core = $core;
 	}
 
 	/**
