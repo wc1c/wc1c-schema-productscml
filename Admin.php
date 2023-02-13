@@ -2,6 +2,7 @@
 
 defined('ABSPATH') || exit;
 
+use Wc1c\Main\Traits\CoreTrait;
 use Wc1c\Main\Traits\SingletonTrait;
 use Wc1c\Main\Traits\UtilityTrait;
 
@@ -14,27 +15,12 @@ class Admin
 {
 	use SingletonTrait;
 	use UtilityTrait;
+	use CoreTrait;
 
 	/**
 	 * @var Core Schema core
 	 */
 	protected $core;
-
-	/**
-	 * @return Core
-	 */
-	public function core(): Core
-	{
-		return $this->core;
-	}
-
-	/**
-	 * @param Core $core
-	 */
-	public function setCore(Core $core)
-	{
-		$this->core = $core;
-	}
 
 	/**
 	 * @return void
