@@ -909,6 +909,18 @@ class Core extends SchemaAbstract
 
 		$this->configuration()->updateMetaData('classifier:' . $classifier->getId(), $classifier);
 
+		$classifier_groups = $classifier->getGroups();
+		if(!empty($classifier_groups))
+		{
+			$this->configuration()->updateMetaData('classifier-groups:' . $classifier->getId(), $classifier_groups);
+		}
+
+		$classifier_categories = $classifier->getCategories();
+		if(!empty($classifier_categories))
+		{
+			$this->configuration()->updateMetaData('classifier-categories:' . $classifier->getId(), $classifier_categories);
+		}
+
 		$classifier_properties = $classifier->getProperties();
 		if(!empty($classifier_properties))
 		{
