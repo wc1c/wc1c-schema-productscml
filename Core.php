@@ -2,7 +2,9 @@
 
 defined('ABSPATH') || exit;
 
-use XMLReader;
+use SimpleXMLElement;
+use Wc1c\Main\Traits\UtilityTrait;
+use Wc1c\Wc\Entities\Image;
 use Wc1c\Wc\Products\AttributeProduct;
 use Wc1c\Cml\Contracts\ClassifierDataContract;
 use Wc1c\Cml\Contracts\ProductDataContract;
@@ -32,6 +34,8 @@ use Wc1c\Wc\Storage;
  */
 class Core extends SchemaAbstract
 {
+	use UtilityTrait;
+
 	/**
 	 * @var string Текущий каталог в файловой системе
 	 */
@@ -48,12 +52,22 @@ class Core extends SchemaAbstract
 	public $receiver;
 
 	/**
+	 * @var string[]
+	 */
+	public $offers_types =
+	[
+		'offers',
+		'rests',
+		'prices',
+	];
+
+	/**
 	 * Core constructor.
 	 */
 	public function __construct()
 	{
 		$this->setId('productscml');
-		$this->setVersion('0.7.0');
+		$this->setVersion('0.9.0');
 
 		$this->setName(__('Products data exchange via CommerceML', 'wc1c-main'));
 		$this->setDescription(__('Creation and updating of products (goods) in WooCommerce according to data from 1C using the CommerceML protocol of various versions.', 'wc1c-main'));
@@ -159,6 +173,22 @@ class Core extends SchemaAbstract
 	}
 
 	/**
+	 * @return array string[]
+	 */
+	public function getOffersTypes(): array
+	{
+		return $this->offers_types;
+	}
+
+	/**
+	 * @param string[] $offers_types
+	 */
+	public function setOffersTypes(array $offers_types)
+	{
+		$this->offers_types = $offers_types;
+	}
+
+	/**
 	 * @param mixed $upload_directory
 	 */
 	public function setUploadDirectory($upload_directory)
@@ -179,7 +209,7 @@ class Core extends SchemaAbstract
 		{
 			$decoder = new Decoder();
 		}
-		catch(Exception $exception)
+		catch(\Throwable $exception)
 		{
 			$this->log()->error(__('The file cannot be processed. DecoderCML threw an exception.', 'wc1c-main'), ['exception' => $exception]);
 			return false;
@@ -187,15 +217,15 @@ class Core extends SchemaAbstract
 
 		if(has_filter('wc1c_schema_productscml_file_processing_decoder'))
 		{
-			$decoder = apply_filters('wc1c_schema_productscml_file_processing_decoder', $decoder, $this);
 			$this->log()->info(__('DecoderCML has been overridden by external algorithms.', 'wc1c-main'));
+			$decoder = apply_filters('wc1c_schema_productscml_file_processing_decoder', $decoder, $this);
 		}
 
 		try
 		{
 			$reader = new Reader($file_path, $decoder);
 		}
-		catch(Exception $exception)
+		catch(\Throwable $exception)
 		{
 			$this->log()->error(__('The file cannot be processed. ReaderCML threw an exception.', 'wc1c-main'), ['exception' => $exception]);
 			return false;
@@ -205,8 +235,8 @@ class Core extends SchemaAbstract
 
 		if(has_filter('wc1c_schema_productscml_file_processing_reader'))
 		{
-			$reader = apply_filters('wc1c_schema_productscml_file_processing_reader', $reader, $this);
 			$this->log()->info(__('ReaderCML has been overridden by external algorithms.', 'wc1c-main'));
+			$reader = apply_filters('wc1c_schema_productscml_file_processing_reader', $reader, $this);
 		}
 
 		while($reader->read())
@@ -215,7 +245,7 @@ class Core extends SchemaAbstract
 			{
 				do_action('wc1c_schema_productscml_file_processing_read', $reader, $this);
 			}
-			catch(Exception $e)
+			catch(\Throwable $e)
 			{
 				$this->log()->error(__('Import file processing not completed. ReaderCML threw an exception.', 'wc1c-main'), ['exception' => $e]);
 				break;
@@ -242,6 +272,56 @@ class Core extends SchemaAbstract
 	}
 
 	/**
+	 * Receiver
+	 *
+	 * @return void
+	 */
+	public function receiver()
+	{
+		if($this->configuration()->isEnabled() === false)
+		{
+			$message = __('Configuration is offline.', 'wc1c-main');
+
+			wc1c()->log('receiver')->warning($message);
+			$this->receiver->sendResponseByType('failure', $message);
+		}
+
+		try
+		{
+			$this->configuration()->setDateActivity(time());
+			$this->configuration()->save();
+		}
+		catch(\Throwable $e)
+		{
+			$message = __('Error saving configuration.', 'wc1c-main');
+
+			wc1c()->log('receiver')->error($message, ['exception' => $e]);
+			$this->receiver->sendResponseByType('failure', $message);
+		}
+
+		$action = false;
+		$wc1c_receiver_action = 'wc1c_receiver_' . $this->getId();
+
+		if(has_action($wc1c_receiver_action))
+		{
+			$action = true;
+
+			ob_start();
+			nocache_headers();
+			do_action($wc1c_receiver_action);
+			ob_end_clean();
+		}
+
+		if(false === $action)
+		{
+			$message = __('Receiver request is very bad! Action not found.', 'wc1c-main');
+
+			wc1c()->log('receiver')->warning($message, ['action' => $wc1c_receiver_action]);
+			$this->receiver->sendResponseByType('failure', $message);
+		}
+	}
+
+	/**
 	 * Обработка данных классификатора
 	 *
 	 * @param Reader $reader
@@ -251,32 +331,43 @@ class Core extends SchemaAbstract
 	 */
 	public function processingClassifier(Reader $reader)
 	{
-		if($reader->filetype !== 'import' && $reader->filetype !== 'offers')
-		{
-			return;
-		}
-
 		if(!is_null($reader->classifier))
 		{
 			return;
 		}
 
-		if($reader->nodeName === 'Классификатор' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->nodeName === 'Классификатор' && $reader->isElement())
 		{
-			/**
-			 * Декодируем данные классификатора из XML в объект
-			 */
-			$classifier = $reader->decoder()->process('classifier', $reader->xml_reader->readOuterXml());
+			$only_changes = $reader->xml_reader->getAttribute('СодержитТолькоИзменения') ?: false;
+			if($only_changes === 'true')
+			{
+				$only_changes = true;
+			}
+
+            $classifier_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+
+            try
+            {
+                $classifier = $reader->decoder()->process('classifier', $classifier_xml);
+            }
+            catch(\Throwable $e)
+            {
+                $this->log()->warning(__('DecoderCML threw an exception while converting the classifier.', 'wc1c-main'), ['exception' => $e]);
+                return;
+            }
+
+			$classifier->setOnlyChanges($only_changes);
 
 			/**
 			 * Внешняя обработка классификатора
 			 *
 			 * @param ClassifierDataContract $classifier
 			 * @param SchemaAbstract $this
+             * @param SimpleXMLElement $classifier_xml
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_classifier'))
 			{
-				$classifier = apply_filters('wc1c_schema_productscml_processing_classifier', $classifier, $this);
+				$classifier = apply_filters('wc1c_schema_productscml_processing_classifier', $classifier, $this, $classifier_xml);
 			}
 
 			if(!$classifier instanceof ClassifierDataContract)
@@ -291,7 +382,7 @@ class Core extends SchemaAbstract
 			{
 				do_action('wc1c_schema_productscml_processing_classifier_item', $classifier, $reader, $this);
 			}
-			catch(Exception $e)
+			catch(\Throwable $e)
 			{
 				$this->log()->warning(__('An exception was thrown while saving the classifier.', 'wc1c-main'), ['exception' => $e]);
 			}
@@ -761,13 +852,8 @@ class Core extends SchemaAbstract
 	 */
 	public function processingClassifierItem(ClassifierDataContract $classifier, Reader $reader)
 	{
-		if($reader->getFiletype() !== 'import' && $reader->getFiletype() !== 'offers')
-		{
-			return;
-		}
-
 		$classifier_push = true;
-		$all_classifiers = $this->configuration()->getMeta('classifier:' . $reader->getFiletype(), false, 'edit');
+		$all_classifiers = $this->configuration()->getMeta('classifier', false, 'edit');
 
 		if(!empty($all_classifiers) && is_array($all_classifiers))
 		{
@@ -785,17 +871,79 @@ class Core extends SchemaAbstract
 
 		if($classifier_push)
 		{
-			$this->configuration()->addMetaData('classifier:' . $reader->getFiletype(), ['id' => $classifier->getId(), 'name' => $classifier->getName()]);
 			$this->configuration()->addMetaData('classifier', ['id' => $classifier->getId(), 'name' => $classifier->getName(), 'filetype' => $reader->getFiletype()]);
 		}
 
-		$this->configuration()->updateMetaData('classifier:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier);
+		$internal_classifier = $this->configuration()->getMeta('classifier:' . $classifier->getId(), true, 'edit');
+
+		/*
+		 * Если классификатор существует, обновляем данные пришедшего из текущего
+		 */
+		if($internal_classifier instanceof ClassifierDataContract)
+		{
+			if($internal_classifier->hasProperties())
+			{
+				$classifier->assignProperties($internal_classifier->getProperties());
+			}
+
+			if($internal_classifier->hasGroups())
+			{
+				$classifier->assignGroups($internal_classifier->getGroups());
+			}
+
+			if($internal_classifier->hasUnits())
+			{
+				$classifier->assignUnits($internal_classifier->getUnits());
+			}
+
+			if($internal_classifier->hasWarehouses())
+			{
+				$classifier->assignWarehouses($internal_classifier->getWarehouses());
+			}
+
+			if($internal_classifier->hasPriceTypes())
+			{
+				$classifier->assignPriceTypes($internal_classifier->getPriceTypes());
+			}
+		}
+
+		$this->configuration()->updateMetaData('classifier:' . $classifier->getId(), $classifier);
+
+		$classifier_groups = $classifier->getGroups();
+		if(!empty($classifier_groups))
+		{
+			$this->configuration()->updateMetaData('classifier-groups:' . $classifier->getId(), $classifier_groups);
+		}
+
+		$classifier_categories = $classifier->getCategories();
+		if(!empty($classifier_categories))
+		{
+			$this->configuration()->updateMetaData('classifier-categories:' . $classifier->getId(), $classifier_categories);
+		}
 
 		$classifier_properties = $classifier->getProperties();
 		if(!empty($classifier_properties))
 		{
-			$this->configuration()->updateMetaData('classifier-properties:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_properties);
+			$this->configuration()->updateMetaData('classifier-properties:' . $classifier->getId(), $classifier_properties);
 		}
+
+        $classifier_prices = $classifier->getPriceTypes();
+        if(!empty($classifier_prices))
+        {
+            $this->configuration()->updateMetaData('classifier-price-types:' . $classifier->getId(), $classifier_prices);
+        }
+
+        $classifier_units = $classifier->getUnits();
+        if(!empty($classifier_units))
+        {
+            $this->configuration()->updateMetaData('classifier-units:' . $classifier->getId(), $classifier_units);
+        }
+
+        $classifier_warehouses = $classifier->getWarehouses();
+        if(!empty($classifier_warehouses))
+        {
+            $this->configuration()->updateMetaData('classifier-warehouses:' . $classifier->getId(), $classifier_warehouses);
+        }
 
 		$this->configuration()->save();
 	}
@@ -820,7 +968,7 @@ class Core extends SchemaAbstract
 			$reader->catalog = new Catalog();
 		}
 
-		if($reader->nodeName === 'Каталог' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->nodeName === 'Каталог' && $reader->isElement())
 		{
 			$only_changes = $reader->xml_reader->getAttribute('СодержитТолькоИзменения') ?: true;
 			if($only_changes === 'false')
@@ -830,7 +978,7 @@ class Core extends SchemaAbstract
 			$reader->catalog->setOnlyChanges($only_changes);
 		}
 
-		if($reader->parentNodeName === 'Каталог' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->parentNodeName === 'Каталог' && $reader->isElement())
 		{
 			switch($reader->nodeName)
 			{
@@ -861,24 +1009,23 @@ class Core extends SchemaAbstract
 		/*
 		 * Пропуск создания и обновления продуктов
 		 */
-		if
-		(
-			$reader->nodeName === 'Товары' && $reader->xml_reader->nodeType === XMLReader::ELEMENT &&
-			'yes' !== $this->getOptions('products_update', 'no') && 'yes' !== $this->getOptions('products_create', 'no')
+		if($reader->nodeName === 'Товары' && $reader->isElement()
+            && 'yes' !== $this->getOptions('products_update', 'no')
+            && 'yes' !== $this->getOptions('products_create', 'no')
 		)
 		{
 			$this->log()->info(__('Products creation and updating is disabled. The processing of goods was skipped.', 'wc1c-main'));
 			$reader->next();
 		}
 
-		if($reader->parentNodeName === 'Товары' && $reader->nodeName === 'Товар' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->parentNodeName === 'Товары' && $reader->nodeName === 'Товар' && $reader->isElement())
 		{
-			// todo: сохранение каталога
+			$product_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
 
 			/**
 			 * Декодирование данных продукта из XML в объект реализующий ProductDataContract
 			 */
-			$product = $reader->decoder->process('product', $reader->xml_reader->readOuterXml());
+			$product = $reader->decoder->process('product', $product_xml);
 
 			/**
 			 * Внешняя фильтрация перед непосредственной обработкой
@@ -886,10 +1033,11 @@ class Core extends SchemaAbstract
 			 * @param ProductDataContract $product
 			 * @param Reader $reader
 			 * @param SchemaAbstract $this
+             * @param SimpleXMLElement $product_xml
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_products'))
 			{
-				$product = apply_filters('wc1c_schema_productscml_processing_products', $product, $reader, $this);
+				$product = apply_filters('wc1c_schema_productscml_processing_products', $product, $reader, $this, $product_xml);
 			}
 
 			if(!$product instanceof ProductDataContract)
@@ -911,7 +1059,7 @@ class Core extends SchemaAbstract
 			{
 				do_action('wc1c_schema_productscml_processing_products_item', $product, $reader, $this);
 			}
-			catch(Exception $e)
+			catch(\Throwable $e)
 			{
 				$this->log()->warning(__('An exception was thrown while saving the product.', 'wc1c-main'), ['exception' => $e]);
 			}
@@ -987,6 +1135,52 @@ class Core extends SchemaAbstract
 	}
 
 	/**
+	 * Назначение данных по времени
+	 *
+	 * @param ProductContract $product Экземпляр продукта - либо существующий, либо новый
+	 *
+	 * @return ProductContract
+	 */
+	public function setProductTimes(ProductContract $product): ProductContract
+	{
+		$time = current_time('timestamp');
+
+		/**
+		 * _wc1c_time
+		 * _wc1c_schema_time_{schema_id}
+		 * _wc1c_configuration_time_{configuration_id}
+		 */
+		$product->update_meta_data('_wc1c_time', $time);
+		$product->update_meta_data('_wc1c_schema_time_' . $this->getId(), $time);
+		$product->update_meta_data('_wc1c_configuration_time_' . $this->configuration()->getId(), $time);
+
+		return $product;
+	}
+
+    /**
+     * Назначение данных по времени для изображений
+     *
+     * @param Image $image Экземпляр продукта - либо существующий, либо новый
+     *
+     * @return Image
+     */
+    public function setImageTimes(Image $image): Image
+    {
+        $time = current_time('timestamp');
+
+        /**
+         * _wc1c_time
+         * _wc1c_schema_time_{schema_id}
+         * _wc1c_configuration_time_{configuration_id}
+         */
+        $image->updateMetaData('_wc1c_time', $time);
+        $image->updateMetaData('_wc1c_schema_time_' . $this->getId(), $time);
+        $image->updateMetaData('_wc1c_configuration_time_' . $this->configuration()->getId(), $time);
+
+        return $image;
+    }
+
+	/**
 	 * Назначение данных продукта исходя из режима: артикул
 	 *
 	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
@@ -998,12 +1192,12 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemSku(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-		if('update' === $mode && 'yes' !== $this->getOptions('products_update_sku', 'no'))
+		if('update' === $mode && 'no' === $this->getOptions('products_update_sku', 'no'))
 		{
 			return $internal_product;
 		}
 
-		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_sku', 'no'))
+		if('create' === $mode && 'no' === $this->getOptions('products_create_adding_sku', 'yes'))
 		{
 			return $internal_product;
 		}
@@ -1029,6 +1223,12 @@ class Core extends SchemaAbstract
 					}
 				}
 				break;
+            case 'barcode':
+                if($barcode = $external_product->getBarcode())
+                {
+                    $sku = $barcode;
+                }
+                break;
 			case 'yes_requisites':
 				$requisite = $this->getOptions('products_sku_from_requisites_name', '');
 				if($external_product->hasRequisites($requisite))
@@ -1044,11 +1244,21 @@ class Core extends SchemaAbstract
 				$sku = $external_product->getSku();
 		}
 
+		if('update' === $mode && 'add' === $this->getOptions('products_update_sku', 'no') && !empty($internal_product->getSku()))
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && empty($sku) && 'yes_yes' === $this->getOptions('products_update_sku', 'no') && empty($internal_product->getSku()))
+		{
+			return $internal_product;
+		}
+
 		try
 		{
 			$internal_product->setSku($sku);
 		}
-		catch(Exception $e)
+		catch(\Throwable $e)
 		{
 			$this->log()->notice(__('Failed to set SKU for product.', 'wc1c-main'), ['exception' => $e, 'sku' => $external_product->getSku()]);
 		}
@@ -1079,7 +1289,12 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		$internal_product->set_catalog_visibility($this->getOptions('products_update_set_catalog_visibility', 'visible'));
+		$visible = $this->getOptions('products_update_set_catalog_visibility', '');
+
+		if(!empty($visible))
+		{
+			$internal_product->set_catalog_visibility($visible);
+		}
 
 		return $internal_product;
 	}
@@ -1112,9 +1327,18 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
+		if('no' === $this->getOptions('products_update_set_reviews_allowed', 'no'))
+		{
+			return $internal_product;
+		}
+
 		if('yes' === $this->getOptions('products_update_set_reviews_allowed', 'no'))
 		{
 			$internal_product->set_reviews_allowed(true);
+		}
+		else
+		{
+			$internal_product->set_reviews_allowed(false);
 		}
 
 		return $internal_product;
@@ -1134,6 +1358,7 @@ class Core extends SchemaAbstract
 	{
 		if($mode === 'create')
 		{
+			$internal_product->set_sold_individually(false);
 			if('yes' === $this->getOptions('products_create_set_sold_individually', 'no'))
 			{
 				$internal_product->set_sold_individually(true);
@@ -1142,9 +1367,18 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
+		if('no' === $this->getOptions('products_update_set_sold_individually', 'no'))
+		{
+			return $internal_product;
+		}
+
 		if('yes' === $this->getOptions('products_update_set_sold_individually', 'no'))
 		{
 			$internal_product->set_sold_individually(true);
+		}
+		else
+		{
+			$internal_product->set_sold_individually(false);
 		}
 
 		return $internal_product;
@@ -1169,6 +1403,7 @@ class Core extends SchemaAbstract
 
 		if($mode === 'create')
 		{
+			$internal_product->set_featured(false);
 			if('yes' === $this->getOptions('products_create_set_featured', 'no'))
 			{
 				$internal_product->set_featured(true);
@@ -1177,9 +1412,18 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
+		if('no' === $this->getOptions('products_update_set_featured', 'no'))
+		{
+			return $internal_product;
+		}
+
 		if('yes' === $this->getOptions('products_update_set_featured', 'no'))
 		{
 			$internal_product->set_featured(true);
+		}
+		else
+		{
+			$internal_product->set_featured(false);
 		}
 
 		return $internal_product;
@@ -1301,21 +1545,22 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemDescriptions(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_description', 'yes'))
+		if('create' === $mode && 'no' === $this->getOptions('products_create_adding_description', 'yes'))
 		{
 			return $internal_product;
 		}
 
-		if('update' === $mode && 'yes' !== $this->getOptions('products_update_description', 'no'))
+		if('update' === $mode && 'no' === $this->getOptions('products_update_description', 'no'))
 		{
 			return $internal_product;
 		}
 
-		$short = $this->getOptions('products_descriptions_short_by_cml', 'no');
+		$short_description = '';
+
+		$short = $this->getOptions('products_descriptions_short_by_cml', 'yes');
 
 		if('no' !== $short)
 		{
-			$short_description = '';
 			switch($short)
 			{
 				case 'yes_html':
@@ -1347,9 +1592,19 @@ class Core extends SchemaAbstract
 				default:
 					$short_description = $external_product->getDescription();
 			}
-
-			$internal_product->set_short_description($short_description);
 		}
+
+		if('update' === $mode && 'add' === $this->getOptions('products_update_description', 'yes') && !empty($internal_product->get_short_description()))
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && empty($short_description) && 'yes_yes' === $this->getOptions('products_update_description', 'yes') && empty($internal_product->get_short_description()))
+		{
+			return $internal_product;
+		}
+
+		$internal_product->set_short_description($short_description);
 
 		return $internal_product;
 	}
@@ -1366,21 +1621,21 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemDescriptionsFull(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_description_full', 'no'))
+		if('create' === $mode && 'no' === $this->getOptions('products_create_adding_description_full', 'yes'))
 		{
 			return $internal_product;
 		}
 
-		if('update' === $mode && 'yes' !== $this->getOptions('products_update_description_full', 'no'))
+		if('update' === $mode && 'no' === $this->getOptions('products_update_description_full', 'no'))
 		{
 			return $internal_product;
 		}
 
-		$full = $this->getOptions('products_descriptions_by_cml', 'no');
+		$full_description = '';
+		$full = $this->getOptions('products_descriptions_by_cml', 'yes');
 
 		if('no' !== $full)
 		{
-			$full_description = '';
 			switch($full)
 			{
 				case 'yes_html':
@@ -1412,9 +1667,19 @@ class Core extends SchemaAbstract
 				default:
 					$full_description = $external_product->getDescription();
 			}
-
-			$internal_product->set_description($full_description);
 		}
+
+		if('update' === $mode && 'add' === $this->getOptions('products_update_description_full', 'yes') && !empty($internal_product->get_description()))
+		{
+			return $internal_product;
+		}
+
+		if('update' === $mode && empty($full_description) && 'yes_yes' === $this->getOptions('products_update_description_full', 'yes') && empty($internal_product->get_description()))
+		{
+			return $internal_product;
+		}
+
+		$internal_product->set_description($full_description);
 
 		return $internal_product;
 	}
@@ -1452,17 +1717,21 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		/** @var CategoriesStorageContract $categories_storage */
-		$categories_storage = Storage::load('category');
-
 		$cats = [];
-		foreach($external_product->getClassifierGroups() as $classifier_group)
-		{
-			$cat = $categories_storage->getByExternalId($classifier_group);
 
-			if($cat instanceof Category)
+		if($external_product->hasClassifierGroups())
+		{
+			/** @var CategoriesStorageContract $categories_storage */
+			$categories_storage = Storage::load('category');
+
+			foreach($external_product->getClassifierGroups() as $classifier_group)
 			{
-				$cats[] = $cat->getId();
+				$cat = $categories_storage->getByExternalId($classifier_group);
+
+				if($cat instanceof Category)
+				{
+					$cats[] = $cat->getId();
+				}
 			}
 		}
 
@@ -1489,11 +1758,6 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		if('update' === $mode && 'no' === $this->getOptions('products_update_taxes_status', 'no'))
-		{
-			return $internal_product;
-		}
-
 		if('create' === $mode)
 		{
 			$internal_product->set_tax_status($this->getOptions('products_create_taxes_status', 'taxable'));
@@ -1501,7 +1765,14 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		$internal_product->set_tax_status($this->getOptions('products_update_taxes_status', 'taxable'));
+		$status = $this->getOptions('products_update_taxes_status', 'no');
+
+		if('no' === $status)
+		{
+			return $internal_product;
+		}
+
+		$internal_product->set_tax_status($status);
 
 		return $internal_product;
 	}
@@ -1524,11 +1795,6 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		if('update' === $mode && 'no' === $this->getOptions('products_update_taxes_class', 'no'))
-		{
-			return $internal_product;
-		}
-
 		if('create' === $mode)
 		{
 			$internal_product->set_tax_class($this->getOptions('products_create_taxes_class', 'standard'));
@@ -1536,7 +1802,14 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		$internal_product->set_tax_class($this->getOptions('products_update_taxes_class', 'standard'));
+		$class = $this->getOptions('products_update_taxes_class', 'no');
+
+		if('no' === $class)
+		{
+			return $internal_product;
+		}
+
+		$internal_product->set_tax_class($class);
 
 		return $internal_product;
 	}
@@ -2810,7 +3083,8 @@ class Core extends SchemaAbstract
 			 */
 			if($external_product->hasCharacteristicId())
 			{
-				$this->log()->info(__('The product contains the characteristics.', 'wc1c-main')); // todo: реализация
+				$this->log()->notice(__('The product contains the characteristics.', 'wc1c-main')); // todo: реализация
+				return;
 			}
 			else
 			{
@@ -2843,12 +3117,14 @@ class Core extends SchemaAbstract
 				$internal_product = apply_filters('wc1c_schema_productscml_processing_products_item_before_save', $internal_product, $external_product, 'create', $reader);
 			}
 
+			$internal_product = $this->setProductTimes($internal_product);
+
 			try
 			{
 				$id = $internal_product->save();
 				$this->log()->info(__('The product is created.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $internal_product->get_type()]);
 			}
-			catch(\Exception $e)
+			catch(\Throwable $e)
 			{
 				throw new Exception($e->getMessage());
 			}
@@ -2872,7 +3148,7 @@ class Core extends SchemaAbstract
 					$id = $internal_product->save();
 					$this->log()->info(__('The product has been updated using external algorithms.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $internal_product->get_type()]);
 				}
-				catch(\Exception $e)
+				catch(\Throwable $e)
 				{
 					throw new Exception($e->getMessage());
 				}
@@ -2944,11 +3220,13 @@ class Core extends SchemaAbstract
 			$update_product = apply_filters('wc1c_schema_productscml_processing_products_item_before_save', $update_product, $external_product, 'update', $reader);
 		}
 
+		$update_product = $this->setProductTimes($update_product);
+
 		try
 		{
 			$update_product->save();
 		}
-		catch(\Exception $e)
+		catch(\Throwable $e)
 		{
 			throw new Exception($e->getMessage());
 		}
@@ -2971,7 +3249,7 @@ class Core extends SchemaAbstract
 			{
 				$update_product->save();
 			}
-			catch(\Exception $e)
+			catch(\Throwable $e)
 			{
 				throw new Exception($e->getMessage());
 			}
@@ -3130,11 +3408,13 @@ class Core extends SchemaAbstract
 			$internal_offer = apply_filters('wc1c_schema_productscml_processing_offers_item_before_save', $internal_offer, $external_offer, $reader);
 		}
 
+		$internal_offer = $this->setProductTimes($internal_offer);
+
 		try
 		{
 			$internal_offer->save();
 		}
-		catch(\Exception $e)
+		catch(\Throwable $e)
 		{
 			throw new Exception($e->getMessage());
 		}
@@ -3150,23 +3430,17 @@ class Core extends SchemaAbstract
 	 */
 	public function processingOffers(Reader $reader)
 	{
-		$types =
-		[
-			'offers',
-			'rests',
-			'prices',
-		];
-
-		if(!in_array($reader->getFiletype(), $types))
+		if(!in_array($reader->getFiletype(), $this->getOffersTypes(), true))
 		{
 			return;
 		}
+
 		if(is_null($reader->offers_package))
 		{
 			$reader->offers_package = new OffersPackage();
 		}
 
-		if($reader->nodeName === 'ПакетПредложений' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if($reader->nodeName === 'ПакетПредложений' && $reader->isElement())
 		{
 			$only_changes = $reader->xml_reader->getAttribute('СодержитТолькоИзменения') ?: true;
 			if($only_changes === 'false')
@@ -3174,23 +3448,36 @@ class Core extends SchemaAbstract
 				$only_changes = false;
 			}
 			$reader->offers_package->setOnlyChanges($only_changes);
+
+			if($only_changes)
+			{
+				$this->log()->debug(__('The offer package object contains only the changes.', 'wc1c-main'));
+			}
+		}
+		elseif($reader->nodeName === 'ИзмененияПакетаПредложений' && $reader->isElement())
+		{
+			$this->log()->debug(__('The offer package object contains only the changes.', 'wc1c-main'));
+			$reader->offers_package->setOnlyChanges(true);
 		}
 
-		if($reader->parentNodeName === 'ПакетПредложений' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+		if(($reader->parentNodeName === 'ПакетПредложений' || $reader->parentNodeName === 'ИзмененияПакетаПредложений') && $reader->isElement())
 		{
 			switch($reader->nodeName)
 			{
 				case 'Ид':
-					$reader->offers_package->setId($reader->xml_reader->readString());
+					$id = $reader->decoder()->normalizeId($reader->xml_reader->readString());
+					$reader->offers_package->setId($id);
 					break;
 				case 'Наименование':
 					$reader->offers_package->setName($reader->xml_reader->readString());
 					break;
 				case 'ИдКаталога':
-					$reader->offers_package->setCatalogId($reader->xml_reader->readString());
+					$id = $reader->decoder()->normalizeId($reader->xml_reader->readString());
+					$reader->offers_package->setCatalogId($id);
 					break;
 				case 'ИдКлассификатора':
-					$reader->offers_package->setClassifierId($reader->xml_reader->readString());
+					$id = $reader->decoder()->normalizeId($reader->xml_reader->readString());
+					$reader->offers_package->setClassifierId($id);
 					break;
 				case 'Владелец':
 					$owner = $reader->decoder()->process('counterparty', $reader->xml_reader->readOuterXml());
@@ -3210,15 +3497,40 @@ class Core extends SchemaAbstract
 			}
 		}
 
-		if($reader->parentNodeName === 'Предложения' && $reader->nodeName === 'Предложение' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
-		{
-			// todo: сохранение пакета предложений
+        if($reader->nodeName === 'Предложения' && $reader->isElement())
+        {
+			if(false === $reader->offers_package->isOnlyChanges())
+			{
+				$this->log()->info(__('Saving the offer package to configuration meta data.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
 
-			$offer = $reader->decoder->process('offer', $reader->xml_reader->readOuterXml());
+				$this->configuration()->addMetaData('offers_package:' . $reader->offers_package->getId(), $reader->offers_package, true);
+				$this->configuration()->saveMetaData();
+			}
+
+			if(empty($reader->offers_package->getPriceTypes()))
+			{
+				$price_types = $this->configuration()->getMeta('classifier-prices:import:' . $reader->offers_package->getClassifierId());
+				if(is_array($price_types))
+				{
+					$reader->offers_package->setPriceTypes($price_types);
+				}
+			}
+
+	        if('yes' === $this->getOptions('browser_debug', 'no'))
+	        {
+		        $this->dump($reader->offers_package);
+	        }
+        }
+
+		if($reader->parentNodeName === 'Предложения' && $reader->nodeName === 'Предложение' && $reader->isElement())
+		{
+			$offer_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+
+			$offer = $reader->decoder->process('offer', $offer_xml);
 
 			if(has_filter('wc1c_schema_productscml_processing_offers'))
 			{
-				$offer = apply_filters('wc1c_schema_productscml_processing_offers', $offer, $reader, $this);
+				$offer = apply_filters('wc1c_schema_productscml_processing_offers', $offer, $reader, $this, $offer_xml);
 			}
 
 			if(!$offer instanceof ProductDataContract)
@@ -3239,7 +3551,7 @@ class Core extends SchemaAbstract
 			{
 				do_action('wc1c_schema_productscml_processing_offers_item', $offer, $reader, $this);
 			}
-			catch(Exception $e)
+			catch(\Throwable $e)
 			{
 				$this->log()->warning(__('An exception was thrown while processing the offer.', 'wc1c-main'), ['exception' => $e]);
 			}
