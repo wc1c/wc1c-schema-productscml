@@ -3,6 +3,7 @@
 defined('ABSPATH') || exit;
 
 use SimpleXMLElement;
+use Wc1c\Main\Traits\UtilityTrait;
 use Wc1c\Wc\Entities\Image;
 use Wc1c\Wc\Products\AttributeProduct;
 use Wc1c\Cml\Contracts\ClassifierDataContract;
@@ -33,6 +34,8 @@ use Wc1c\Wc\Storage;
  */
 class Core extends SchemaAbstract
 {
+	use UtilityTrait;
+
 	/**
 	 * @var string Текущий каталог в файловой системе
 	 */
@@ -47,6 +50,16 @@ class Core extends SchemaAbstract
 	 * @var Receiver
 	 */
 	public $receiver;
+
+	/**
+	 * @var string[]
+	 */
+	public $offers_types =
+	[
+		'offers',
+		'rests',
+		'prices',
+	];
 
 	/**
 	 * Core constructor.
@@ -157,6 +170,22 @@ class Core extends SchemaAbstract
 	public function getUploadDirectory(): string
 	{
 		return $this->upload_directory;
+	}
+
+	/**
+	 * @return array string[]
+	 */
+	public function getOffersTypes(): array
+	{
+		return $this->offers_types;
+	}
+
+	/**
+	 * @param string[] $offers_types
+	 */
+	public function setOffersTypes(array $offers_types)
+	{
+		$this->offers_types = $offers_types;
 	}
 
 	/**
@@ -302,11 +331,6 @@ class Core extends SchemaAbstract
 	 */
 	public function processingClassifier(Reader $reader)
 	{
-		if($reader->filetype !== 'import' && $reader->filetype !== 'offers')
-		{
-			return;
-		}
-
 		if(!is_null($reader->classifier))
 		{
 			return;
@@ -314,6 +338,12 @@ class Core extends SchemaAbstract
 
 		if($reader->nodeName === 'Классификатор' && $reader->isElement())
 		{
+			$only_changes = $reader->xml_reader->getAttribute('СодержитТолькоИзменения') ?: false;
+			if($only_changes === 'true')
+			{
+				$only_changes = true;
+			}
+
             $classifier_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
 
             try
@@ -325,6 +355,8 @@ class Core extends SchemaAbstract
                 $this->log()->warning(__('DecoderCML threw an exception while converting the classifier.', 'wc1c-main'), ['exception' => $e]);
                 return;
             }
+
+			$classifier->setOnlyChanges($only_changes);
 
 			/**
 			 * Внешняя обработка классификатора
@@ -821,7 +853,7 @@ class Core extends SchemaAbstract
 	public function processingClassifierItem(ClassifierDataContract $classifier, Reader $reader)
 	{
 		$classifier_push = true;
-		$all_classifiers = $this->configuration()->getMeta('classifier:' . $reader->getFiletype(), false, 'edit');
+		$all_classifiers = $this->configuration()->getMeta('classifier', false, 'edit');
 
 		if(!empty($all_classifiers) && is_array($all_classifiers))
 		{
@@ -839,34 +871,66 @@ class Core extends SchemaAbstract
 
 		if($classifier_push)
 		{
-			$this->configuration()->addMetaData('classifier:' . $reader->getFiletype(), ['id' => $classifier->getId(), 'name' => $classifier->getName()]);
 			$this->configuration()->addMetaData('classifier', ['id' => $classifier->getId(), 'name' => $classifier->getName(), 'filetype' => $reader->getFiletype()]);
 		}
 
-		$this->configuration()->updateMetaData('classifier:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier);
+		$internal_classifier = $this->configuration()->getMeta('classifier:' . $classifier->getId(), true, 'edit');
+
+		/*
+		 * Если классификатор существует, обновляем данные пришедшего из текущего
+		 */
+		if($internal_classifier instanceof ClassifierDataContract)
+		{
+			if($internal_classifier->hasProperties())
+			{
+				$classifier->assignProperties($internal_classifier->getProperties());
+			}
+
+			if($internal_classifier->hasGroups())
+			{
+				$classifier->assignGroups($internal_classifier->getGroups());
+			}
+
+			if($internal_classifier->hasUnits())
+			{
+				$classifier->assignUnits($internal_classifier->getUnits());
+			}
+
+			if($internal_classifier->hasWarehouses())
+			{
+				$classifier->assignWarehouses($internal_classifier->getWarehouses());
+			}
+
+			if($internal_classifier->hasPriceTypes())
+			{
+				$classifier->assignPriceTypes($internal_classifier->getPriceTypes());
+			}
+		}
+
+		$this->configuration()->updateMetaData('classifier:' . $classifier->getId(), $classifier);
 
 		$classifier_properties = $classifier->getProperties();
 		if(!empty($classifier_properties))
 		{
-			$this->configuration()->updateMetaData('classifier-properties:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_properties);
+			$this->configuration()->updateMetaData('classifier-properties:' . $classifier->getId(), $classifier_properties);
 		}
 
         $classifier_prices = $classifier->getPriceTypes();
         if(!empty($classifier_prices))
         {
-            $this->configuration()->updateMetaData('classifier-prices:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_prices);
+            $this->configuration()->updateMetaData('classifier-price-types:' . $classifier->getId(), $classifier_prices);
         }
 
         $classifier_units = $classifier->getUnits();
         if(!empty($classifier_units))
         {
-            $this->configuration()->updateMetaData('classifier-units:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_units);
+            $this->configuration()->updateMetaData('classifier-units:' . $classifier->getId(), $classifier_units);
         }
 
         $classifier_warehouses = $classifier->getWarehouses();
         if(!empty($classifier_warehouses))
         {
-            $this->configuration()->updateMetaData('classifier-warehouses:' . $reader->getFiletype() . ':' . $classifier->getId(), $classifier_warehouses);
+            $this->configuration()->updateMetaData('classifier-warehouses:' . $classifier->getId(), $classifier_warehouses);
         }
 
 		$this->configuration()->save();
@@ -3354,17 +3418,11 @@ class Core extends SchemaAbstract
 	 */
 	public function processingOffers(Reader $reader)
 	{
-		$types =
-		[
-			'offers',
-			'rests',
-			'prices',
-		];
-
-		if(!in_array($reader->getFiletype(), $types))
+		if(!in_array($reader->getFiletype(), $this->getOffersTypes(), true))
 		{
 			return;
 		}
+
 		if(is_null($reader->offers_package))
 		{
 			$reader->offers_package = new OffersPackage();
@@ -3378,23 +3436,36 @@ class Core extends SchemaAbstract
 				$only_changes = false;
 			}
 			$reader->offers_package->setOnlyChanges($only_changes);
+
+			if($only_changes)
+			{
+				$this->log()->debug(__('The offer package object contains only the changes.', 'wc1c-main'));
+			}
+		}
+		elseif($reader->nodeName === 'ИзмененияПакетаПредложений' && $reader->isElement())
+		{
+			$this->log()->debug(__('The offer package object contains only the changes.', 'wc1c-main'));
+			$reader->offers_package->setOnlyChanges(true);
 		}
 
-		if($reader->parentNodeName === 'ПакетПредложений' && $reader->isElement())
+		if(($reader->parentNodeName === 'ПакетПредложений' || $reader->parentNodeName === 'ИзмененияПакетаПредложений') && $reader->isElement())
 		{
 			switch($reader->nodeName)
 			{
 				case 'Ид':
-					$reader->offers_package->setId($reader->xml_reader->readString());
+					$id = $reader->decoder()->normalizeId($reader->xml_reader->readString());
+					$reader->offers_package->setId($id);
 					break;
 				case 'Наименование':
 					$reader->offers_package->setName($reader->xml_reader->readString());
 					break;
 				case 'ИдКаталога':
-					$reader->offers_package->setCatalogId($reader->xml_reader->readString());
+					$id = $reader->decoder()->normalizeId($reader->xml_reader->readString());
+					$reader->offers_package->setCatalogId($id);
 					break;
 				case 'ИдКлассификатора':
-					$reader->offers_package->setClassifierId($reader->xml_reader->readString());
+					$id = $reader->decoder()->normalizeId($reader->xml_reader->readString());
+					$reader->offers_package->setClassifierId($id);
 					break;
 				case 'Владелец':
 					$owner = $reader->decoder()->process('counterparty', $reader->xml_reader->readOuterXml());
@@ -3416,27 +3487,38 @@ class Core extends SchemaAbstract
 
         if($reader->nodeName === 'Предложения' && $reader->isElement())
         {
-            $this->log()->info(__('Saving the offer package to configuration meta data.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
+			if(false === $reader->offers_package->isOnlyChanges())
+			{
+				$this->log()->info(__('Saving the offer package to configuration meta data.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
 
-            $this->configuration()->addMetaData('offers_package:' . $reader->getFiletype() . ':' . $reader->offers_package->getId(), maybe_serialize($reader->offers_package), true);
-            $this->configuration()->saveMetaData();
+				$this->configuration()->addMetaData('offers_package:' . $reader->offers_package->getId(), $reader->offers_package, true);
+				$this->configuration()->saveMetaData();
+			}
 
-            $price_types = $this->configuration()->getMeta('classifier-prices:import:' . $reader->offers_package->getClassifierId());
-            if(is_array($price_types))
-            {
-                $reader->offers_package->setPriceTypes($price_types);
-            }
+			if(empty($reader->offers_package->getPriceTypes()))
+			{
+				$price_types = $this->configuration()->getMeta('classifier-prices:import:' . $reader->offers_package->getClassifierId());
+				if(is_array($price_types))
+				{
+					$reader->offers_package->setPriceTypes($price_types);
+				}
+			}
+
+	        if('yes' === $this->getOptions('browser_debug', 'no'))
+	        {
+		        $this->dump($reader->offers_package);
+	        }
         }
 
 		if($reader->parentNodeName === 'Предложения' && $reader->nodeName === 'Предложение' && $reader->isElement())
 		{
-			// todo: сохранение пакета предложений
+			$offer_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
 
-			$offer = $reader->decoder->process('offer', $reader->xml_reader->readOuterXml());
+			$offer = $reader->decoder->process('offer', $offer_xml);
 
 			if(has_filter('wc1c_schema_productscml_processing_offers'))
 			{
-				$offer = apply_filters('wc1c_schema_productscml_processing_offers', $offer, $reader, $this);
+				$offer = apply_filters('wc1c_schema_productscml_processing_offers', $offer, $reader, $this, $offer_xml);
 			}
 
 			if(!$offer instanceof ProductDataContract)
