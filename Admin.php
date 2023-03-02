@@ -1702,13 +1702,73 @@ class Admin
 			'description' => __('The main settings for filling in the dimensions of products (goods) according to data from 1C. Dimensions include: weight, length, width, height.', 'wc1c-main'),
 		];
 
-		$fields['products_dimensions_by_requisites'] =
+		$fields['products_create_adding_dimensions'] =
 		[
-			'title' => __('Filling dimensions based on requisites', 'wc1c-main'),
+			'title' => __('Filling the dimensions of the created product', 'wc1c-main'),
 			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('Filling in the dimensions will be performed from the given details of the products. For the setting to work, you must specify the correspondence of the details in the fields below.', 'wc1c-main'),
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<hr>%s',
+				__('The product dimensions will be added according to data from 1C. It is recommended to enable this feature.', 'wc1c-main'),
+				__('The setting works when creating products (goods).', 'wc1c-main')
+			),
 			'default' => 'yes'
+		];
+
+		$products_update_dimensions_options =
+		[
+			'no' => __('Do not update', 'wc1c-main'),
+			'yes' => __('Update in any case', 'wc1c-main'),
+			'add' => __('Add if not on the site and available in 1C', 'wc1c-main'),
+			'yes_yes' => __('Update if present on the site and in 1C', 'wc1c-main'),
+		];
+
+		$fields['products_update_dimensions'] =
+		[
+			'title' => __('Dimensions update when products updates', 'wc1c-main'),
+			'default' => 'no',
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<hr>%s',
+				__('Do not update', 'wc1c-main'),
+				__('Dimensions updates will be skipped in any case.', 'wc1c-main'),
+				__('Update in any case', 'wc1c-main'),
+				__('Dimensions will be updated in any case. The same value will always be on the site and in 1C.', 'wc1c-main'),
+				__('Add if not on the site, but available in 1C', 'wc1c-main'),
+				__('Existing dimensions will not be affected. There will be a filling of those missing on the site if they are available in 1C.', 'wc1c-main'),
+				__('Update if present on the site and in 1C', 'wc1c-main'),
+				__('Dimensions will be updated only if they are filled in 1C and on the site at the same time.', 'wc1c-main'),
+				__('The setting works when updating products (goods).', 'wc1c-main')
+			),
+			'options' => $products_update_dimensions_options
+		];
+
+		$products_dimensions_source_options =
+		[
+			'no' => __('Do not use', 'wc1c-main'),
+			'yes' => __('From the standard fields', 'wc1c-main'),
+			'yes_requisites' => __('From requisite with the specified name', 'wc1c-main'),
+		];
+
+		$fields['products_dimensions_source'] =
+		[
+			'title' => __('Source for dimensions', 'wc1c-main'),
+			'type' => 'select',
+			'description' => sprintf
+			(
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				__('The setting works when creating and updating products (goods).', 'wc1c-main'),
+				__('Do not use', 'wc1c-main'),
+				__('Populating the dimensions data from CommerceML data will be skipped. If a product is updating, then its current dimensions will not be updated.', 'wc1c-main'),
+				__('From the standard fields', 'wc1c-main'),
+				__('This dimensions is contained in the standard fields of 1C products. It is located in the conditional tags.', 'wc1c-main'),
+				__('From requisite with the specified name', 'wc1c-main'),
+				__('The dimensions data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c-main')
+			),
+			'default' => 'yes_requisites',
+			'options' => $products_dimensions_source_options
 		];
 
 		$fields['products_dimensions_by_requisites_weight_from_name'] =
