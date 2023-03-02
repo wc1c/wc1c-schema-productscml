@@ -1844,7 +1844,7 @@ class Admin
 		[
 			'title' => __('Maximum files', 'wc1c-main'),
 			'type' => 'text',
-			'description' => __('Log files created daily. This option on the maximum number of stored files. By default saved of the logs are for the last 30 days.', 'wc1c-main'),
+			'description' => __('Log files created daily. This option on the maximum number of stored files. By default saved of the logs are for the last 10 days.', 'wc1c-main'),
 			'default' => 10,
 			'css' => 'min-width: 20px;',
 		];
