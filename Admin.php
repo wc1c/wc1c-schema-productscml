@@ -896,7 +896,7 @@ class Admin
 
 		$fields['products_update_sku'] =
 		[
-			'title' => __('Product SKU update when products updates', 'wc1c-main'),
+			'title' => __('SKU update when products updates', 'wc1c-main'),
 			'default' => 'no',
 			'type' => 'select',
 			'description' => sprintf
