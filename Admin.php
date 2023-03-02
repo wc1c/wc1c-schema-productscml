@@ -1358,7 +1358,7 @@ class Admin
 
 		$fields['products_create_adding_images'] =
 		[
-			'title' => __('Adding the images of the created product', 'wc1c-main'),
+			'title' => __('Adding the images of the created products', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
 			'description' => sprintf
@@ -1369,38 +1369,53 @@ class Admin
 			'default' => 'yes'
 		];
 
+		$products_update_images_options =
+		[
+			'no' => __('Do not update', 'wc1c-main'),
+			'yes' => __('Update in any case', 'wc1c-main'),
+			'add' => __('Add if not on the site, but available in 1C', 'wc1c-main'),
+			'yes_yes' => __('Update if present on the site and in 1C', 'wc1c-main'),
+		];
+
 		$fields['products_update_images'] =
 		[
-			'title' => __('Product images update when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'title' => __('Update images when update products', 'wc1c-main'),
+			'default' => 'no',
+			'type' => 'select',
 			'description' => sprintf
 			(
-				'%s<hr>%s',
-				__('If the setting is disabled, new images will not be assigned to old products and the old ones will not be deleted either. In this case, you can edit images from WooCommerce.', 'wc1c-main'),
-				__('The choice of a source for a brief images from 1C is in a separate settings block - Products (goods): images.', 'wc1c-main')
+				'<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<hr>%s',
+				__('Do not update', 'wc1c-main'),
+				__('Update images will be skipped in any case.', 'wc1c-main'),
+				__('Update in any case', 'wc1c-main'),
+				__('Images will be updated in any case. The same value will always be on the site and in 1C.', 'wc1c-main'),
+				__('Add if not on the site, but available in 1C', 'wc1c-main'),
+				__('Existing images will not be affected. There will be a filling of those missing on the site if they are available in 1C.', 'wc1c-main'),
+				__('Update if present on the site and in 1C', 'wc1c-main'),
+				__('Images will be updated only if they are filled in 1C and on the site at the same time.', 'wc1c-main'),
+				__('The setting works when updating products (goods).', 'wc1c-main')
 			),
-			'default' => 'no'
+			'options' => $products_update_images_options
 		];
 
 		$fields['products_images_by_cml'] =
 		[
-			'title' => __('Images based on CommerceML files', 'wc1c-main'),
+			'title' => __('Images based on CommerceML data', 'wc1c-main'),
 			'type' => 'checkbox',
-			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
+			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
 			'description' => sprintf
 			(
 				'%s<hr>%s %s',
 				__('When enabled, work with images based on CommerceML files will be allowed.', 'wc1c-main'),
-				__('Available images in CommerceML files for products will be populated for future use.', 'wc1c-main'),
+				__('Available images in CommerceML data for products will be populated for future use.', 'wc1c-main'),
 				__('In this case, the image files themselves must first be added to the WordPress media library. If they are not included, their use will be skipped.', 'wc1c-main')
 			),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		$fields['products_images_by_cml_max'] =
 		[
-			'title' => __('Images based on CommerceML files: maximum quantity', 'wc1c-main'),
+			'title' => __('Images based on CommerceML data: maximum quantity', 'wc1c-main'),
 			'type' => 'text',
 			'description' => sprintf
 			(
