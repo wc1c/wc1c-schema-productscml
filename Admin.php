@@ -869,7 +869,7 @@ class Admin
 		[
 			'title' => __('Products (goods): SKU', 'wc1c-main'),
 			'type' => 'title',
-			'description' => __('Sources and algorithms for filling out product SKU.', 'wc1c-main'),
+			'description' => __('Sources and algorithms for filling out products SKU.', 'wc1c-main'),
 		];
 
 		$fields['products_create_adding_sku'] =
@@ -896,7 +896,7 @@ class Admin
 
 		$fields['products_update_sku'] =
 		[
-			'title' => __('Product SKU update when requesting product updates', 'wc1c-main'),
+			'title' => __('Product SKU update when products updates', 'wc1c-main'),
 			'default' => 'no',
 			'type' => 'select',
 			'description' => sprintf
@@ -926,7 +926,7 @@ class Admin
 
 		$fields['products_sku_by_cml'] =
 		[
-			'title' => __('SKU based on CommerceML data', 'wc1c-main'),
+			'title' => __('Source for SKUs', 'wc1c-main'),
 			'type' => 'select',
 			'description' => sprintf
 			(
@@ -949,9 +949,9 @@ class Admin
 
 		$fields['products_sku_from_requisites_name'] =
 		[
-			'title' => __('SKU based on CommerceML data: name for requisite', 'wc1c-main'),
+			'title' => __('Source for SKUs: name for requisite', 'wc1c-main'),
 			'type' => 'text',
-			'description' => __('The name of the requisite of the product (goods) which contains a SKU of the product.', 'wc1c-main'),
+			'description' => __('The name of the requisite of the products (goods) which contains a SKU of the product.', 'wc1c-main'),
 			'default' => '',
 			'css' => 'min-width: 370px;',
 		];
