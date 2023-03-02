@@ -1748,7 +1748,6 @@ class Admin
 		$products_dimensions_source_options =
 		[
 			'no' => __('Do not use', 'wc1c-main'),
-			'yes' => __('From the standard fields', 'wc1c-main'),
 			'yes_requisites' => __('From requisite with the specified name', 'wc1c-main'),
 		];
 
@@ -1758,12 +1757,10 @@ class Admin
 			'type' => 'select',
 			'description' => sprintf
 			(
-				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+				'%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s',
 				__('The setting works when creating and updating products (goods).', 'wc1c-main'),
 				__('Do not use', 'wc1c-main'),
 				__('Populating the dimensions data from CommerceML data will be skipped. If a product is updating, then its current dimensions will not be updated.', 'wc1c-main'),
-				__('From the standard fields', 'wc1c-main'),
-				__('This dimensions is contained in the standard fields of 1C products. It is located in the conditional tags.', 'wc1c-main'),
 				__('From requisite with the specified name', 'wc1c-main'),
 				__('The dimensions data will be filled in based on the completed name of the requisite of the products (goods).', 'wc1c-main')
 			),
