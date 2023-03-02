@@ -972,15 +972,15 @@ class Admin
 		[
 			'title' => __('Products (goods): names', 'wc1c-main'),
 			'type' => 'title',
-			'description' => __('Sources and algorithms for filling out product names.', 'wc1c-main'),
+			'description' => __('Sources and algorithms for filling out products name.', 'wc1c-main'),
 		];
 
 		$fields['products_update_name'] =
 		[
-			'title' => __('Product name update when requesting product updates', 'wc1c-main'),
+			'title' => __('Product name update when update products', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When changing the product name in 1C, the data will be changed on the site.', 'wc1c-main'),
+			'description' => __('When changing the products names in 1C, the data will be changed on the site.', 'wc1c-main'),
 			'default' => 'no'
 		];
 
@@ -994,7 +994,7 @@ class Admin
 
 		$fields['products_names_by_cml'] =
 		[
-			'title' => __('Names based on CommerceML data', 'wc1c-main'),
+			'title' => __('Source for product names', 'wc1c-main'),
 			'type' => 'select',
 			'description' => sprintf
 			(
@@ -1015,9 +1015,9 @@ class Admin
 
 		$fields['products_names_from_requisites_name'] =
 		[
-			'title' => __('Names based on CommerceML data: name for requisite', 'wc1c-main'),
+			'title' => __('Source for product names: name for requisite', 'wc1c-main'),
 			'type' => 'text',
-			'description' => __('The name of the requisite of the product (goods) which contains a name of the product.', 'wc1c-main'),
+			'description' => __('The name of the requisite of the products (goods) which contains a name of the product.', 'wc1c-main'),
 			'default' => '',
 			'css' => 'min-width: 370px;',
 		];
@@ -1043,7 +1043,7 @@ class Admin
 
 		$fields['products_create_adding_description'] =
 		[
-			'title' => __('Filling the description of the created product', 'wc1c-main'),
+			'title' => __('Filling the description of the created products', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
 			'description' => sprintf
@@ -1066,7 +1066,7 @@ class Admin
 
 		$fields['products_update_description'] =
 		[
-			'title' => __('Description update when requesting product updates', 'wc1c-main'),
+			'title' => __('Description update when update products', 'wc1c-main'),
 			'default' => 'no',
 			'type' => 'select',
 			'description' => sprintf
@@ -1096,7 +1096,7 @@ class Admin
 
 		$fields['products_descriptions_short_by_cml'] =
 		[
-			'title' => __('Descriptions based on CommerceML data: short', 'wc1c-main'),
+			'title' => __('Source for descriptions', 'wc1c-main'),
 			'type' => 'select',
 			'description' => sprintf
 			(
@@ -1119,7 +1119,7 @@ class Admin
 
 		$fields['products_descriptions_short_from_requisites_name'] =
 		[
-			'title' => __('Descriptions based on CommerceML data: short - name for requisite', 'wc1c-main'),
+			'title' => __('Source for descriptions: name for requisite', 'wc1c-main'),
 			'type' => 'text',
 			'description' => __('The name of the requisite of the product (goods) which contains a short description of the product.', 'wc1c-main'),
 			'default' => '',
@@ -1128,7 +1128,7 @@ class Admin
 
 		$fields['products_create_adding_description_full'] =
 		[
-			'title' => __('Filling a full description of the created product', 'wc1c-main'),
+			'title' => __('Filling a full description of the created products', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
 			'description' => sprintf
@@ -1143,7 +1143,7 @@ class Admin
 
 		$fields['products_update_description_full'] =
 		[
-			'title' => __('Full description update when requesting product updates', 'wc1c-main'),
+			'title' => __('Full description update when update products', 'wc1c-main'),
 			'default' => 'no',
 			'type' => 'select',
 			'description' => sprintf
@@ -1164,7 +1164,7 @@ class Admin
 
 		$fields['products_descriptions_by_cml'] =
 		[
-			'title' => __('Descriptions based on CommerceML data: full', 'wc1c-main'),
+			'title' => __('Source for full descriptions', 'wc1c-main'),
 			'type' => 'select',
 			'description' => sprintf
 			(
@@ -1187,7 +1187,7 @@ class Admin
 
 		$fields['products_descriptions_from_requisites_name'] =
 		[
-			'title' => __('Descriptions based on CommerceML data: full - name for requisite', 'wc1c-main'),
+			'title' => __('Source for full descriptions: name for requisite', 'wc1c-main'),
 			'type' => 'text',
 			'description' => __('The name of the requisite of the product (goods) which contains a full description of the product.', 'wc1c-main'),
 			'default' => '',
