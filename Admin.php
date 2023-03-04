@@ -581,7 +581,7 @@ class Admin
 
 		$fields['products_create_adding_category'] =
 		[
-			'title' => __('Assigning categories of the created product', 'wc1c-main'),
+			'title' => __('Assigning categories of the creating products', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Enabled by default.', 'wc1c-main'),
 			'description' => sprintf
