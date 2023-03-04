@@ -127,9 +127,9 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handlerCatalogModeDeactivate()
 	{
-        if(isset($_GET['deactivate×tamp']))
+        if(isset($_GET['timestamp']))
         {
-            $timestamp = (int)$_GET['deactivate×tamp'];
+            $timestamp = (int)$_GET['timestamp'];
 
             $this->core()->log()->notice(__('The time of the last full exchange has been set.', 'wc1c-main'));
 
