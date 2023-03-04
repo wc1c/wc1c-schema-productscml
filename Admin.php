@@ -40,8 +40,8 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsAttributes'], 60, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsPrices'], 70, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsTaxes'], 70, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 72, 1);
+		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 71, 1);
+        add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsTaxes'], 73, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDimensions'], 74, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsOther'], 79, 1);
