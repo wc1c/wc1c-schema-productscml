@@ -555,6 +555,30 @@ class Admin
 			),
 		];
 
+        $products_categories_source_options =
+        [
+            'no' => __('Do not use', 'wc1c-main'),
+            'classifier_groups' => __('From classifier groups', 'wc1c-main'),
+        ];
+
+        $fields['products_categories_source'] =
+        [
+            'title' => __('Source for categories', 'wc1c-main'),
+            'type' => 'select',
+            'description' => sprintf
+            (
+                '%s<hr><b>%s</b> - %s<br /><b>%s</b> - %s %s',
+                __('The setting works when creating and updating products (goods).', 'wc1c-main'),
+                __('Do not use', 'wc1c-main'),
+                __('Populating the categories data from CommerceML data will be skipped. If a product is updating, then its current categories will not be updated.', 'wc1c-main'),
+                __('From classifier groups', 'wc1c-main'),
+                __('The categories data will be filled in based on the classifier groups of the products (goods).', 'wc1c-main'),
+                __('To use this mode, need to configure the creation of categories based on classifier groups.', 'wc1c-main')
+            ),
+            'default' => 'classifier_groups',
+            'options' => $products_categories_source_options
+        ];
+
 		$fields['products_create_adding_category'] =
 		[
 			'title' => __('Assigning categories of the created product', 'wc1c-main'),
@@ -583,14 +607,34 @@ class Admin
 			'default' => 'yes'
 		];
 
-		$fields['products_update_categories'] =
-		[
-			'title' => __('Product categories update when requesting product updates', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('If the setting is disabled, new categories will not be assigned to old products. Categories can be edited manually and the data will remain unchanged.', 'wc1c-main'),
-			'default' => 'no'
-		];
+        $products_update_categories_options =
+        [
+            'no' => __('Do not update', 'wc1c-main'),
+            'yes' => __('Update in any case', 'wc1c-main'),
+            'add' => __('Add if not on the site and available in 1C', 'wc1c-main'),
+            'yes_yes' => __('Update if present on the site and in 1C', 'wc1c-main'),
+        ];
+
+        $fields['products_update_categories'] =
+        [
+            'title' => __('Categories updating when products updates', 'wc1c-main'),
+            'default' => 'no',
+            'type' => 'select',
+            'description' => sprintf
+            (
+                '<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<hr>%s',
+                __('Do not update', 'wc1c-main'),
+                __('Categories updates will be skipped in any case.', 'wc1c-main'),
+                __('Update in any case', 'wc1c-main'),
+                __('Categories will be updated in any case. The same value will always be on the site and in 1C.', 'wc1c-main'),
+                __('Add if not on the site and available in 1C', 'wc1c-main'),
+                __('Existing categories will not be affected. There will be a filling of those missing on the site if they are available in 1C.', 'wc1c-main'),
+                __('Update if present on the site and in 1C', 'wc1c-main'),
+                __('Categories will be updated only if they are filled in 1C and on the site at the same time.', 'wc1c-main'),
+                __('The setting works when updating products (goods).', 'wc1c-main')
+            ),
+            'options' => $products_update_categories_options
+        ];
 
 		$fields['products_update_categories_fill_parent'] =
 		[

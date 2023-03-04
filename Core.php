@@ -1668,12 +1668,17 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemCategories(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_category', 'yes'))
+		if('create' === $mode && 'no' === $this->getOptions('products_create_adding_category', 'yes'))
 		{
 			return $internal_product;
 		}
 
-		if('update' === $mode && 'yes' !== $this->getOptions('products_update_categories', 'no'))
+        if('create' === $mode && false === $external_product->hasClassifierGroups())
+        {
+            return $internal_product;
+        }
+
+		if('update' === $mode && 'no' === $this->getOptions('products_update_categories', 'no'))
 		{
 			return $internal_product;
 		}
@@ -1683,33 +1688,101 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		if('create' === $mode && false === $external_product->hasClassifierGroups())
-		{
-			return $internal_product;
-		}
+        $source = $this->getOptions('products_categories_source', 'classifier_groups');
 
-		$cats = [];
+        if('no' === $source)
+        {
+            return $internal_product;
+        }
 
-		if($external_product->hasClassifierGroups())
-		{
-			/** @var CategoriesStorageContract $categories_storage */
-			$categories_storage = Storage::load('category');
+        $cats = [];
 
-			foreach($external_product->getClassifierGroups() as $classifier_group)
-			{
-				$cat = $categories_storage->getByExternalId($classifier_group);
+        if(($source === 'classifier_groups') && $external_product->hasClassifierGroups())
+        {
+            $classifier_groups = $external_product->getClassifierGroups();
 
-				if($cat instanceof Category)
-				{
-					$cats[] = $cat->getId();
-				}
-			}
-		}
+            /** @var CategoriesStorageContract $categories_storage */
+            $categories_storage = Storage::load('category');
+
+            foreach($classifier_groups as $classifier_group)
+            {
+                $cat = $categories_storage->getByExternalId($classifier_group);
+
+                if($cat instanceof Category)
+                {
+                    $cats[] = $cat->getId();
+                }
+            }
+        }
+
+        if('update' === $mode && 'add' === $this->getOptions('products_update_categories', 'no') && !empty($internal_product->get_category_ids()))
+        {
+            return $internal_product;
+        }
+
+        if('update' === $mode && empty($cats) && 'yes_yes' === $this->getOptions('products_update_categories', 'no') && empty($internal_product->get_category_ids()))
+        {
+            return $internal_product;
+        }
+
+        if
+        (
+            ('create' === $mode && $this->getOptions('products_create_adding_category_fill_parent', 'yes') === 'yes')
+            ||
+            ('update' === $mode && $this->getOptions('products_update_categories_fill_parent', 'yes') === 'yes')
+        )
+        {
+            $this->fillParentCategories($product_categories);
+        }
 
 		$internal_product->set_category_ids($cats);
 
 		return $internal_product;
 	}
+
+    /**
+     * Заполняет родительские категории у продукта
+     *
+     * @param $product_categories
+     *
+     * @return array
+     */
+    private function fillParentCategories(&$product_categories): array
+    {
+        if(empty($product_categories))
+        {
+            return $product_categories;
+        }
+
+        foreach($product_categories as $category_id)
+        {
+            $parents = $this->findParentCategories($category_id);
+
+            foreach($parents as $parent_id)
+            {
+                $key = array_search($parent_id, $product_categories, true);
+
+                if($key === false)
+                {
+                    $product_categories[] = $parent_id;
+                }
+            }
+        }
+
+        return $product_categories;
+    }
+
+    /**
+     * Поиск всех родительских категорий
+     *
+     * @param int $category_id
+     *
+     * @return array
+     */
+    private function findParentCategories(int $category_id): array
+    {
+        return get_ancestors($category_id, 'product_cat');
+    }
 
 	/**
 	 * Назначение данных продукта исходя из режима: статус налога
