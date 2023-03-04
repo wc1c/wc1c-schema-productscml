@@ -49,7 +49,6 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsWithCharacteristics'], 80, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategories'], 80, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsCategoriesClassifierGroups'], 85, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsAttributes'], 90, 1);
 
@@ -267,6 +266,33 @@ class Admin
 			'default' => 'no'
 		];
 
+        $fields['categories_classifier_groups_create'] =
+        [
+            'title' => __('Creating categories from classifier groups', 'wc1c-main'),
+            'type' => 'checkbox',
+            'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+            'description' => __('Categories are only created if they have not been created before. Also, if access to work with categories is allowed from the global settings.', 'wc1c-main'),
+            'default' => 'no'
+        ];
+
+        $fields['categories_classifier_groups_create_assign_parent'] =
+        [
+            'title' => __('Assign parent categories on creating', 'wc1c-main'),
+            'type' => 'checkbox',
+            'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+            'description' => __('If there is a parent category in 1C, it will also be assigned in WooCommerce. The setting is triggered when a category is created.', 'wc1c-main'),
+            'default' => 'yes'
+        ];
+
+        $fields['categories_classifier_groups_create_assign_description'] =
+        [
+            'title' => __('Assign categories description on creating', 'wc1c-main'),
+            'type' => 'checkbox',
+            'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+            'description' => __('When creating categories, descriptions will be filled in if category descriptions are present in 1C.', 'wc1c-main'),
+            'default' => 'no'
+        ];
+
 		$fields['categories_update'] =
 		[
 			'title' => __('Updating categories', 'wc1c-main'),
@@ -280,6 +306,43 @@ class Admin
 			),
 			'default' => 'no'
 		];
+
+        $fields['categories_classifier_groups_update'] =
+        [
+            'title' => __('Updating categories from classifier groups', 'wc1c-main'),
+            'type' => 'checkbox',
+            'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+            'description' => __('If the category created earlier was linked to 1C data, then when you change any category data in 1C, the data will also change in WooCommerce.', 'wc1c-main'),
+            'default' => 'no'
+        ];
+
+        $fields['categories_classifier_groups_update_parent'] =
+        [
+            'title' => __('Update parent categories on updating', 'wc1c-main'),
+            'type' => 'checkbox',
+            'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+            'description' => __('When enabled, parent categories will be updated when they are updated in 1C. The setting is triggered when a category is updated.', 'wc1c-main'),
+            'default' => 'yes'
+        ];
+
+        $fields['categories_classifier_groups_update_name'] =
+        [
+            'title' => __('Updating categories name', 'wc1c-main'),
+            'type' => 'checkbox',
+            'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+            'description' => __('If the category was previously linked to 1C data, then when changing the name in 1C, the name will also change in WooCommerce.', 'wc1c-main'),
+            'default' => 'no'
+        ];
+
+        $fields['categories_classifier_groups_update_description'] =
+        [
+            'title' => __('Updating categories description', 'wc1c-main'),
+            'type' => 'checkbox',
+            'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+            'description' => __('If the category was previously linked to 1C data, then when you change the description in 1C, the description will also change in WooCommerce. 
+            It should be borne in mind that descriptions in 1C are not always stored. Therefore, you should not enable this function if the descriptions were filled out on the site.', 'wc1c-main'),
+            'default' => 'no'
+        ];
 
 		$fields['categories_update_only_configuration'] =
 		[
@@ -297,89 +360,6 @@ class Admin
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
 			'description' => __('When updating category data, the update will only occur if the category was created through the current schema.', 'wc1c-main'),
 			'default' => 'yes'
-		];
-
-		return $fields;
-	}
-
-	/**
-	 * Configuration fields: categories from classifier groups
-	 *
-	 * @param array $fields
-	 *
-	 * @return array
-	 */
-	public function configurationsFieldsCategoriesClassifierGroups(array $fields): array
-	{
-		$fields['categories_classifier_groups'] =
-		[
-			'title' => __('Categories: classifier groups', 'wc1c-main'),
-			'type' => 'title',
-			'description' => __('Create and update categories based on groups from the classifier.', 'wc1c-main'),
-		];
-
-		$fields['categories_classifier_groups_create'] =
-		[
-			'title' => __('Creating categories from classifier groups', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('Categories are only created if they have not been created before. Also, if access to work with categories is allowed from the global settings.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['categories_classifier_groups_create_assign_parent'] =
-		[
-			'title' => __('Assign parent categories on creating', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('If there is a parent category in 1C, it will also be assigned in WooCommerce. The setting is triggered when a category is created.', 'wc1c-main'),
-			'default' => 'yes'
-		];
-
-		$fields['categories_classifier_groups_create_assign_description'] =
-		[
-			'title' => __('Assign categories description on creating', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When creating categories, descriptions will be filled in if category descriptions are present in 1C.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['categories_classifier_groups_update'] =
-		[
-			'title' => __('Updating categories from classifier groups', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('If the category created earlier was linked to 1C data, then when you change any category data in 1C, the data will also change in WooCommerce.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['categories_classifier_groups_update_parent'] =
-		[
-			'title' => __('Update parent categories on updating', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When enabled, parent categories will be updated when they are updated in 1C. The setting is triggered when a category is updated.', 'wc1c-main'),
-			'default' => 'yes'
-		];
-
-		$fields['categories_classifier_groups_update_name'] =
-		[
-			'title' => __('Updating categories name', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('If the category was previously linked to 1C data, then when changing the name in 1C, the name will also change in WooCommerce.', 'wc1c-main'),
-			'default' => 'no'
-		];
-
-		$fields['categories_classifier_groups_update_description'] =
-		[
-			'title' => __('Updating categories description', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('If the category was previously linked to 1C data, then when you change the description in 1C, the description will also change in WooCommerce. 
-			It should be borne in mind that descriptions in 1C are not always stored. Therefore, you should not enable this function if the descriptions were filled out on the site.', 'wc1c-main'),
-			'default' => 'no'
 		];
 
 		return $fields;
