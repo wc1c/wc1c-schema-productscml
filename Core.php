@@ -940,6 +940,13 @@ class Core extends SchemaAbstract
 				$only_changes = false;
 			}
 			$reader->catalog->setOnlyChanges($only_changes);
+
+            if(false === $only_changes)
+            {
+                $this->log()->notice(__('The time of the last full exchange has been set.', 'wc1c-main'));
+                $this->configuration()->addMetaData('_catalog_full_time', current_time('timestamp'), true);
+                $this->configuration()->saveMetaData();
+            }
 		}
 
 		if($reader->parentNodeName === 'Каталог')
