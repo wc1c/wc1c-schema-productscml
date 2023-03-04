@@ -33,6 +33,7 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSync'], 30, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsSku'], 60, 1);
+        add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsCategories'], 60, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsNames'], 60, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDescriptions'], 60, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsImages'], 60, 1);
@@ -42,7 +43,6 @@ class Admin
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsTaxes'], 70, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsInventories'], 72, 1);
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsDimensions'], 74, 1);
-		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsCategories'], 76, 1);
 
 		add_filter('wc1c_configurations-update_form_load_fields', [$this, 'configurationsFieldsProductsOther'], 79, 1);
 
