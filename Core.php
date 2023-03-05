@@ -2691,7 +2691,7 @@ class Core extends SchemaAbstract
 				$property_values_from_characteristics = $external_product->getCharacteristics();
 			}
 
-			$classifier_properties = maybe_unserialize($this->configuration()->getMeta('classifier-properties:' . $reader->getFiletype() . ':' . $reader->offers_package->getClassifierId()));
+			$classifier_properties = maybe_unserialize($this->configuration()->getMeta('classifier-properties:' . $reader->offers_package->getClassifierId()));
 
 			foreach($external_product->getPropertyValues() as $property_id => $property_value)
 			{
