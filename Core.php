@@ -2439,11 +2439,6 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemAttributes(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-		if($reader->getFiletype() !== 'import')
-		{
-			return $internal_product;
-		}
-
 		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_attributes', 'yes'))
 		{
 			return $internal_product;
@@ -2474,7 +2469,7 @@ class Core extends SchemaAbstract
 		{
 			$this->log()->info(__('Processing of product properties.', 'wc1c-main'));
 
-			$classifier_properties = maybe_unserialize($this->configuration()->getMeta('classifier-properties:' . $reader->getFiletype() . ':' . $reader->catalog->getClassifierId()));
+			$classifier_properties = maybe_unserialize($this->configuration()->getMeta('classifier-properties:' . $reader->catalog->getClassifierId()));
 
 			foreach($external_product->getPropertyValues() as $property_id => $property_value)
 			{
