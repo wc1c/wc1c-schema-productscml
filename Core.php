@@ -2943,6 +2943,11 @@ class Core extends SchemaAbstract
 	 */
 	public function assignOffersItemPrices(ProductContract $internal_product, ProductDataContract $external_product, Reader $reader): ProductContract
 	{
+		if($reader->schema_version === '3.1' && $reader->getFiletype() !== 'prices')
+		{
+			return $internal_product;
+		}
+
 		$this->log()->debug(__('Prices processing.', 'wc1c-main'), ['filetype' => $reader->getFiletype(), 'product_id' => $internal_product->getId(), 'offer_id' => $external_product->getId(), 'offer_characteristic_id' => $external_product->getCharacteristicId()]);
 
 		if(false === $external_product->hasPrices())
@@ -3065,6 +3070,11 @@ class Core extends SchemaAbstract
 	 */
 	public function assignOffersItemInventories(ProductContract $internal_product, ProductDataContract $external_product, Reader $reader): ProductContract
 	{
+		if($reader->schema_version === '3.1' && $reader->getFiletype() !== 'rests')
+		{
+			return $internal_product;
+		}
+
 		$this->log()->debug(__('Inventories processing.', 'wc1c-main'), ['filetype' => $reader->getFiletype(), 'product_id' => $internal_product->getId(), 'offer_id' => $external_product->getId(), 'offer_characteristic_id' => $external_product->getCharacteristicId()]);
 
 		if('yes' !== $this->getOptions('products_inventories_by_offers_quantity', 'no'))
