@@ -944,7 +944,7 @@ class Core extends SchemaAbstract
             if(false === $only_changes)
             {
                 $this->log()->notice(__('The time of the last full exchange has been set.', 'wc1c-main'));
-                $this->configuration()->addMetaData('_catalog_full_time', current_time('timestamp'), true);
+                $this->configuration()->addMetaData('_catalog_full_time', current_time('timestamp', true), true);
                 $this->configuration()->saveMetaData();
             }
 		}
@@ -1114,7 +1114,7 @@ class Core extends SchemaAbstract
 	 */
 	public function setProductTimes(ProductContract $product): ProductContract
 	{
-		$time = current_time('timestamp');
+		$time = current_time('timestamp', true);
 
 		/**
 		 * _wc1c_time
@@ -1137,7 +1137,7 @@ class Core extends SchemaAbstract
      */
     public function setImageTimes(Image $image): Image
     {
-        $time = current_time('timestamp');
+        $time = current_time('timestamp', true);
 
         /**
          * _wc1c_time

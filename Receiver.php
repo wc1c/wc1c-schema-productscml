@@ -55,6 +55,11 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handler()
 	{
+		if('no' !== $this->core()->getOptions('ob_end_clean', 'no'))
+		{
+			ob_end_clean();
+		}
+
 		$this->core()->log()->info(__('Received new request for Receiver.', 'wc1c-main'));
 
 		$mode_and_type = $this->detectModeAndType();
@@ -300,7 +305,7 @@ final class Receiver extends ReceiverAbstract
 		$lines['session_id'] = $session_id . PHP_EOL;
 
 		$lines['bitrix_sessid'] = 'sessid=' . $session_id . PHP_EOL;
-		$lines['timestamp'] = 'timestamp=' . time() . PHP_EOL;
+		$lines['timestamp'] = 'timestamp=' . current_time('timestamp', true) . PHP_EOL;
 
 		if(has_filter('wc1c_schema_productscml_handler_checkauth_lines'))
 		{
