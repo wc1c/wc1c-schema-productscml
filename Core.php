@@ -425,7 +425,7 @@ class Core extends SchemaAbstract
 			foreach($classifier_groups as $group_id => $group)
 			{
 				$category = false;
-
+				var_dump($group);
 				$this->log()->debug(__('Classifier group processing.', 'wc1c-main'), ['group_id' => $group_id, 'group' => $group]);
 
 				/**
@@ -581,6 +581,7 @@ class Core extends SchemaAbstract
 					if('yes' === $update_name)
 					{
 						$category->setName($group['name']);
+						var_dump($group['name']);
 					}
 
 					/**
@@ -621,8 +622,8 @@ class Core extends SchemaAbstract
 						}
 					}
 
-					$category->save();
-
+					var_dump($category->save());
+					var_dump($category->getName());
 					$this->log()->info(__('Update of existing category data completed successfully.', 'wc1c-main'));
 					continue;
 				}
@@ -868,7 +869,7 @@ class Core extends SchemaAbstract
 		/*
 		 * Если классификатор существует, обновляем данные пришедшего из текущего
 		 */
-		if($internal_classifier instanceof ClassifierDataContract)
+		if($internal_classifier instanceof ClassifierDataContract && $classifier->isOnlyChanges())
 		{
 			if($internal_classifier->hasProperties())
 			{
