@@ -55,11 +55,6 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handler()
 	{
-		if('no' !== $this->core()->getOptions('ob_end_clean', 'no'))
-		{
-			ob_end_clean();
-		}
-
 		$this->core()->log()->info(__('Received new request for Receiver.', 'wc1c-main'));
 
 		$mode_and_type = $this->detectModeAndType();

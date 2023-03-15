@@ -3,6 +3,7 @@
 defined('ABSPATH') || exit;
 
 use SimpleXMLElement;
+use Wc1c\Main\Exceptions\TimerException;
 use Wc1c\Main\Traits\UtilityTrait;
 use Wc1c\Wc\Entities\Image;
 use Wc1c\Wc\Products\AttributeProduct;
@@ -241,7 +242,7 @@ class Core extends SchemaAbstract
 	{
 		if(wc1c()->timer()->getMaximum() !== 0 && !wc1c()->timer()->isRemainingBiggerThan(5))
 		{
-			throw new Exception(__('There was not enough time to load all the data.', 'wc1c-main'));
+			throw new TimerException(__('There was not enough time to load all the data.', 'wc1c-main'));
 		}
 	}
 
@@ -252,6 +253,11 @@ class Core extends SchemaAbstract
 	 */
 	public function receiver()
 	{
+		if('no' !== $this->getOptions('ob_end_clean', 'no'))
+		{
+			ob_end_clean();
+		}
+
 		if($this->configuration()->isEnabled() === false)
 		{
 			$message = __('Configuration is offline.', 'wc1c-main');
