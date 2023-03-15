@@ -455,8 +455,15 @@ class Core extends SchemaAbstract
 				 */
 				if(!empty($category) && is_array($category))
 				{
-					$this->log()->warning(__('More than one category found by ID from 1C. Assigning the first available.', 'wc1c-main'), ['categories' => $category]);
 					$category = $category[0];
+
+					$cats_data =[];
+					foreach($category as $category_key => $category_obj)
+					{
+						$cats_data[$category_key] = $category_obj->getData();
+					}
+
+					$this->log()->warning(__('More than one category found by ID from 1C. Assigning the first available.', 'wc1c-main'), ['categories' => $cats_data]);
 				}
 
 				/**
