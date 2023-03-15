@@ -268,6 +268,8 @@ class Core extends SchemaAbstract
 
 		try
 		{
+			$this->configuration()->setStatus('processing');
+
 			$this->configuration()->setDateActivity(time());
 			$this->configuration()->save();
 		}
