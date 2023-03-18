@@ -621,6 +621,8 @@ class Core extends SchemaAbstract
 						}
 					}
 
+                    $category->save();
+
 					$this->log()->info(__('Update of existing category data completed successfully.', 'wc1c-main'));
 					continue;
 				}
