@@ -3758,11 +3758,6 @@ class Core extends SchemaAbstract
 					$reader->offers_package->setPriceTypes($price_types);
 				}
 			}
-
-	        if('yes' === $this->getOptions('browser_debug', 'no'))
-	        {
-		        $this->dump($reader->offers_package);
-	        }
         }
 
 		if($reader->parentNodeName === 'Предложения' && $reader->nodeName === 'Предложение')
