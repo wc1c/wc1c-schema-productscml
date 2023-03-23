@@ -3752,7 +3752,7 @@ class Core extends SchemaAbstract
 
 			if(empty($reader->offers_package->getPriceTypes()))
 			{
-				$price_types = $this->configuration()->getMeta('classifier-prices:import:' . $reader->offers_package->getClassifierId());
+				$price_types = $this->configuration()->getMeta('classifier-price-types:' . $reader->offers_package->getClassifierId());
 				if(is_array($price_types))
 				{
 					$reader->offers_package->setPriceTypes($price_types);
