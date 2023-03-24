@@ -27,6 +27,7 @@ use Wc1c\Wc\Products\SimpleProduct;
 use Wc1c\Wc\Products\VariableProduct;
 use Wc1c\Wc\Products\VariationVariableProduct;
 use Wc1c\Wc\Storage;
+use XMLReader;
 
 /**
  * Core
@@ -1026,6 +1027,14 @@ class Core extends SchemaAbstract
 	{
 		if(false === $reader->isElement())
 		{
+			if($reader->nodeName === 'Каталог' && $reader->xml_reader->nodeType === XMLReader::END_ELEMENT)
+			{
+				$this->log()->info(__('Saving a catalog to meta configuration data.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
+
+				$this->configuration()->addMetaData('catalog:' . $reader->catalog->getId(), maybe_serialize($reader->catalog), true);
+				$this->configuration()->saveMetaData();
+			}
+
 			return;
 		}
 
@@ -1033,6 +1042,8 @@ class Core extends SchemaAbstract
 		{
 			if(is_null($reader->catalog))
 			{
+				$this->log()->info(__('The catalog object has not been previously initialized. Initialization.', 'wc1c-main'));
+
 				$reader->catalog = new Catalog();
 			}
 
@@ -1057,24 +1068,30 @@ class Core extends SchemaAbstract
 			{
 				case 'Ид':
 					$reader->catalog->setId($reader->xml_reader->readString());
+					$this->log()->debug(__('The catalog object has been assigned an ID.', 'wc1c-main'), ['id' => $reader->catalog->getId()]);
 					break;
 				case 'ИдКлассификатора':
 					$reader->catalog->setClassifierId($reader->xml_reader->readString());
+					$this->log()->debug(__('The catalog object has been assigned a classifier ID.', 'wc1c-main'), ['classifier_id' => $reader->catalog->getClassifierId()]);
 					break;
 				case 'Наименование':
 					$reader->catalog->setName($reader->xml_reader->readString());
+					$this->log()->debug(__('A name has been assigned to the catalog object.', 'wc1c-main'), ['name' => $reader->catalog->getName()]);
 					break;
 				case 'Владелец':
 					$owner = $reader->decoder()->process('counterparty', $reader->xml_reader->readOuterXml());
 					$reader->catalog->setOwner($owner);
+					$this->log()->debug(__('The catalog object has been assigned an owner.', 'wc1c-main'), ['owner' => $owner]);
 					break;
 				case 'Описание':
 					$reader->catalog->setDescription($reader->xml_reader->readString());
+					$this->log()->debug(__('A description has been assigned to the catalog object.', 'wc1c-main'), ['description' => $reader->catalog->getDescription()]);
 					break;
 				case 'Склады':
 					$warehouses = $reader->decoder()->process('warehouses', $reader->xml_reader->readOuterXml());
 					$reader->catalog->setWarehouses($warehouses);
 					$reader->next();
+					$this->log()->debug(__('A warehouses has been assigned to the catalog object.', 'wc1c-main'), ['warehouses' => $warehouses]);
 					break;
 			}
 		}
@@ -1111,11 +1128,13 @@ class Core extends SchemaAbstract
 			if(has_filter('wc1c_schema_productscml_processing_products'))
 			{
 				$product = apply_filters('wc1c_schema_productscml_processing_products', $product, $reader, $this, $product_xml);
+
+				$this->log()->info(__('The product is modified according to external algorithms.', 'wc1c-main'));
 			}
 
 			if(!$product instanceof ProductDataContract)
 			{
-				$this->log()->debug(__('Product !instanceof ProductDataContract. Skip processing.', 'wc1c-main'), ['data' => $product]);
+				$this->log()->warning(__('Product !instanceof ProductDataContract. Skip processing.', 'wc1c-main'), ['data' => $product]);
 				return;
 			}
 
@@ -3764,15 +3783,34 @@ class Core extends SchemaAbstract
 		{
 			$offer_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
 
-			$offer = $reader->decoder->process('offer', $offer_xml);
+			try
+			{
+				$offer = $reader->decoder->process('offer', $offer_xml);
+			}
+			catch(\Throwable $e)
+			{
+				$this->log()->warning(__('An exception was thrown decode the offer.', 'wc1c-main'), ['exception' => $e]);
+				return;
+			}
 
+			/**
+			 * Внешняя фильтрация перед непосредственной обработкой
+			 *
+			 * @param ProductDataContract $offer
+			 * @param Reader $reader
+			 * @param SchemaAbstract $this
+			 * @param SimpleXMLElement $offer_xml
+			 */
 			if(has_filter('wc1c_schema_productscml_processing_offers'))
 			{
 				$offer = apply_filters('wc1c_schema_productscml_processing_offers', $offer, $reader, $this, $offer_xml);
+
+				$this->log()->info(__('The offer has been changed according to external algorithms.', 'wc1c-main'));
 			}
 
 			if(!$offer instanceof ProductDataContract)
 			{
+				$this->log()->warning(__('Offer !instanceof ProductDataContract. Skip processing.', 'wc1c-main'), ['data' => $offer]);
 				return;
 			}
 
