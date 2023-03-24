@@ -3100,7 +3100,7 @@ class Core extends SchemaAbstract
 					{
 						if($price_type['name'] === $regular_price_name)
 						{
-							$regular_price_id = $price_type['guid'];
+							$regular_price_id = $price_type['id'];
 							break;
 						}
 					}
@@ -3134,7 +3134,7 @@ class Core extends SchemaAbstract
 					{
 						if($price_type['name'] === $sale_price_name)
 						{
-							$sale_price_id = $price_type['guid'];
+							$sale_price_id = $price_type['id'];
 							break;
 						}
 					}
