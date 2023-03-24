@@ -613,7 +613,7 @@ final class Receiver extends ReceiverAbstract
 			/*
 			 * Adding to media library
 			 */
-			if(wc1c()->filesystem()->extension($upload_file_path) !== 'xml' && 'yes' === $this->core()->getOptions('media_library_images_by_receiver', 'no'))
+			if('yes' === $this->core()->getOptions('media_library_images_by_receiver', 'no') && wc1c()->filesystem()->extension($upload_file_path) !== 'xml')
 			{
 				if('yes' !== $this->core()->getOptions('media_library', 'no'))
 				{
