@@ -638,27 +638,30 @@ final class Receiver extends ReceiverAbstract
 							$image_current = $image_current[0];
 						}
 
-                        $current_file_extension = $image_current->getMeta('_wc1c_external_image_extension', true);
-                        $current_file_extension = reset($current_file_extension);
-                        $current_file_hash = $image_current->getMeta('_wc1c_external_hash', true);
-                        $current_file_hash = reset($current_file_hash);
+                        if($image_current)
+                        {
+                            $current_file_extension = $image_current->getMeta('_wc1c_external_image_extension', true);
+                            $current_file_extension = reset($current_file_extension);
+                            $current_file_hash = $image_current->getMeta('_wc1c_external_hash', true);
+                            $current_file_hash = reset($current_file_hash);
 
-                        if(!empty($current_file_extension) && $current_file_extension !== $file_extension)
-                        {
-                            $image_current = false;
-                        }
-                        elseif(empty($current_file_extension) && $image_current !== false)
-                        {
-                            $image_current->addMetaData('_wc1c_external_image_extension', $file_extension);
-                        }
+                            if(!empty($current_file_extension) && $current_file_extension !== $file_extension)
+                            {
+                                $image_current = false;
+                            }
+                            elseif(empty($current_file_extension))
+                            {
+                                $image_current->addMetaData('_wc1c_external_image_extension', $file_extension);
+                            }
 
-                        if(!empty($current_file_hash) && $current_file_hash !== $file_hash)
-                        {
-                            $image_current = false;
-                        }
-                        elseif(empty($current_file_hash) && $image_current !== false)
-                        {
-                            $image_current->addMetaData('_wc1c_external_hash', $file_hash);
+                            if(!empty($current_file_hash) && $current_file_hash !== $file_hash)
+                            {
+                                $image_current = false;
+                            }
+                            elseif(empty($current_file_hash))
+                            {
+                                $image_current->addMetaData('_wc1c_external_hash', $file_hash);
+                            }
                         }
 
 						if(false === $image_current)
