@@ -107,7 +107,7 @@ final class Receiver extends ReceiverAbstract
 		$response_description = __('Action is not found in schema.', 'wc1c-main');
 
 		$this->core()->log()->warning($response_description);
-		$this->sendResponseByType('failure', $response_description);
+		$this->sendResponseByType($this->core()->getOptions('response_unknown_action', 'failure'), $response_description);
 	}
 
 	/**
