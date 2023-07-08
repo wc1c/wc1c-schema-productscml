@@ -763,7 +763,7 @@ class Admin
 				__('To create, the products parameters from the current configuration are used.', 'wc1c-main'),
 				__('The option works only with automatic creation of products. When disabled, it is still possible to manually create products through ManualCML and similar extensions.', 'wc1c-main')
 			),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		$fields['products_create_delete_mark'] =
@@ -834,7 +834,7 @@ class Admin
 				__('If the product is marked in 1C for deletion, then when the setting is enabled, it will be placed in the trash.', 'wc1c-main'),
 				__('It is possible to restore the products placed in the trash both manually and using the settings for updating products.', 'wc1c-main')
 			),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		$fields['products_update_only_configuration'] =
@@ -843,7 +843,7 @@ class Admin
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
 			'description' => __('When updating products data, the update will only occur if the product was created through the current configuration.', 'wc1c-main'),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		$fields['products_update_only_schema'] =
@@ -852,7 +852,7 @@ class Admin
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
 			'description' => __('When updating products data, the update will only occur if the product was created through the current schema.', 'wc1c-main'),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		return $fields;
@@ -896,7 +896,7 @@ class Admin
 				__('From specified name', 'wc1c-main'),
 				__('The price with the specified name will be used as the regular price. If the price is not found by name, no value will be assigned.', 'wc1c-main')
 			),
-			'default' => 'no',
+			'default' => 'yes_primary',
 			'options' => $products_prices_by_cml_options
 		];
 
@@ -1667,7 +1667,7 @@ class Admin
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
 			'description' => __('All file handling capabilities available to the library will be enabled. If disabled, no actions will be performed on files in the library through the schema.', 'wc1c-main'),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		$fields['media_library_images_by_receiver'] =
@@ -1740,7 +1740,7 @@ class Admin
 			'type' => 'checkbox',
 			'label' => __('Check the box to enable this feature. Disabled by default.', 'wc1c-main'),
 			'description' => __('It will be allowed to fill in the quantity of product stocks in WooCommerce based on the quantity received in 1C offers.', 'wc1c-main'),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		$fields['products_inventories_quantities_min'] =
