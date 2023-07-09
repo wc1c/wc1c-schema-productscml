@@ -458,20 +458,6 @@ class Admin
 			'default' => 'no'
 		];
 
-		$fields['products_with_characteristics_use_attributes'] =
-		[
-			'title' => __('Using global attributes for products', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c-main'),
-			'description' => sprintf
-			(
-				'%s<br /><hr>%s',
-				__('It will be allowed to create global attributes and then add values based on product characteristics.', 'wc1c-main'),
-				__('If the setting is disabled, either existing attributes or attributes at the product level will be used.', 'wc1c-main')
-			),
-			'default' => 'yes'
-		];
-
         $fields['products_with_characteristics_simple'] =
         [
             'title' => __('Create simple products from features', 'wc1c-main'),
@@ -486,6 +472,20 @@ class Admin
             ),
             'default' => 'no'
         ];
+
+		$fields['products_with_characteristics_use_attributes'] =
+		[
+			'title' => __('Using global attributes for products', 'wc1c-main'),
+			'type' => 'checkbox',
+			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c-main'),
+			'description' => sprintf
+			(
+				'%s<br /><hr>%s',
+				__('It will be allowed to create global attributes and then add values based on product characteristics.', 'wc1c-main'),
+				__('If the setting is disabled, either existing attributes or attributes at the product level will be used.', 'wc1c-main')
+			),
+			'default' => 'yes'
+		];
 
 		return $fields;
 	}
