@@ -460,7 +460,7 @@ class Admin
 
         $fields['products_with_characteristics_simple'] =
         [
-            'title' => __('Create simple products from features', 'wc1c-main'),
+            'title' => __('Create simple products from characteristics', 'wc1c-main'),
             'type' => 'checkbox',
             'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
             'description' => sprintf
