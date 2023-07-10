@@ -2790,7 +2790,7 @@ class Core extends SchemaAbstract
 				];
 			}
 
-			if(!empty($external_product->getCharacteristicId()) && $parent_characteristics instanceof VariableProduct)
+			if(!empty($external_product->getCharacteristicId()) && isset($parent_characteristics) && $parent_characteristics instanceof VariableProduct)
 			{
 				$parent_characteristics->update_meta_data('_wc1c_characteristics', $old_characteristics);
 				$parent_characteristics->save();
