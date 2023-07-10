@@ -2755,6 +2755,19 @@ class Core extends SchemaAbstract
 				$old_characteristics[$characteristic_id] = $characteristic_value;
 
 				$global = $attributes_storage->getByLabel($characteristic_value['name']);
+
+                if(false === $global && 'yes' === $this->getOptions('attributes_create_by_product_characteristics', 'yes'))
+                {
+                    $this->log()->info(__('The attribute was not found. Creating by characteristic.', 'wc1c-main'));
+
+                    $attribute = new Attribute();
+                    $attribute->setLabel($characteristic_value['name']);
+
+                    $attribute->save();
+
+                    $global = $attributes_storage->getByLabel($characteristic_value['name']);
+                }
+
 				$attribute_name = $global ? $global->getName() : $characteristic_value['name'];
 
 				$value = $raw_attributes[$attribute_name]['value'] ?? [];
@@ -2976,6 +2989,19 @@ class Core extends SchemaAbstract
 				$old_characteristics[] = $characteristic_value;
 
 				$global = $attributes_storage->getByLabel($characteristic_value['name']);
+
+                if(false === $global && 'yes' === $this->getOptions('attributes_create_by_product_characteristics', 'yes'))
+                {
+                    $this->log()->info(__('The attribute was not found. Creating by characteristic.', 'wc1c-main'));
+
+                    $attribute = new Attribute();
+                    $attribute->setLabel($characteristic_value['name']);
+
+                    $attribute->save();
+
+                    $global = $attributes_storage->getByLabel($characteristic_value['name']);
+                }
+
 				$attribute_name = $global ? $global->getName() : $characteristic_value['name'];
 
 				$value = $raw_attributes[$attribute_name]['value'] ?? [];
@@ -3030,6 +3056,19 @@ class Core extends SchemaAbstract
 					}
 
 					$global = $attributes_storage->getByLabel($characteristic_value['name']);
+
+                    if(false === $global && 'yes' === $this->getOptions('attributes_create_by_product_characteristics', 'yes'))
+                    {
+                        $this->log()->info(__('The attribute was not found. Creating by characteristic.', 'wc1c-main'));
+
+                        $attribute = new Attribute();
+                        $attribute->setLabel($characteristic_value['name']);
+
+                        $attribute->save();
+
+                        $global = $attributes_storage->getByLabel($characteristic_value['name']);
+                    }
+
 					$attribute_name = $global ? $global->getName() : $characteristic_value['name'];
 
 					$value = $parent_attr[$attribute_name]['value'] ?? [];
