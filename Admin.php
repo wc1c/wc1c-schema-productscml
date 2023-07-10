@@ -473,20 +473,6 @@ class Admin
             'default' => 'no'
         ];
 
-		$fields['products_with_characteristics_use_attributes'] =
-		[
-			'title' => __('Using global attributes for products', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Enabled by default.', 'wc1c-main'),
-			'description' => sprintf
-			(
-				'%s<br /><hr>%s',
-				__('It will be allowed to create global attributes and then add values based on product characteristics.', 'wc1c-main'),
-				__('If the setting is disabled, either existing attributes or attributes at the product level will be used.', 'wc1c-main')
-			),
-			'default' => 'yes'
-		];
-
 		return $fields;
 	}
 
@@ -537,35 +523,37 @@ class Admin
 				__('The creation will occur when processing the properties of the classifier. Creation occurs only if there is no attribute with the specified name or associated identifier.', 'wc1c-main'),
 				__('If disable the creation of attributes and create some attributes manually, it is possible to adding values to them.', 'wc1c-main')
 			),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
-		$fields['attributes_update'] =
-		[
-			'title' => __('Updating attributes', 'wc1c-main'),
-			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => sprintf
-			(
-				'%s<hr>%s',
-				__('It will be allowed to update common attributes for products based on characteristics, properties and other data according to the other setting sections.', 'wc1c-main'),
-				__('Attribute updating refers to adding product attribute values based on product characteristics, classifier properties, and other data specified in the settings. If you disable this feature, work will only occur with existing attribute values without updating attribute data. In some cases, updating refers to sorting and renaming the attributes themselves.', 'wc1c-main')
-			),
-			'default' => 'no'
-		];
+        $fields['attributes_create_by_product_characteristics'] =
+        [
+            'title' => __('Creating attributes from product characteristics', 'wc1c-main'),
+            'type' => 'checkbox',
+            'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+            'description' => sprintf
+            (
+                '%s %s<hr>%s',
+                __('Products may contain characteristics that are not in the properties of the classifier.', 'wc1c-main'),
+                __('Due to this setting, when processing such products, missing global attributes will be created.', 'wc1c-main'),
+                __('If disable the creation of attributes and create some attributes manually, it is possible to adding values to them.', 'wc1c-main')
+            ),
+            'default' => 'yes'
+        ];
 
 		$fields['attributes_values_by_classifier_properties'] =
 		[
-			'title' => __('Updating attributes values from classifier properties', 'wc1c-main'),
+			'title' => __('Adding values to attributes from classifier properties', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
 			'description' => sprintf
 			(
-				'%s<hr>%s',
+				'%s<hr>%s %s',
 				__('Adding product attribute values based on classifier property values.', 'wc1c-main'),
-				__('The value is added only if it is absent: by name.', 'wc1c-main')
+				__('The value is added only if it is absent: by name.', 'wc1c-main'),
+                __('The values of the classifier properties are not always filled in by the reference book. It is also recommended to enable adding values based on product properties.', 'wc1c-main')
 			),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		$fields['attributes_values_by_product_properties'] =
@@ -578,10 +566,40 @@ class Admin
 				'%s<hr>%s %s',
 				__('Classifier properties do not always contain values in the reference. When the setting is enabled, values will be added based on the values of the product properties.', 'wc1c-main'),
 				__('The value is added only if it is absent: by name.', 'wc1c-main'),
-				__('The value is added only if it is missing. If do not add a value, the attribute will be skipped.', 'wc1c-main')
+				__('The value is added only if it is missing.', 'wc1c-main')
 			),
-			'default' => 'no'
+			'default' => 'yes'
 		];
+
+        $fields['attributes_values_by_product_characteristics'] =
+        [
+            'title' => __('Adding values to attributes from product characteristics', 'wc1c-main'),
+            'type' => 'checkbox',
+            'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+            'description' => sprintf
+            (
+                '%s %s<hr>%s %s',
+                __('The characteristics of products may contain data on properties that are not presented anywhere.', 'wc1c-main'),
+                __('Based on this data, in the process of processing products, new values will be added.', 'wc1c-main'),
+                __('The value is added only if it is absent: by name.', 'wc1c-main'),
+                __('For correct operation, you must either enable the setting for creating global attributes based on product characteristics, or add the attribute manually.', 'wc1c-main')
+            ),
+            'default' => 'yes'
+        ];
+
+        $fields['attributes_update'] =
+        [
+            'title' => __('Updating attributes', 'wc1c-main'),
+            'type' => 'checkbox',
+            'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+            'description' => sprintf
+            (
+                '%s<hr>%s',
+                __('It will be allowed to update common attributes for products based on characteristics, properties and other data according to the other setting sections.', 'wc1c-main'),
+                __('Attribute updating refers to adding product attribute values based on product characteristics, classifier properties, and other data specified in the settings. If you disable this feature, work will only occur with existing attribute values without updating attribute data. In some cases, updating refers to sorting and renaming the attributes themselves.', 'wc1c-main')
+            ),
+            'default' => 'no'
+        ];
 
 		return $fields;
 	}
