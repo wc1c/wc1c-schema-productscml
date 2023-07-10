@@ -2767,7 +2767,7 @@ class Core extends SchemaAbstract
 					{
 						$default_term = get_term_by('name', $characteristic_value['value'], $global->getTaxonomyName());
 
-						if(!$default_term instanceof \WP_Term && 'yes' !== $this->getOptions('products_with_characteristics_use_attributes', 'yes'))
+						if(!$default_term instanceof \WP_Term && 'yes' !== $this->getOptions('attributes_values_by_product_characteristics', 'yes'))
 						{
 							$this->log()->notice(__('Adding values from product characteristics is disabled and the value is missing in global attributes. Adding a value is skipped.', 'wc1c-main'), ['attribute_name' => $attribute_name, 'value' => $characteristic_value['value']]);
 							continue;
@@ -2988,7 +2988,7 @@ class Core extends SchemaAbstract
 					{
 						$default_term = get_term_by('name', $characteristic_value['value'], $global->getTaxonomyName());
 
-						if(!$default_term instanceof \WP_Term && 'yes' !== $this->getOptions('products_with_characteristics_use_attributes', 'yes'))
+						if(!$default_term instanceof \WP_Term && 'yes' !== $this->getOptions('attributes_values_by_product_characteristics', 'yes'))
 						{
 							$this->log()->notice(__('Adding values from product characteristics is disabled and the value is missing in global attributes. Adding a value is skipped.', 'wc1c-main'), ['attribute_name' => $attribute_name, 'value' => $characteristic_value['value']]);
 							continue;
