@@ -2505,6 +2505,8 @@ class Core extends SchemaAbstract
 			$attributes = [];
 			$parent_attributes = $this->getVariationParentAttributes($raw_attributes, $parent);
 
+            $this->log()->debug(__('The parent product attributes.', 'wc1c-main'), ['parent_attributes' => $parent_attributes]);
+
 			foreach($raw_attributes as $attribute)
 			{
 				$attribute_id = 0;
@@ -2545,6 +2547,7 @@ class Core extends SchemaAbstract
 			}
 
 			$variation->set_attributes($attributes);
+
 			$this->log()->debug(__('Adding attributes to the variation is successfully.', 'wc1c-main'), ['attributes' => $attributes]);
 		}
 
@@ -3390,43 +3393,118 @@ class Core extends SchemaAbstract
 			}
 			unset($raw);
 
-			/*
-			 * Продукт с характеристикой
-			 * 1. Проверяем родительский продукт
-			 * - Если нет, и включено создание родительского продукта по данным характеристики - создаем вариативный
-			 * - Иначе создаем простой продукт с назначением ему характеристики
-			 */
+            /**
+             * Продукт с характеристикой
+             * ---
+             * Проверяем наличие родительского продукта для продукта с характеристикой, и
+             * если родительского продукта нет, пропускаем обработку.
+             * Исключение составляет включенная возможность создания родительского продукта на основе первой характеристики.
+             */
 			if($external_product->hasCharacteristicId())
 			{
-				$this->log()->notice(__('The product contains the characteristics. Parent product is not found.', 'wc1c-main'));
+				$this->log()->info(__('The product contains the characteristics.', 'wc1c-main'));
 
-                if('yes' !== $this->getOptions('products_with_characteristics_simple', 'no'))
+                $parent_product_id = 0;
+
+                /*
+                 * Поиск родительского продукта по идентификатору 1С
+                 */
+                if('yes' === $this->getOptions('product_sync_by_id', 'yes'))
                 {
-                    $this->log()->info(__('Creating simple products by characteristics is disabled in the settings. Processing skipped.', 'wc1c-main'));
-                    return;
+                    $parent_product_id = $product_factory->findIdsByExternalIdAndCharacteristicId($external_product->getId(), '');
+
+                    $this->log()->debug(__('Parent product search result by external code from 1C.', 'wc1c-main'), ['parent_product_ids' => $parent_product_id]);
+
+                    if(is_array($parent_product_id)) // todo: обработка нескольких?
+                    {
+                        $this->log()->notice(__('Several identical parent products were found. The first one is selected.', 'wc1c-main'), ['parent_product_ids' => $parent_product_id]);
+                        $parent_product_id = reset($parent_product_id);
+                    }
                 }
 
-                $this->log()->info(__('The product is simple by characteristics. Creating.', 'wc1c-main'));
+                /**
+                 * Поиск идентификатора существующего родительского продукта по внешним алгоритмам
+                 *
+                 * @param int $parent_product_id Идентификатор найденного продукта
+                 * @param ProductDataContract $external_product Данные продукта в CML
+                 * @param SchemaAbstract $this
+                 * @param Reader $reader Текущий итератор
+                 *
+                 * @return int|false
+                 */
+                if(empty($parent_product_id) && has_filter('wc1c_schema_productscml_processing_products_parent_search'))
+                {
+                    $parent_product_id = apply_filters('wc1c_schema_productscml_processing_products_parent_search', $parent_product_id, $external_product, $this, $reader);
+
+                    $this->log()->debug(__('Parent product search result by external algorithms.', 'wc1c-main'), ['parent_product_ids' => $parent_product_id]);
+                }
+
+                if(empty($parent_product_id))
+                {
+                    if('yes' !== $this->getOptions('products_with_characteristics_simple', 'no'))
+                    {
+                        $this->log()->info(__('Parent product is not found.', 'wc1c-main'));
+                        $this->log()->notice(__('Creating simple products by characteristics is disabled in the settings. Processing skipped.', 'wc1c-main'));
+                        return;
+                    }
+
+                    $this->log()->info(__('Creating simple products by characteristics is enabled in the settings. Parent product is not found. Creating simple product by characteristic.', 'wc1c-main'));
+                }
+                else
+                {
+                    $internal_product_parent = $product_factory->getProduct($parent_product_id);
+
+                    /*
+                     * Родительский продукт не вариативный, превращаем его в вариативный
+                     */
+                    if(!$internal_product_parent instanceof VariableProduct)
+                    {
+                        $this->log()->info(__('Changing the parent product type to variable.', 'wc1c-main'), ['product_id' => $parent_product_id]);
+
+                        $internal_product_parent = new VariableProduct($parent_product_id);
+
+                        $internal_product_parent->save();
+                    }
+
+                    $this->log()->info(__('Variation is not found. Creating.', 'wc1c-main'), ['parent_product_id' => $parent_product_id]);
+
+                    $internal_product = new VariationVariableProduct();
+
+                    $internal_product->set_parent_id($parent_product_id);
+
+                    $internal_product->setSchemaId($this->getId());
+                    $internal_product->setConfigurationId($this->configuration()->getId());
+
+                    $internal_product->setExternalId($external_product->getId());
+                    $internal_product->setExternalCharacteristicId($external_product->getCharacteristicId());
+
+                    $internal_product_id = $internal_product->save();
+
+                    $this->log()->debug(__('The creation of the variation is completed.', 'wc1c-main'), ['parent_product_id' => $parent_product_id, 'product_variation_id' => $internal_product_id]);
+                }
 			}
 			else
 			{
 				$this->log()->info(__('The product is simple. Creating.', 'wc1c-main'));
 			}
 
-            /**
-             * Создание простого продукта с заполнением данных
-             *
-             * @var $internal_product ProductContract
-             */
-            $internal_product = new SimpleProduct();
-
-            $internal_product->setSchemaId($this->getId());
-            $internal_product->setConfigurationId($this->configuration()->getId());
-            $internal_product->setExternalId($external_product->getId());
-
-            if($external_product->hasCharacteristicId())
+            if(!isset($internal_product))
             {
-                $internal_product->setExternalCharacteristicId($external_product->getCharacteristicId());
+                /**
+                 * Создание простого продукта с заполнением данных
+                 *
+                 * @var $internal_product ProductContract
+                 */
+                $internal_product = new SimpleProduct();
+
+                $internal_product->setSchemaId($this->getId());
+                $internal_product->setConfigurationId($this->configuration()->getId());
+                $internal_product->setExternalId($external_product->getId());
+
+                if($external_product->hasCharacteristicId())
+                {
+                    $internal_product->setExternalCharacteristicId($external_product->getCharacteristicId());
+                }
             }
 
 			/**
@@ -3525,13 +3603,13 @@ class Core extends SchemaAbstract
 		 */
 		$raw = $external_product->getData(); // todo: вынести в метод
 		if
-		(
-			'trash' === $update_product->get_status() &&
-			isset($raw['delete_mark']) && $raw['delete_mark'] === 'no'
-		   && 'yes' !== $this->getOptions('products_update_use_delete_mark', 'no')
-		)
+        (
+            'trash' === $update_product->get_status()
+            && isset($raw['delete_mark']) && $raw['delete_mark'] === 'no'
+            && 'yes' !== $this->getOptions('products_update_use_delete_mark', 'no')
+        )
 		{
-			$this->log()->info(__('The use of products from trash is disabled. Processing skipped.', 'wc1c-main'));
+			$this->log()->notice(__('The use of products from trash is disabled. Processing skipped.', 'wc1c-main'));
 			return;
 		}
 		unset($raw);
@@ -3604,11 +3682,11 @@ class Core extends SchemaAbstract
 
 		$product_factory = new Factory();
 
-		$internal_offer_id = $product_factory->findIdsByExternalIdAndCharacteristicId($external_offer->getId(), $external_offer->getCharacteristicId());
+		$internal_offer_id = $product_factory->findIdsByExternalIdAndCharacteristicId($external_offer->getId(), $external_offer->getCharacteristicId()); // todo: Учитывать каталога при поиске
 
 		if(is_array($internal_offer_id)) // todo: обработка нескольких?
 		{
-			$this->log()->notice(__('Several identical products were found. The first one is selected.', 'wc1c-main'), ['product_ids' => $internal_offer_id]);
+			$this->log()->notice(__('Several identical products were found. The first one is selected.', 'wc1c-main'), ['product_ids' => $internal_offer_id, 'offer' => $external_offer->getData()]);
 			$internal_offer_id = reset($internal_offer_id);
 		}
 
@@ -3623,112 +3701,140 @@ class Core extends SchemaAbstract
 		 */
 		if(empty($internal_offer_id) && has_filter('wc1c_schema_productscml_processing_offers_search'))
 		{
+            $this->log()->info(__('Product not found. Search by external algorithms.', 'wc1c-main'), ['offer' => $external_offer->getData()]);
+
 			$internal_offer_id = apply_filters('wc1c_schema_productscml_processing_offers_search', $internal_offer_id, $external_offer, $reader);
 		}
 
-		/*
-		 * Привет. Как дела? Что бы было не хуже, вот пояснения.
-		 *
-		 * Если продукт не найден, пришла характеристика и включено использование характеристик на основе пакета предложений
-		 * - проверяем родительский продукт
-		 * -- если найден, превращаем его в вариативный
-		 * -- добавляем вариацию с присвоением идентификатора характеристики
-		 * -- запускаем алгоритмы обновления вариаций
-		 * -- если не найден, и включено создание на основе первой характеристики - создаем
-		 */
+        /**
+         * Продукт не найден
+         */
+        if(empty($internal_offer_id))
+        {
+            $this->log()->notice(__('Product not found.', 'wc1c-main'), ['offer' => $external_offer->getData()]);
 
-		if(empty($internal_offer_id) && empty($external_offer->getCharacteristicId()))
-		{
-			$this->log()->notice(__('Product not found. Offer update skipped.', 'wc1c-main'), ['offer' => $external_offer->getData()]);
-			return;
-		}
-
-		/**
-		 * Родительский продукт
-		 */
-		$internal_parent_offer_id = 0;
-		if(!empty($external_offer->getCharacteristicId()))
-		{
-			$internal_parent_offer_id = $product_factory->findIdsByExternalIdAndCharacteristicId($external_offer->getId(), $external_offer->getCharacteristicId());
-
-			if(is_array($internal_parent_offer_id)) // todo: обработка нескольких?
-			{
-				$this->log()->warning(__('Several identical parent of products were found. The first one is selected.', 'wc1c-main'), ['product_ids' => $internal_offer_id]);
-				$internal_parent_offer_id = reset($internal_parent_offer_id);
-			}
-
-			/*
-			 * Родительский продукт не найден
-			 */
-			if(empty($internal_parent_offer_id))
-			{
-				$this->log()->notice(__('Product parent not found. Offer update skipped.', 'wc1c-main'), ['offer' => $external_offer]);
-				return;
-			}
-
-            if($internal_parent_offer_id !== $internal_offer_id)
+            /**
+             * Предложение продукта с характеристикой
+             * ---
+             * Проверяем наличие родительского продукта для продукта с характеристикой, и
+             * если родительского продукта нет, пропускаем обработку.
+             * Исключение составляет включенная возможность создания родительского продукта на основе первой характеристики.
+             */
+            if($external_offer->hasCharacteristicId())
             {
-                $internal_product_parent = $product_factory->getProduct($internal_parent_offer_id);
+                $this->log()->info(__('The product contains the characteristics.', 'wc1c-main'));
+
+                $parent_product_id = 0;
 
                 /*
-                 * Продукт не вариативный, превращаем его в вариативный
+                 * Поиск родительского продукта по идентификатору 1С
                  */
-                if(!$internal_product_parent instanceof VariableProduct)
+                if('yes' === $this->getOptions('product_sync_by_id', 'yes'))
                 {
-                    $this->log()->debug(__('Changing the product type to variable.', 'wc1c-main'), ['product_id' => $internal_parent_offer_id]);
+                    $parent_product_id = $product_factory->findIdsByExternalIdAndCharacteristicId($external_offer->getId(), '');
 
-                    $internal_product_parent = new VariableProduct($internal_parent_offer_id);
-                    $internal_parent_offer_id = $internal_product_parent->save();
+                    $this->log()->debug(__('Parent product search result by external code from 1C.', 'wc1c-main'), ['parent_product_ids' => $parent_product_id]);
+
+                    if(is_array($parent_product_id)) // todo: обработка нескольких?
+                    {
+                        $this->log()->notice(__('Several identical parent products were found. The first one is selected.', 'wc1c-main'), ['parent_product_ids' => $parent_product_id]);
+                        $parent_product_id = reset($parent_product_id);
+                    }
+                }
+
+                /**
+                 * Поиск идентификатора существующего родительского продукта по внешним алгоритмам
+                 *
+                 * @param int $parent_product_id Идентификатор найденного продукта
+                 * @param ProductDataContract $external_offer Данные продукта в CML
+                 * @param SchemaAbstract $this
+                 * @param Reader $reader Текущий итератор
+                 *
+                 * @return int|false
+                 */
+                if(empty($parent_product_id) && has_filter('wc1c_schema_productscml_processing_products_parent_search'))
+                {
+                    $parent_product_id = apply_filters('wc1c_schema_productscml_processing_products_parent_search', $parent_product_id, $external_offer, $this, $reader);
+
+                    $this->log()->debug(__('Parent product search result by external algorithms.', 'wc1c-main'), ['parent_product_ids' => $parent_product_id]);
+                }
+
+                if(empty($parent_product_id))
+                {
+                    if('yes' !== $this->getOptions('products_with_characteristics_simple', 'no'))
+                    {
+                        $this->log()->info(__('Parent product is not found.', 'wc1c-main'));
+                        $this->log()->notice(__('Creating simple products by characteristics is disabled in the settings. Processing skipped.', 'wc1c-main'));
+                        return;
+                    }
+
+                    $this->log()->info(__('Creating simple products by characteristics is enabled in the settings. Parent product is not found. Creating simple product by characteristic.', 'wc1c-main'));
+                }
+                else
+                {
+                    $internal_product_parent = $product_factory->getProduct($parent_product_id);
+
+                    /*
+                     * Родительский продукт не вариативный, превращаем его в вариативный
+                     */
+                    if(!$internal_product_parent instanceof VariableProduct)
+                    {
+                        $this->log()->info(__('Changing the parent product type to variable.', 'wc1c-main'), ['product_id' => $parent_product_id]);
+
+                        $internal_product_parent = new VariableProduct($parent_product_id);
+
+                        $internal_product_parent->save();
+                    }
+
+                    $this->log()->info(__('Variation is not found. Creating.', 'wc1c-main'), ['parent_product_id' => $parent_product_id]);
+
+                    $internal_offer = new VariationVariableProduct();
+
+                    $internal_offer->set_parent_id($parent_product_id);
+
+                    $internal_offer->setSchemaId($this->getId());
+                    $internal_offer->setConfigurationId($this->configuration()->getId());
+
+                    $internal_offer->setExternalId($external_offer->getId());
+                    $internal_offer->setExternalCharacteristicId($external_offer->getCharacteristicId());
+
+                    $internal_offer_id = $internal_offer->save();
+
+                    $this->log()->debug(__('The creation of the variation is completed.', 'wc1c-main'), ['parent_product_id' => $parent_product_id, 'product_variation_id' => $internal_offer_id]);
                 }
             }
-		}
+            else
+            {
+                $this->log()->notice(__('Product not found. Offer update skipped.', 'wc1c-main'), ['offer' => $external_offer->getData()]);
+                return;
+            }
+        }
 
-		/*
-		 * Экземпляр обновляемого продукта по найденному идентификатору продукта
-		 */
-		if($internal_offer_id)
-		{
-			$internal_offer = $product_factory->getProduct($internal_offer_id);
-		}
-		else
-		{
-			if(empty($internal_parent_offer_id))
-			{
-				$this->log()->warning(__('The parent product was not found. The creation of the variation is skipped.', 'wc1c-main'), ['offer_id' => $internal_offer_id]);
-				return;
-			}
+        /*
+         * Экземпляр обновляемого продукта по найденному идентификатору продукта
+         */
+        if(!isset($internal_offer))
+        {
+            $internal_offer = $product_factory->getProduct($internal_offer_id);
+        }
 
-			$this->log()->debug(__('Variation is not found. Creating.', 'wc1c-main'), ['product_id' => $internal_parent_offer_id]);
+        /*
+         * Пропуск продуктов созданных из других конфигураций
+         */
+        if('yes' === $this->getOptions('products_update_only_configuration', 'no') && (int)$internal_offer->getConfigurationId() !== $this->configuration()->getId())
+        {
+            $this->log()->info(__('The product is created from a different configuration. Update skipped.', 'wc1c-main'), ['offer_id' => $internal_offer_id]);
+            return;
+        }
 
-			$internal_offer = new VariationVariableProduct();
-
-			$internal_offer->set_parent_id($internal_parent_offer_id);
-			$internal_offer->setSchemaId($this->getId());
-			$internal_offer->setConfigurationId($this->configuration()->getId());
-			$internal_offer->setExternalId($external_offer->getId());
-			$internal_offer->setExternalCharacteristicId($external_offer->getCharacteristicId());
-
-			$internal_offer_id = $internal_offer->save();
-			$this->log()->debug(__('The creation of the variation is completed.', 'wc1c-main'), ['product_variation_id' => $internal_offer_id]);
-		}
-
-		/*
-		 * Пропуск продуктов созданных из других конфигураций
-		 */
-		if('yes' === $this->getOptions('products_update_only_configuration', 'no') && (int)$internal_offer->getConfigurationId() !== $this->configuration()->getId())
-		{
-			$this->log()->info(__('The product is created from a different configuration. Update skipped.', 'wc1c-main'), ['offer_id' => $internal_offer_id]);
-			return;
-		}
-
-		/*
-		 * Пропуск продуктов созданных из других схем
-		 */
-		if('yes' === $this->getOptions('products_update_only_schema', 'no') && (string)$internal_offer->getSchemaId() !== $this->getId())
-		{
-			$this->log()->info(__('The product is created from a different schema. Update skipped.', 'wc1c-main'), ['offer_id' => $internal_offer_id]);
-			return;
-		}
+        /*
+         * Пропуск продуктов созданных из других схем
+         */
+        if('yes' === $this->getOptions('products_update_only_schema', 'no') && (string)$internal_offer->getSchemaId() !== $this->getId())
+        {
+            $this->log()->info(__('The product is created from a different schema. Update skipped.', 'wc1c-main'), ['offer_id' => $internal_offer_id]);
+            return;
+        }
 
 		/**
 		 * Назначение данных обновляемого продукта по внешним алгоритмам перед сохранением
