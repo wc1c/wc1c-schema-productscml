@@ -24,11 +24,6 @@ final class Receiver extends ReceiverAbstract
 	use CoreTrait;
 
 	/**
-	 * @var SchemaContract Core Schema core
-	 */
-	protected $core;
-
-	/**
 	 * @return void
 	 */
 	public function initHandler()
@@ -117,7 +112,9 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handlerCatalogModeComplete()
 	{
-		$this->sendResponseByType('success');
+        $this->core()->log()->info(__('Sending a successful completion of the exchange in 1C.', 'wc1c-main'));
+
+        $this->sendResponseByType('success');
 	}
 
 	/**
