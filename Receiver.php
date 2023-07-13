@@ -4,7 +4,6 @@ defined('ABSPATH') || exit;
 
 use Wc1c\Main\Exceptions\Exception;
 use Wc1c\Main\Schemas\Abstracts\Cml\ReceiverAbstract;
-use Wc1c\Main\Schemas\Contracts\SchemaContract;
 use Wc1c\Main\Traits\CoreTrait;
 use Wc1c\Main\Traits\SingletonTrait;
 use Wc1c\Main\Traits\UtilityTrait;
