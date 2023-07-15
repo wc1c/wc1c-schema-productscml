@@ -18,11 +18,6 @@ class Admin
 	use CoreTrait;
 
 	/**
-	 * @var Core Schema core
-	 */
-	protected $core;
-
-	/**
 	 * @return void
 	 */
 	public function initConfigurationsFields()
