@@ -467,19 +467,29 @@ class Core extends SchemaAbstract
 				 */
 				if(has_filter('wc1c_schema_productscml_processing_classifier_groups_category_search'))
 				{
+                    $this->log()->info(__('Category search by external algorithms.', 'wc1c-main'));
+
 					$category = apply_filters('wc1c_schema_productscml_processing_classifier_groups_category_search', $this, $group, $reader);
 
-					$this->log()->debug(__('The category was searched using external algorithms.', 'wc1c-main'), ['category' => $category]);
+                    if(!empty($category))
+                    {
+                        $this->log()->debug(__('Category search result by external algorithms.', 'wc1c-main'), ['category' => $category]);
+                    }
 				}
 
 				/*
 				 * Поиск категории по идентификатору из классификатора
 				 */
-				if(false === $category)
+				if(empty($category))
 				{
-					$this->log()->debug(__('Category search by category ID from 1C.', 'wc1c-main'), ['group_id' => $group_id]);
+					$this->log()->info(__('Category search by group ID from 1C.', 'wc1c-main'), ['group_id' => $group_id]);
 
 					$category = $categories_storage->getByExternalId($group_id);
+
+                    if(!empty($category))
+                    {
+                        $this->log()->debug(__('Category search result by group ID from 1C.', 'wc1c-main'), ['category' => $category]);
+                    }
 				}
 
 				/**
@@ -610,9 +620,15 @@ class Core extends SchemaAbstract
 				/**
 				 * Категория найдена и включено обновление данных
 				 */
-				if($category instanceof Category && 'yes' === $update_categories)
+				if($category instanceof Category)
 				{
 					$this->log()->info(__('The category exists. Started updating the data of an existing category.', 'wc1c-main'));
+
+                    if('yes' !== $update_categories)
+                    {
+                        $this->log()->info(__('Category data update is skipped, it is disabled in the configuration settings.', 'wc1c-main'));
+                        continue;
+                    }
 
 					/**
 					 * Пропуск созданных категорий не под текущей конфигурацией
@@ -737,7 +753,7 @@ class Core extends SchemaAbstract
 
                     $category->save();
 
-					$this->log()->info(__('Update of existing category data completed successfully.', 'wc1c-main'));
+					$this->log()->info(__('Update data of existing category completed successfully.', 'wc1c-main'));
 					continue;
 				}
 
