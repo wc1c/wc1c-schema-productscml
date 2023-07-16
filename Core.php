@@ -900,7 +900,7 @@ class Core extends SchemaAbstract
 			('yes' === $this->getOptions('attributes_update', 'no') && 'yes' === $update_attributes_values)
 		)
 		{
-			$this->log()->info(__('Creating attributes based on classifier properties.', 'wc1c-main'));
+			$this->log()->info(__('Creating and updating attributes based on classifier properties.', 'wc1c-main'));
 
 			/** @var AttributesStorageContract $attributes_storage */
 			$attributes_storage = Storage::load('attribute');
@@ -937,7 +937,8 @@ class Core extends SchemaAbstract
 				if(!$attribute instanceof AttributeContract)
 				{
 					$this->log()->info(__('Search for an attribute by name for a classifier property.', 'wc1c-main'), ['property_name' => $property['name']]);
-					$attribute = $attributes_storage->getByLabel($property['name']);
+
+                    $attribute = $attributes_storage->getByLabel($property['name']);
 
 					if($attribute instanceof AttributeContract)
 					{
