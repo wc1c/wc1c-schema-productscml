@@ -184,10 +184,13 @@ final class Receiver extends ReceiverAbstract
 
 		$this->core()->log()->debug(__('Headers for response.', 'wc1c-main'), ['context' => $headers]);
 
-		foreach($headers as $header)
-		{
-			header($header);
-		}
+        if(!headers_sent())
+        {
+            foreach($headers as $header)
+            {
+                header($header);
+            }
+        }
 
 		switch($type)
 		{
