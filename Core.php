@@ -256,7 +256,26 @@ class Core extends SchemaAbstract
 	{
 		if('no' !== $this->getOptions('ob_end_clean', 'no'))
 		{
-			ob_end_clean();
+            $this->log()->info(__('Clearing the output buffer.', 'wc1c-main'));
+
+            $buffer_status = ob_get_status();
+
+            if(empty($buffer_status))
+            {
+                unset($buffer_status);
+            }
+            else
+            {
+                $content = ob_get_contents();
+
+                if($content !== '')
+                {
+                    ob_clean();
+                    $this->log()->debug(__('Cleaned up data.', 'wc1c-main'), ['data' => $content]);
+                }
+
+                unset($content, $buffer_status);
+            }
 		}
 
 		if($this->configuration()->isEnabled() === false)
