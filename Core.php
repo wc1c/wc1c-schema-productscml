@@ -978,11 +978,11 @@ class Core extends SchemaAbstract
 						foreach($property['values_variants'] as $values_variant_id => $values_variant)
 						{
 							// todo: search before add
-							$this->log()->info(__('Adding a value for an attribute.', 'wc1c-main'), ['attribute_name' => $attribute->getName(), 'value' => $values_variant]);
+							$this->log()->info(__('Assigning a value for an attribute.', 'wc1c-main'), ['attribute_name' => $attribute->getName(), 'value' => $values_variant]);
 
 							if(!$attribute->assignValue($values_variant))
 							{
-								$this->log()->info(__('Failed to add value for attribute.', 'wc1c-main'), ['attribute_name' => $attribute->getName(), 'value' => $values_variant]);
+								$this->log()->notice(__('Failed to add value for attribute.', 'wc1c-main'), ['attribute_name' => $attribute->getName(), 'value' => $values_variant]);
 							}
 						}
 					}
