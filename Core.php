@@ -2273,28 +2273,40 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemImages(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-		if('yes' !== $this->getOptions('products_images_by_cml', 'no'))
+        $this->log()->info(__('Assign images to a product.', 'wc1c-main'));
+
+        if('yes' !== $this->getOptions('products_images_by_cml', 'no'))
 		{
+            $this->log()->notice(__('Image assignments for CommerceML data are disabled in the settings. Assigning skipped.', 'wc1c-main'));
+
 			return $internal_product;
 		}
 
 		if('create' === $mode && false === $external_product->hasImages())
 		{
+            $this->log()->info(__('There are no images for the product being created. Assigning skipped.', 'wc1c-main'));
+
 			return $internal_product;
 		}
 
 		if($internal_product->isType('variation')) // todo: назначение одного изображения для вариации
 		{
+            $this->log()->notice(__('Assigning images to a product variation is not possible. Assigning skipped', 'wc1c-main'));
+
 			return $internal_product;
 		}
 
 		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_images', 'no'))
 		{
+            $this->log()->notice(__('Assigning images to the created product is disabled. Assigning skipped.', 'wc1c-main'));
+
 			return $internal_product;
 		}
 
 		if('update' === $mode && 'no' === $this->getOptions('products_update_images', 'no'))
 		{
+            $this->log()->notice(__('Image assignment for the product being updated is disabled. Assigning skipped.', 'wc1c-main'));
+
 			return $internal_product;
 		}
 
@@ -2304,12 +2316,16 @@ class Core extends SchemaAbstract
 
 		if('update' === $mode && 'add' === $images_mode && !empty($internal_product->get_image_id()))
 		{
+            $this->log()->notice(__('The product being updated contains images. Adding images is allowed only if there are none. Assigning skipped.', 'wc1c-main'));
+
 			return $internal_product;
 		}
 
 		if('update' === $mode && empty($external_images) && 'yes_yes' === $images_mode && empty($internal_product->get_image_id()))
 		{
-			return $internal_product;
+            $this->log()->notice(__('The product being updated does not contain an image. Updating images is allowed only if they are present on the site and in 1C. Assigning skipped.', 'wc1c-main'));
+
+            return $internal_product;
 		}
 
 		/** @var ImagesStorageContract $images_storage */
@@ -2333,7 +2349,7 @@ class Core extends SchemaAbstract
 
 				if(false === $image_current)
 				{
-					$this->log()->notice(__('The image assignment for the product is missing. It is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+					$this->log()->notice(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
 					continue;
 				}
 
@@ -2346,7 +2362,7 @@ class Core extends SchemaAbstract
 
 				if(0 === $attach_id)
 				{
-					$this->log()->notice(__('The image assignment for the product is missing. It is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+					$this->log()->notice(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
 					continue;
 				}
 
@@ -2356,7 +2372,10 @@ class Core extends SchemaAbstract
 				if($index === 0)
 				{
 					$internal_product->set_image_id($attach_id);
-					continue;
+
+                    $this->log()->debug(__('Assigning a main image for a product.', 'wc1c-main'), ['image_id' => $attach_id]);
+
+                    continue;
 				}
 
 				$gallery_image_ids[] = $attach_id;
@@ -2365,7 +2384,9 @@ class Core extends SchemaAbstract
 
 		$internal_product->set_gallery_image_ids($gallery_image_ids);
 
-		return $internal_product;
+        $this->log()->debug(__('Product images assign completed successfully.', 'wc1c-main'), ['images' => $gallery_image_ids]);
+
+        return $internal_product;
 	}
 
 	/**
