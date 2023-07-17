@@ -1077,7 +1077,13 @@ class Admin
 			'title' => __('Product name update when update products', 'wc1c-main'),
 			'type' => 'checkbox',
 			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
-			'description' => __('When changing the products names in 1C, the data will be changed on the site.', 'wc1c-main'),
+			'description' => sprintf
+            (
+                '%s<hr>%s %s',
+                __('When changing the products names in 1C, the data will be changed on the site.', 'wc1c-main'),
+                __('It is only possible to enable or disable, because. name is always required.', 'wc1c-main'),
+                __('It is possible to disable the update of names for specific products (via additional extensions).', 'wc1c-main')
+            ),
 			'default' => 'no'
 		];
 
