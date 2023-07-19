@@ -214,7 +214,7 @@ class Admin
 				__('When enabled, buffering will be disabled in the request receiver and the output buffer will be cleared.', 'wc1c-main'),
 				__('Used for sites that have viruses.', 'wc1c-main')
 			),
-			'default' => 'no'
+			'default' => 'yes'
 		];
 
 		$response_options =
