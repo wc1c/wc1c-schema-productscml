@@ -738,7 +738,7 @@ final class Receiver extends ReceiverAbstract
 			$response_description = __('File for import is not exists.', 'wc1c-main');
 
             $this->core()->log()->error($response_description);
-			$this->sendResponseByType('success', $response_description);
+			$this->sendResponseByType('failure', $response_description);
 		}
 
 		try
