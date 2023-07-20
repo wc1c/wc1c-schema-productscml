@@ -977,13 +977,23 @@ class Core extends SchemaAbstract
 					{
 						foreach($property['values_variants'] as $values_variant_id => $values_variant)
 						{
-							// todo: search before add
 							$this->log()->info(__('Assigning a value for an attribute.', 'wc1c-main'), ['attribute_name' => $attribute->getName(), 'value' => $values_variant]);
 
-							if(!$attribute->assignValue($values_variant))
-							{
-								$this->log()->notice(__('Failed to add value for attribute.', 'wc1c-main'), ['attribute_name' => $attribute->getName(), 'value' => $values_variant]);
-							}
+                            $default_term = get_term_by('name', $values_variant, $attribute->getTaxonomyName());
+
+                            if(!$default_term instanceof \WP_Term)
+                            {
+                                $this->log()->info(__('Value for attribute not found. Adding value.', 'wc1c-main'), ['attribute_name' => $attribute->getName(), 'value' => $values_variant]);
+
+                                if(!$attribute->assignValue($values_variant))
+                                {
+                                    $this->log()->warning(__('Failed to add value for attribute.', 'wc1c-main'), ['attribute_name' => $attribute->getName(), 'value' => $values_variant]);
+                                }
+                            }
+                            else
+                            {
+                                $this->log()->info(__('The value for the attribute was added earlier. Skip adding value.', 'wc1c-main'), ['attribute_name' => $attribute->getName(), 'value' => $values_variant]);
+                            }
 						}
 					}
 					else
@@ -2870,14 +2880,20 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemAttributes(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
+        $this->log()->info(__('Processing of product attributes.', 'wc1c-main'));
+
 		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_attributes', 'yes'))
 		{
+            $this->log()->notice(__('Assigning attributes when creating products is disabled. Attribute assignment skipped.', 'wc1c-main'));
+
 			return $internal_product;
 		}
 
 		if('update' === $mode && 'yes' !== $this->getOptions('products_update_attributes', 'no'))
 		{
-			return $internal_product;
+            $this->log()->notice(__('Assigning attributes when updating products is disabled. Attribute assignment skipped.', 'wc1c-main'));
+
+            return $internal_product;
 		}
 
 		$this->log()->info(__('Assigning attributes to a product based on the properties of the product catalog.', 'wc1c-main'), ['mode' => $mode, 'filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId(), 'external_product_id' => $external_product->getId()]);
@@ -2885,7 +2901,8 @@ class Core extends SchemaAbstract
 		if($internal_product->isType('variable') && empty($external_product->getCharacteristicId()))
 		{
 			$this->log()->info(__('Zeroing the characteristics of a variable product.', 'wc1c-main'), ['product_id' => $internal_product->getId(), 'external_product_id' => $external_product->getId()]);
-			$internal_product->update_meta_data('_wc1c_characteristics', '');
+
+            $internal_product->update_meta_data('_wc1c_characteristics', '');
 		}
 
 		$raw_attributes = [];
