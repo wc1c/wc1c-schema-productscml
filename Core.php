@@ -151,6 +151,7 @@ class Core extends SchemaAbstract
 			add_filter('wc1c_schema_productscml_processing_offers_item_before_save', [$this, 'assignOffersItemAttributes'], 10, 3);
 			add_filter('wc1c_schema_productscml_processing_offers_item_before_save', [$this, 'assignOffersItemPrices'], 10, 3);
 			add_filter('wc1c_schema_productscml_processing_offers_item_before_save', [$this, 'assignOffersItemInventories'], 10, 3);
+            add_filter('wc1c_schema_productscml_processing_offers_item_before_save', [$this, 'assignOffersItemImages'], 10, 3);
 		}
 
 		return true;
@@ -2270,6 +2271,136 @@ class Core extends SchemaAbstract
 		return $internal_product;
 	}
 
+    /**
+     * Назначение данных продукта на основе пакета предложений: изображения
+     *
+     * @param ProductContract $internal_offer Экземпляр обновляемого продукта
+     * @param ProductDataContract $external_offer Данные продукта в CML
+     * @param Reader $reader Текущий итератор
+     *
+     * @return ProductContract
+     * @throws Exception
+     */
+    public function assignOffersItemImages(ProductContract $internal_offer, ProductDataContract $external_offer, Reader $reader): ProductContract
+    {
+        $this->log()->info(__('Assigning images to a product by offers.', 'wc1c-main'));
+
+        if(false === $internal_offer->isType('variation'))
+        {
+            $this->log()->notice(__('Assignment of images based on offer package is only possible for variations.. Assigning skipped', 'wc1c-main'));
+
+            return $internal_offer;
+        }
+
+        if('yes' !== $this->getOptions('products_images_by_cml', 'no'))
+        {
+            $this->log()->notice(__('Image assignments for CommerceML data are disabled in the settings. Assigning skipped.', 'wc1c-main'));
+
+            return $internal_offer;
+        }
+
+        if(false === $external_offer->hasImages())
+        {
+            $this->log()->info(__('There are no images for the product. Assigning skipped.', 'wc1c-main'));
+
+            return $internal_offer;
+        }
+
+        if('no' === $this->getOptions('products_update_images', 'no'))
+        {
+            $this->log()->notice(__('Image assignment for the product being updated is disabled. Assigning skipped.', 'wc1c-main'));
+
+            return $internal_offer;
+        }
+
+        $images_mode = $this->getOptions('products_update_images', 'no');
+        $images_max = $this->getOptions('products_images_by_cml_max', 10);
+        $external_images = $external_offer->getImages();
+
+        if('add' === $images_mode && !empty($internal_offer->get_image_id()))
+        {
+            $this->log()->notice(__('The product being updated contains images. Adding images is allowed only if there are none. Assigning skipped.', 'wc1c-main'));
+
+            return $internal_offer;
+        }
+
+        if(empty($external_images) && 'yes_yes' === $images_mode && empty($internal_offer->get_image_id()))
+        {
+            $this->log()->notice(__('The product being updated does not contain an image. Updating images is allowed only if they are present on the site and in 1C. Assigning skipped.', 'wc1c-main'));
+
+            return $internal_offer;
+        }
+
+        /** @var ImagesStorageContract $images_storage */
+        $images_storage = Storage::load('image');
+
+        $product_factory = new Factory();
+        $parent_offer = $product_factory->getProduct($internal_offer->get_parent_id());
+
+        $gallery_image_ids = [];
+
+        if(is_array($external_images))
+        {
+            foreach($external_images as $index => $image)
+            {
+                if($index >= $images_max)
+                {
+                    $this->log()->notice(__('The maximum possible number of images has been processed. The rest of the images are skip.', 'wc1c-main'));
+                    break;
+                }
+
+                $file = explode('.', basename($image));
+
+                $image_current = $images_storage->getByExternalName(reset($file));
+
+                if(false === $image_current)
+                {
+                    $this->log()->notice(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+                    continue;
+                }
+
+                if(is_array($image_current))
+                {
+                    $image_current = reset($image_current);
+                }
+
+                $attach_id = $image_current->getId();
+
+                if(0 === $attach_id)
+                {
+                    $this->log()->notice(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+                    continue;
+                }
+
+                $image_current->setProductId($internal_offer->getId());
+                $image_current->save();
+
+                if($index === 0)
+                {
+                    $internal_offer->set_image_id($attach_id);
+
+                    if(empty($parent_offer->get_image_id()))
+                    {
+                        $parent_offer->set_image_id($attach_id);
+                    }
+                    else
+                    {
+                        $gallery_image_ids[] = $attach_id;
+                    }
+
+                    $this->log()->debug(__('Assigning a main image for a product variation.', 'wc1c-main'), ['image_id' => $attach_id]);
+                }
+            }
+        }
+
+        $parent_offer->set_gallery_image_ids($gallery_image_ids);
+        $parent_offer->save();
+
+        $this->log()->debug(__('Product images assign completed successfully.', 'wc1c-main'), ['images' => $gallery_image_ids]);
+
+        return $internal_offer;
+    }
+
 	/**
 	 * Назначение данных продукта исходя из режима: изображения
 	 *
@@ -2299,7 +2430,7 @@ class Core extends SchemaAbstract
 			return $internal_product;
 		}
 
-		if($internal_product->isType('variation')) // todo: назначение одного изображения для вариации
+		if($internal_product->isType('variation')) // todo: назначение одного изображения для вариации по данным каталога?
 		{
             $this->log()->notice(__('Assigning images to a product variation is not possible. Assigning skipped', 'wc1c-main'));
 
