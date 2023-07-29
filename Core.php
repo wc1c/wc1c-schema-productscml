@@ -3252,22 +3252,24 @@ class Core extends SchemaAbstract
 	 */
 	public function assignOffersItemAttributes(ProductContract $internal_product, ProductDataContract $external_product, Reader $reader): ProductContract
 	{
-		if($reader->getFiletype() !== 'offers')
-		{
-			return $internal_product;
-		}
+        $this->log()->info(__('Assigning attributes to a product based on the properties of the offers package.', 'wc1c-main'), ['filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId()]);
 
-		$this->log()->info(__('Assigning attributes to a product based on the properties of the offers package.', 'wc1c-main'), ['filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId()]);
+        if($reader->getFiletype() !== 'offers')
+		{
+            $this->log()->notice(__('The file type is not an offer package. Skip assigning attributes on offer data.', 'wc1c-main'));
+
+            return $internal_product;
+		}
 
 		/** @var AttributesStorageContract $attributes_storage */
 		$attributes_storage = Storage::load('attribute');
 
 		$raw_attributes = [];
 
-		$parent_characteristics = false;
+		$parent_product = false;
 		if($internal_product->get_parent_id() !== 0)
 		{
-			$parent_characteristics = (new Factory())->getProduct($internal_product->get_parent_id()); // todo: cache
+			$parent_product = (new Factory())->getProduct($internal_product->get_parent_id()); // todo: cache
 		}
 
 		/*
@@ -3369,9 +3371,9 @@ class Core extends SchemaAbstract
 			 */
 			$old_characteristics = [];
 
-			if($parent_characteristics instanceof VariableProduct)
+			if($parent_product instanceof VariableProduct)
 			{
-				$old_characteristics = maybe_unserialize($parent_characteristics->get_meta('_wc1c_characteristics', true));
+				$old_characteristics = maybe_unserialize($parent_product->get_meta('_wc1c_characteristics', true));
 				if(empty($old_characteristics))
 				{
 					$old_characteristics = [];
@@ -3437,9 +3439,9 @@ class Core extends SchemaAbstract
 				];
 			}
 
-			if($parent_characteristics instanceof VariableProduct)
+			if($parent_product instanceof VariableProduct)
 			{
-				$import_characteristics = maybe_unserialize($parent_characteristics->get_meta('_wc1c_properties_import', true));
+				$import_characteristics = maybe_unserialize($parent_product->get_meta('_wc1c_properties_import', true));
 				if(!is_array($import_characteristics) )
 				{
 					$import_characteristics = [];
@@ -3504,9 +3506,9 @@ class Core extends SchemaAbstract
 					];
 				}
 
-				$this->setProductAttributes($parent_characteristics, $parent_attr);
-				$parent_characteristics->update_meta_data('_wc1c_characteristics', $old_characteristics);
-				$parent_characteristics->save();
+				$this->setProductAttributes($parent_product, $parent_attr);
+				$parent_product->update_meta_data('_wc1c_characteristics', $old_characteristics);
+				$parent_product->save();
 			}
 		}
 
