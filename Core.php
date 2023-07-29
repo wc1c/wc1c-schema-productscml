@@ -3148,7 +3148,7 @@ class Core extends SchemaAbstract
 			{
 				if(empty($characteristic_value['value']))
 				{
-					$this->log()->info(__('The characteristic has an empty value.', 'wc1c-main'), ['characteristic_id' => $characteristic_id, 'value' => $characteristic_value]);
+					$this->log()->notice(__('The characteristic has an empty value.', 'wc1c-main'), ['characteristic_id' => $characteristic_id, 'value' => $characteristic_value]);
 					continue;
 				}
 
