@@ -3525,11 +3525,6 @@ class Core extends SchemaAbstract
 		if(has_filter('wc1c_schema_productscml_assign_offers_item_attributes_raw'))
 		{
 			$raw_attributes = apply_filters('wc1c_schema_productscml_assign_offers_item_attributes_raw', $raw_attributes, $internal_product, $external_product, $reader);
-
-			if(empty($raw_attributes))
-			{
-				return $internal_product;
-			}
 		}
 
 		$this->log()->debug(__('Attributes before processing.', 'wc1c-main'), ['raw_attributes' => $raw_attributes, 'filetype' => $reader->getFiletype()]);
