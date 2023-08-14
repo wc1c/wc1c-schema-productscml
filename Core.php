@@ -2887,6 +2887,7 @@ class Core extends SchemaAbstract
 			return $variation;
 		}
 
+        // Stop if parent is variation.
 		if($parent->isType('variation'))
 		{
 			$this->log()->warning(__('The parent product is variation. Skipped.', 'wc1c-main'), ['parent_id' => $variation->get_parent_id()]);
@@ -2913,10 +2914,17 @@ class Core extends SchemaAbstract
 
 				$attribute_name = $attribute_id ? $attribute_exist->getTaxonomyName() : sanitize_title($attribute['name']);
 
-				if(!isset($parent_attributes[$attribute_name]) || !$parent_attributes[$attribute_name]->get_variation())
+				if(!isset($parent_attributes[$attribute_name]))
 				{
-					continue;
+                    $this->log()->debug(__('The attribute was not found in the parent product.', 'wc1c-main'), ['attribute_name' => $attribute_name]);
+                    continue;
 				}
+
+                if(!$parent_attributes[$attribute_name]->get_variation())
+                {
+                    $this->log()->debug(__('The attribute is not for variations.', 'wc1c-main'), ['attribute_name' => $attribute_name]);
+                    continue;
+                }
 
 				$attribute_key = sanitize_title($parent_attributes[$attribute_name]->get_name());
 				$attribute_value = isset($attribute['value']) ? current($attribute['value']) : '';
@@ -2958,6 +2966,8 @@ class Core extends SchemaAbstract
 	 */
 	protected function getVariationParentAttributes(array $attributes, ProductContract $parent): array
 	{
+        $this->log()->debug(__('Getting to variation parent attributes.', 'wc1c-main'), ['attributes' => $attributes]);
+
 		/** @var AttributesStorageContract $attributes_storage */
 		$attributes_storage = Storage::load('attribute');
 
@@ -2980,6 +2990,8 @@ class Core extends SchemaAbstract
 			// Check if attribute handle variations.
 			if(isset($parent_attributes[$attribute_name]) && !$parent_attributes[$attribute_name]->get_variation())
 			{
+                $this->log()->notice(__('The attribute is not for variations. Save required.', 'wc1c-main'), ['attribute_name' => $attribute_name]);
+
 				// Re-create the attribute to CRUD save and generate again.
 				$parent_attributes[$attribute_name] = clone $parent_attributes[$attribute_name];
 				$parent_attributes[$attribute_name]->set_variation(1);
@@ -2988,10 +3000,12 @@ class Core extends SchemaAbstract
 			}
 		}
 
-		// Save variation attributes.
+		// Save parent attributes.
 		if($require_save)
 		{
-			$parent->set_attributes(array_values($parent_attributes));
+            $this->log()->info(__('Preserve parent attributes for accessibility in variations.', 'wc1c-main'), ['attributes' => $parent_attributes]);
+
+            $parent->set_attributes(array_values($parent_attributes));
 			$parent->save();
 		}
 
@@ -3382,6 +3396,9 @@ class Core extends SchemaAbstract
 
 			foreach($external_product->getCharacteristics() as $characteristic_id => $characteristic_value)
 			{
+                $variation_meta_name = 'attribute_';
+                $variation_meta_value = '';
+
 				if(empty($characteristic_value['value']))
 				{
 					$this->log()->info(__('The characteristic has an empty value.', 'wc1c-main'), ['characteristic_id' => $characteristic_id, 'value' => $characteristic_value]);
@@ -3407,6 +3424,13 @@ class Core extends SchemaAbstract
 				$attribute_name = $global ? $global->getName() : $characteristic_value['name'];
 
 				$value = $raw_attributes[$attribute_name]['value'] ?? [];
+
+                if($global)
+                {
+                    $variation_meta_name .= 'pa_' . \esc_attr(\sanitize_title($global->getName()));
+                    $variation_term = get_term_by('name', $characteristic_value['value'], $global->getTaxonomyName());
+                    $variation_meta_value = $variation_term->slug;
+                }
 
 				// значение отсутствует в атрибутах
 				if(!in_array($characteristic_value['value'], $value, true))
@@ -3437,6 +3461,8 @@ class Core extends SchemaAbstract
 					'variation' => 1,
 					'taxonomy' => $global ? 1 : 0,
 				];
+
+                $internal_product->update_meta_data($variation_meta_name, $variation_meta_value);
 			}
 
 			if($parent_product instanceof VariableProduct)
@@ -3507,6 +3533,7 @@ class Core extends SchemaAbstract
 				}
 
 				$this->setProductAttributes($parent_product, $parent_attr);
+
 				$parent_product->update_meta_data('_wc1c_characteristics', $old_characteristics);
 				$parent_product->save();
 			}
