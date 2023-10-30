@@ -640,9 +640,16 @@ final class Receiver extends ReceiverAbstract
                         if($image_current)
                         {
                             $current_file_extension = $image_current->getMeta('_wc1c_external_image_extension', true);
-                            $current_file_extension = reset($current_file_extension);
+                            if(is_array($current_file_extension))
+                            {
+                                $current_file_extension = reset($current_file_extension);
+                            }
+
                             $current_file_hash = $image_current->getMeta('_wc1c_external_hash', true);
-                            $current_file_hash = reset($current_file_hash);
+                            if(is_array($current_file_hash))
+                            {
+                                $current_file_hash = reset($current_file_hash);
+                            }
 
                             if(!empty($current_file_extension) && $current_file_extension !== $file_extension)
                             {
