@@ -933,7 +933,7 @@ class Core extends SchemaAbstract
 
 					if($attribute instanceof AttributeContract)
 					{
-						$this->log()->info(__('An existing attribute was found when searching by name.', 'wc1c-main'), ['property_name' => $property['name'], 'attribute' => $attribute]);
+						$this->log()->info(__('An existing attribute was found when searching by name.', 'wc1c-main'), ['property_name' => $property['name'], 'attribute' => $attribute->getData()]);
 					}
 				}
 
@@ -949,7 +949,14 @@ class Core extends SchemaAbstract
 						$attribute = new Attribute();
 						$attribute->setLabel($property['name']);
 
-						$attribute->save();
+						$result_save = $attribute->save();
+
+                        if($result_save === 0)
+                        {
+                            $this->log()->warning(__('The attribute was not created. Creating error.', 'wc1c-main'));
+
+                            continue;
+                        }
 					}
 					else
 					{
@@ -3258,7 +3265,7 @@ class Core extends SchemaAbstract
 	{
         $this->log()->info(__('Assigning attributes to a product based on the properties of the offers package.', 'wc1c-main'), ['filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId()]);
 
-        if($reader->getFiletype() !== 'offers')
+        if($reader->getFiletype() !== 'offers' && $reader->schema_version !== '3.1')
 		{
             $this->log()->notice(__('The file type is not an offer package. Skip assigning attributes on offer data.', 'wc1c-main'));
 
