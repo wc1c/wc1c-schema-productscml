@@ -405,11 +405,6 @@ class Core extends SchemaAbstract
 	 */
 	public function processingClassifierGroups(ClassifierDataContract $classifier, Reader $reader)
 	{
-		if($reader->schema_version === '3.1' && $reader->getFiletype() !== 'groups')
-		{
-			return;
-		}
-
 		if(!$classifier->hasGroups())
 		{
 			$this->log()->info(__('Classifier groups is empty.', 'wc1c-main'));
@@ -878,11 +873,6 @@ class Core extends SchemaAbstract
 	 */
 	public function processingClassifierProperties(ClassifierDataContract $classifier, Reader $reader)
 	{
-		if($reader->schema_version === '3.1' && $reader->getFiletype() !== 'propertiesGoods')
-		{
-			return;
-		}
-
 		if(!$classifier->hasProperties())
 		{
 			$this->log()->info(__('Classifier properties is empty.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
