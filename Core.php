@@ -62,7 +62,7 @@ class Core extends SchemaAbstract
 		$this->setVersion('0.15.0');
 
 		$this->setName(__('Products data exchange via CommerceML', 'wc1c-main'));
-		$this->setDescription(__('Creation and updating of products (goods) in WooCommerce according to data from 1C using the CommerceML protocol of various versions.', 'wc1c-main'));
+		$this->setDescription(__('Creating and updating products (goods) in WooCommerce according to data from 1C using the CommerceML protocol of different versions.', 'wc1c-main'));
 	}
 
 	/**
@@ -96,6 +96,7 @@ class Core extends SchemaAbstract
 		{
 			return true;
 		}
+
 		$this->setInitialized(true);
 
 		$this->setOptions($this->configuration()->getOptions());
@@ -112,8 +113,10 @@ class Core extends SchemaAbstract
 		if(true === wc1c()->context()->isReceiver())
 		{
 			$receiver = Receiver::instance();
+
 			$receiver->setCore($this);
 			$receiver->initHandler();
+
 			$this->setReceiver($receiver);
 
 			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingTimer'], 5, 1);
