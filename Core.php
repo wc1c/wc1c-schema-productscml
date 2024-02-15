@@ -1181,12 +1181,12 @@ class Core extends SchemaAbstract
                     $products_count = $reader->elements['Товар'];
                 }
 
-                $this->log()->info(__('Processing of the product catalog is completed.', 'wc1c-main'), ['products_count' => $products_count]);
+                $this->log()->notice(__('Processing of the product catalog as completed.', 'wc1c-main'), ['products_count' => $products_count]);
 
                 /**
                  * Сохранение каталога в базу данных
                  */
-                $this->log()->info(__('Saving a catalog to meta configuration data.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
+                $this->log()->debug(__('Saving a catalog to meta configuration data.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
 
                 // todo: сохранение не только последнего каталога, но и пул всех каталогов?
 				$this->configuration()->addMetaData('catalog:' . $reader->catalog->getId(), maybe_serialize($reader->catalog), true);
@@ -1265,7 +1265,7 @@ class Core extends SchemaAbstract
             && 'yes' !== $this->getOptions('products_create', 'no')
 		)
 		{
-			$this->log()->info(__('Products creation and updating is disabled. The processing of goods was skipped.', 'wc1c-main'));
+			$this->log()->debug(__('Products creation and updating is disabled. The processing of goods was skipped.', 'wc1c-main'));
 			$reader->next();
 		}
 
@@ -1290,7 +1290,7 @@ class Core extends SchemaAbstract
 			{
 				$product = apply_filters('wc1c_schema_productscml_processing_products', $product, $reader, $this, $product_xml);
 
-				$this->log()->info(__('The product is modified according to external algorithms.', 'wc1c-main'));
+				$this->log()->debug(__('The product is modified according to external algorithms.', 'wc1c-main'));
 			}
 
 			if(!$product instanceof ProductDataContract)
@@ -1304,7 +1304,7 @@ class Core extends SchemaAbstract
 			 */
 			if(true === $product->hasCharacteristicId() && 'yes' !== $this->getOptions('products_with_characteristics', 'no'))
 			{
-				$this->log()->info(__('The use of products with characteristics is disabled. Processing skipped.', 'wc1c-main'));
+				$this->log()->debug(__('The use of products with characteristics is disabled. Processing skipped.', 'wc1c-main'));
 				return;
 			}
 
