@@ -173,8 +173,6 @@ final class Receiver extends ReceiverAbstract
 			$description = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_description', $description, $this, $type);
 		}
 
-		$this->core()->log()->info(sprintf('%s %s.', __('In 1C was send a response of the type:', 'wc1c-main'),  $type), ['type' => $type]);
-
 		$headers= [];
 		$headers['Content-Type'] = 'Content-Type: text/plain; charset=utf-8';
 
@@ -183,15 +181,17 @@ final class Receiver extends ReceiverAbstract
 			$headers = apply_filters('wc1c_schema_productscml_receiver_send_response_by_type_headers', $headers, $this, $type);
 		}
 
-		$this->core()->log()->debug(__('Headers for response.', 'wc1c-main'), ['context' => $headers]);
-
         if(!headers_sent())
         {
+            $this->core()->log()->debug(__('Headers for response.', 'wc1c-main'), ['context' => $headers]);
+
             foreach($headers as $header)
             {
                 header($header);
             }
         }
+
+        $this->core()->log()->info(sprintf('%s %s.', __('In 1C was send a response of the type:', 'wc1c-main'),  $type), ['type' => $type]);
 
 		switch($type)
 		{
