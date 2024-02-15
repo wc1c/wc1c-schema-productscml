@@ -1865,14 +1865,14 @@ class Core extends SchemaAbstract
 
         if('create' === $mode && 'no' === $this->getOptions('products_create_adding_description', 'yes'))
 		{
-            $this->log()->notice(__('Assigning a description to the created product is disabled. Assigning description skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Assigning a description to the created product is disabled. Assigning description skipped.', 'wc1c-main'));
 
 			return $internal_product;
 		}
 
 		if('update' === $mode && 'no' === $this->getOptions('products_update_description', 'no'))
 		{
-            $this->log()->notice(__('Assigning a description to the updated product is disabled. Assigning description skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Assigning a description to the updated product is disabled. Assigning description skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
@@ -1918,14 +1918,14 @@ class Core extends SchemaAbstract
 
 		if('update' === $mode && 'add' === $this->getOptions('products_update_description', 'yes') && !empty($internal_product->get_short_description()))
 		{
-            $this->log()->notice(__('When updating products, it is allowed to add descriptions only to products without a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('When updating products, it is allowed to add descriptions only to products without a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
 
 		if('update' === $mode && empty($short_description) && 'yes_yes' === $this->getOptions('products_update_description', 'yes') && empty($internal_product->get_short_description()))
 		{
-            $this->log()->notice(__('When updating products, it is allowed to add descriptions only to products with a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('When updating products, it is allowed to add descriptions only to products with a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
