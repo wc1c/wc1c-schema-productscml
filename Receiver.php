@@ -314,7 +314,7 @@ final class Receiver extends ReceiverAbstract
 
 		$this->core()->configuration()->saveMetaData();
 
-		$this->core()->log()->info(__('Request authorization from 1C successfully completed.', 'wc1c-main'), ['session_name' => $session_name, 'session_id' => $session_id]);
+		$this->core()->log()->info(__('1C authorization has been successfully passed.', 'wc1c-main'), ['session_name' => $session_name, 'session_id' => $session_id]);
 
 		$lines['success'] = 'success' . PHP_EOL;
 		$lines['session_name'] = $session_name . PHP_EOL;
