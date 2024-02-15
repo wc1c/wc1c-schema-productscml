@@ -2287,28 +2287,28 @@ class Core extends SchemaAbstract
 
         if(false === $internal_offer->isType('variation'))
         {
-            $this->log()->notice(__('Assignment of images based on offer package is only possible for variations.. Assigning skipped', 'wc1c-main'));
+            $this->log()->debug(__('Assigning of images based on offer package is only possible for variations. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
 
         if('yes' !== $this->getOptions('products_images_by_cml', 'no'))
         {
-            $this->log()->notice(__('Image assignments for CommerceML data are disabled in the settings. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Image assignments for CommerceML data are disabled in the settings. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
 
         if(false === $external_offer->hasImages())
         {
-            $this->log()->info(__('There are no images for the product. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('There are no images for the product. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
 
         if('no' === $this->getOptions('products_update_images', 'no'))
         {
-            $this->log()->notice(__('Image assignment for the product being updated is disabled. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Image assigning for the product being updated is disabled. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
@@ -2319,14 +2319,14 @@ class Core extends SchemaAbstract
 
         if('add' === $images_mode && !empty($internal_offer->get_image_id()))
         {
-            $this->log()->notice(__('The product being updated contains images. Adding images is allowed only if there are none. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('The product being updated contains images. Adding images is allowed only if there are none. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
 
         if(empty($external_images) && 'yes_yes' === $images_mode && empty($internal_offer->get_image_id()))
         {
-            $this->log()->notice(__('The product being updated does not contain an image. Updating images is allowed only if they are present on the site and in 1C. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('The product being updated does not contain an image. Updating images is allowed only if they are present on the site and in 1C. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
@@ -2345,7 +2345,7 @@ class Core extends SchemaAbstract
             {
                 if($index >= $images_max)
                 {
-                    $this->log()->notice(__('The maximum possible number of images has been processed. The rest of the images are skip.', 'wc1c-main'));
+                    $this->log()->debug(__('The maximum possible number of images has been processed. The rest of the images are skip.', 'wc1c-main'));
                     break;
                 }
 
@@ -2355,7 +2355,7 @@ class Core extends SchemaAbstract
 
                 if(false === $image_current)
                 {
-                    $this->log()->notice(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+                    $this->log()->warning(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
                     continue;
                 }
 
@@ -2368,7 +2368,7 @@ class Core extends SchemaAbstract
 
                 if(0 === $attach_id)
                 {
-                    $this->log()->notice(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+                    $this->log()->warning(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
                     continue;
                 }
 
@@ -2396,7 +2396,7 @@ class Core extends SchemaAbstract
         $parent_offer->set_gallery_image_ids($gallery_image_ids);
         $parent_offer->save();
 
-        $this->log()->debug(__('Product images assign completed successfully.', 'wc1c-main'), ['images' => $gallery_image_ids]);
+        $this->log()->info(__('Assigning images to a product by offers as completed.', 'wc1c-main'), ['images' => $gallery_image_ids]);
 
         return $internal_offer;
     }
