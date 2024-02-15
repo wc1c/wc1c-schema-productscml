@@ -303,7 +303,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(session_status() === PHP_SESSION_NONE)
 		{
-			$this->core()->log()->info(__('PHP session none, start new PHP session.', 'wc1c-main'));
+			$this->core()->log()->debug(__('PHP session none, start new PHP session.', 'wc1c-main'));
 			session_start();
 		}
 
@@ -415,7 +415,7 @@ final class Receiver extends ReceiverAbstract
 		{
 			session_id($session_id);
 
-			$this->core()->log()->info(__('PHP session none, restart last PHP session.', 'wc1c-main'), ['session_id' => $session_id]);
+			$this->core()->log()->debug(__('PHP session none, restart last PHP session.', 'wc1c-main'), ['session_id' => $session_id]);
 			session_start();
 		}
 
