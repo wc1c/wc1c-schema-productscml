@@ -49,13 +49,13 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handler()
 	{
-		$this->core()->log()->info(__('Received new request for Receiver.', 'wc1c-main'));
+		$this->core()->log()->info(__('Received new request from 1C for Receiver.', 'wc1c-main'));
 
 		$mode_and_type = $this->detectModeAndType();
 		$mode = $mode_and_type['mode'];
 		$type = $mode_and_type['type'];
 
-		$this->core()->log()->debug(__('Received request params.', 'wc1c-main'), ['type' => $type, 'mode=' => $mode]);
+		$this->core()->log()->debug(__('The resulting query parameters.', 'wc1c-main'), ['type' => $type, 'mode=' => $mode]);
 
         $this->core()->configuration()->addMetaData('_receiver_mode', $mode, true);
         $this->core()->configuration()->addMetaData('_receiver_type', $type, true);
@@ -101,6 +101,7 @@ final class Receiver extends ReceiverAbstract
 		$response_description = __('Action is not found in schema.', 'wc1c-main');
 
 		$this->core()->log()->warning($response_description);
+
 		$this->sendResponseByType($this->core()->getOptions('response_unknown_action', 'failure'), $response_description);
 	}
 
