@@ -443,11 +443,11 @@ final class Receiver extends ReceiverAbstract
 
 		if(wc1c()->filesystem()->cleanDirectory($directory))
 		{
-			$this->core()->log()->notice(__('The directory for temporary files was successfully cleared of old files.', 'wc1c-main'), ['directory' => $this->core()->getUploadDirectory()]);
+			$this->core()->log()->notice(__('Cleaning the directory for temporary files as completed.', 'wc1c-main'), ['directory' => $this->core()->getUploadDirectory()]);
 		}
 		else
 		{
-			$error = __('Failed to clear the temp directory of old files.', 'wc1c-main');
+			$error = __('Cleaning the directory for temporary files as failed.', 'wc1c-main');
 
 			$this->core()->log()->error($error, ['directory' => $directory]);
 
