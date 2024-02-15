@@ -328,7 +328,7 @@ final class Receiver extends ReceiverAbstract
 			$lines = apply_filters('wc1c_schema_productscml_handler_checkauth_lines', $lines);
 		}
 
-		$this->core()->log()->debug(__('Print lines for 1C.', 'wc1c-main'), ['data' => $lines]);
+		$this->core()->log()->debug(__('Print lines for 1C.', 'wc1c-main'), $lines);
 
         if($this->core()->configuration()->isStatus('processing'))
         {
