@@ -330,6 +330,9 @@ final class Receiver extends ReceiverAbstract
 
 		$this->core()->log()->debug(__('Print lines for 1C.', 'wc1c-main'), ['data' => $lines]);
 
+        $this->core()->configuration()->setStatus('active');
+        $this->core()->configuration()->save();
+
 		foreach($lines as $line)
 		{
 			printf('%s', wp_kses_post($line));
