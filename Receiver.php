@@ -743,9 +743,9 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handlerCatalogModeImport()
 	{
-		$this->core()->log()->info(__('On request from 1C - started importing data from a file.', 'wc1c-main'));
-
 		$filename = wc1c()->getVar($_GET['filename'], '');
+
+        $this->core()->log()->notice(__('On request from 1C - started importing data from a file.', 'wc1c-main'), ['file' => $filename]);
 
 		if($filename === '')
 		{
@@ -773,7 +773,7 @@ final class Receiver extends ReceiverAbstract
 			{
 				$response_description = __('Import of data from file completed successfully.', 'wc1c-main');
 
-                $this->core()->log()->info($response_description, ['file_name' => $filename, 'file_path' => $file]);
+                $this->core()->log()->notice($response_description, ['file_name' => $filename, 'file_path' => $file]);
 				$this->sendResponseByType('success', $response_description);
 			}
 		}
