@@ -579,7 +579,7 @@ final class Receiver extends ReceiverAbstract
 
 		$upload_file_path = wp_normalize_path($upload_directory . $filename);
 
-		$this->core()->log()->info(sprintf('%s %s', __('Saving data to a file named:', 'wc1c-main'), $filename), ['file_path' => $upload_file_path]);
+		$this->core()->log()->info(sprintf('%s %s', __('Writing data to a file named:', 'wc1c-main'), $filename), ['file_path' => $upload_file_path]);
 
 		if(strpos($filename, 'import_files') !== false)
 		{
