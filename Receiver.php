@@ -128,7 +128,7 @@ final class Receiver extends ReceiverAbstract
         {
             $timestamp = (int)$_GET['timestamp'];
 
-            $this->core()->log()->notice(__('The time of the last full exchange has been set.', 'wc1c-main'));
+            $this->core()->log()->notice(__('The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $timestamp]);
 
             $this->core()->configuration()->addMetaData('_catalog_full_time', $timestamp, true);
             $this->core()->configuration()->saveMetaData();
