@@ -1247,7 +1247,7 @@ class Core extends SchemaAbstract
 			}
 		}
 
-        if($reader->nodeName === 'Товары')
+        if($reader->nodeName === 'Товары' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
         {
             if(false === $reader->catalog->isOnlyChanges())
             {
