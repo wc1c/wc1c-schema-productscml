@@ -3952,7 +3952,7 @@ class Core extends SchemaAbstract
                         $internal_product_parent->save();
                     }
 
-                    $this->log()->info(__('Variation is not found. Creating.', 'wc1c-main'), ['parent_product_id' => $parent_product_id]);
+                    $this->log()->debug(__('Variation is not found. Creating.', 'wc1c-main'), ['parent_product_id' => $parent_product_id]);
 
                     $internal_product = new VariationVariableProduct();
 
@@ -3966,7 +3966,7 @@ class Core extends SchemaAbstract
 
                     $internal_product_id = $internal_product->save();
 
-                    $this->log()->debug(__('The creation of the variation is completed.', 'wc1c-main'), ['parent_product_id' => $parent_product_id, 'product_variation_id' => $internal_product_id]);
+                    $this->log()->info(__('The creation of the variation is completed.', 'wc1c-main'), ['parent_product_id' => $parent_product_id, 'product_variation_id' => $internal_product_id]);
                 }
 			}
 			else
@@ -4037,7 +4037,7 @@ class Core extends SchemaAbstract
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_products_item_after_save'))
 			{
-                $this->log()->info(__('Assignment of data for the created product according to external algorithms after saving.', 'wc1c-main'));
+                $this->log()->debug(__('Assignment of data for the created product according to external algorithms after saving.', 'wc1c-main'));
 
                 $internal_product = apply_filters('wc1c_schema_productscml_processing_products_item_after_save', $internal_product, $external_product, 'create', $reader);
 
@@ -4056,14 +4056,14 @@ class Core extends SchemaAbstract
 			return;
 		}
 
-        $this->log()->info(__('Product is found. Updating.', 'wc1c-main'));
+        $this->log()->debug(__('Product is found. Updating.', 'wc1c-main'), ['product_id' => $product_id]);
 
 		/**
 		 * Обновление существующих продуктов отключено
 		 */
 		if('yes' !== $this->getOptions('products_update', 'no'))
 		{
-			$this->log()->debug(__('Products update is disabled in settings. Product update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
+			$this->log()->info(__('Products update is disabled in settings. Product update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
 			return;
 		}
 
@@ -4129,7 +4129,7 @@ class Core extends SchemaAbstract
 		{
             $id = $update_product->save();
 
-            $this->log()->notice(__('Product update has been successfully completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type()]);
+            $this->log()->info(__('Product update has been successfully completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type()]);
         }
 		catch(\Throwable $e)
 		{
@@ -4148,7 +4148,7 @@ class Core extends SchemaAbstract
 		 */
 		if(has_filter('wc1c_schema_productscml_processing_products_item_after_save'))
 		{
-            $this->log()->info(__('Assignment of data for the updated product according to external algorithms after saving.', 'wc1c-main'));
+            $this->log()->debug(__('Assignment of data for the updated product according to external algorithms after saving.', 'wc1c-main'));
 
             $update_product = apply_filters('wc1c_schema_productscml_processing_products_item_after_save', $update_product, $external_product, 'update', $reader);
 
@@ -4156,7 +4156,7 @@ class Core extends SchemaAbstract
 			{
                 $id = $update_product->save();
 
-                $this->log()->notice(__('Product update after assigning data using external algorithms has been successfully completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type()]);
+                $this->log()->info(__('Product update after assigning data using external algorithms has been successfully completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type()]);
 			}
 			catch(\Throwable $e)
 			{
