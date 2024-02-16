@@ -437,13 +437,13 @@ final class Receiver extends ReceiverAbstract
 	{
 		$directory = $this->core()->getUploadDirectory();
 
-		$this->core()->log()->info(__('Cleaning the directory for temporary files.', 'wc1c-main'), ['directory' => $directory]);
+		$this->core()->log()->debug(__('Cleaning the directory for temporary files.', 'wc1c-main'), ['directory' => $directory]);
 
 		wc1c()->filesystem()->ensureDirectoryExists($directory);
 
 		if(wc1c()->filesystem()->cleanDirectory($directory))
 		{
-			$this->core()->log()->notice(__('Cleaning the directory for temporary files as completed.', 'wc1c-main'), ['directory' => $this->core()->getUploadDirectory()]);
+			$this->core()->log()->info(__('Cleaning the directory for temporary files as completed.', 'wc1c-main'), ['directory' => $this->core()->getUploadDirectory()]);
 		}
 		else
 		{
