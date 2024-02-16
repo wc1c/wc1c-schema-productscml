@@ -1211,16 +1211,6 @@ class Core extends SchemaAbstract
 				$only_changes = false;
 			}
 			$reader->catalog->setOnlyChanges($only_changes);
-
-            if(false === $only_changes)
-            {
-                $catalog_full_time = current_time('timestamp', true);
-
-                $this->configuration()->addMetaData('_catalog_full_time', $catalog_full_time, true);
-                $this->configuration()->saveMetaData();
-
-                $this->log()->notice(__('The catalog contains full data. The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $catalog_full_time, 'catalog_id' => $reader->catalog->getId()]);
-            }
 		}
 
 		if($reader->parentNodeName === 'Каталог')
@@ -1256,6 +1246,19 @@ class Core extends SchemaAbstract
 					break;
 			}
 		}
+
+        if($reader->nodeName === 'Товары')
+        {
+            if(false === $reader->catalog->isOnlyChanges())
+            {
+                $catalog_full_time = current_time('timestamp', true);
+
+                $this->configuration()->addMetaData('_catalog_full_time', $catalog_full_time, true);
+                $this->configuration()->saveMetaData();
+
+                $this->log()->notice(__('The catalog contains full data. The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $catalog_full_time, 'catalog_id' => $reader->catalog->getId()]);
+            }
+        }
 
 		/*
 		 * Пропуск создания и обновления продуктов
