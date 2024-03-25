@@ -928,7 +928,7 @@ class Core extends SchemaAbstract
 				/**
 				 * Поиск существующего атрибута по внешним алгоритмам
 				 *
-				 * @param SchemaAbstract $schema Текущая схема
+				 * @param SchemaAbstract $this Текущая схема
 				 * @param array $property Данные свойства в CML
 				 * @param Reader $reader Текущий итератор
 				 *
