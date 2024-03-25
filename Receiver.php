@@ -130,6 +130,7 @@ final class Receiver extends ReceiverAbstract
 
             $this->core()->log()->notice(__('The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $timestamp]);
 
+            $this->core()->configuration()->addMetaData('_catalog_deactivate', $timestamp, true);
             $this->core()->configuration()->addMetaData('_catalog_full_time', $timestamp, true);
             $this->core()->configuration()->saveMetaData();
         }
