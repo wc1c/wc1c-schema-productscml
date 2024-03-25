@@ -195,6 +195,14 @@ class Core extends SchemaAbstract
 			return false;
 		}
 
+        /**
+         * Переназначение декодера для CommerceML
+         *
+         * @param Decoder $decoder Текущий декодер
+         * @param SchemaAbstract $schema Текущая схема
+         *
+         * @return Decoder
+         */
 		if(has_filter('wc1c_schema_productscml_file_processing_decoder'))
 		{
 			$this->log()->info(__('DecoderCML has been overridden by external algorithms.', 'wc1c-main'));
@@ -213,6 +221,14 @@ class Core extends SchemaAbstract
 
 		$this->log()->debug(__('Filetype:', 'wc1c-main') . ' ' . $reader->getFiletype(), ['filetype' => $reader->getFiletype()]);
 
+        /**
+         * Переназначение ридера для CommerceML
+         *
+         * @param Reader $reader Текущий ридер
+         * @param SchemaAbstract $schema Текущая схема
+         *
+         * @return Reader
+         */
 		if(has_filter('wc1c_schema_productscml_file_processing_reader'))
 		{
 			$this->log()->info(__('ReaderCML has been overridden by external algorithms.', 'wc1c-main'));
@@ -369,9 +385,11 @@ class Core extends SchemaAbstract
 			/**
 			 * Внешняя обработка классификатора
 			 *
-			 * @param ClassifierDataContract $classifier
-			 * @param SchemaAbstract $this
-             * @param SimpleXMLElement $classifier_xml
+			 * @param ClassifierDataContract $classifier Текущий классификатор
+			 * @param SchemaAbstract $this Текущая схема
+             * @param SimpleXMLElement $classifier_xml Исходный xml классификатора
+             *
+             * @retun ClassifierDataContract
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_classifier'))
 			{
@@ -460,9 +478,9 @@ class Core extends SchemaAbstract
 				/**
 				 * Поиск существующей категории по внешним алгоритмам
 				 *
-				 * @param SchemaAbstract $schema Текущая схема
-				 * @param array $property Данные категории в CML
-				 * @param Reader $reader Текущий итератор
+				 * @param SchemaAbstract $this Текущая схема
+				 * @param array $group Данные категории в CML
+				 * @param Reader $reader Текущий ридер
 				 *
 				 * @return int|false
 				 */
