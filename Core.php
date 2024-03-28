@@ -59,10 +59,10 @@ class Core extends SchemaAbstract
 	public function __construct()
 	{
 		$this->setId('productscml');
-		$this->setVersion('0.14.0');
+		$this->setVersion('0.15.0');
 
 		$this->setName(__('Products data exchange via CommerceML', 'wc1c-main'));
-		$this->setDescription(__('Creation and updating of products (goods) in WooCommerce according to data from 1C using the CommerceML protocol of various versions.', 'wc1c-main'));
+		$this->setDescription(__('Creating and updating products (goods) in WooCommerce according to data from 1C using the CommerceML protocol of different versions.', 'wc1c-main'));
 	}
 
 	/**
@@ -96,6 +96,7 @@ class Core extends SchemaAbstract
 		{
 			return true;
 		}
+
 		$this->setInitialized(true);
 
 		$this->setOptions($this->configuration()->getOptions());
@@ -112,8 +113,10 @@ class Core extends SchemaAbstract
 		if(true === wc1c()->context()->isReceiver())
 		{
 			$receiver = Receiver::instance();
+
 			$receiver->setCore($this);
 			$receiver->initHandler();
+
 			$this->setReceiver($receiver);
 
 			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingTimer'], 5, 1);
@@ -192,6 +195,14 @@ class Core extends SchemaAbstract
 			return false;
 		}
 
+        /**
+         * Переназначение декодера для CommerceML
+         *
+         * @param Decoder $decoder Текущий декодер
+         * @param SchemaAbstract $schema Текущая схема
+         *
+         * @return Decoder
+         */
 		if(has_filter('wc1c_schema_productscml_file_processing_decoder'))
 		{
 			$this->log()->info(__('DecoderCML has been overridden by external algorithms.', 'wc1c-main'));
@@ -210,6 +221,14 @@ class Core extends SchemaAbstract
 
 		$this->log()->debug(__('Filetype:', 'wc1c-main') . ' ' . $reader->getFiletype(), ['filetype' => $reader->getFiletype()]);
 
+        /**
+         * Переназначение ридера для CommerceML
+         *
+         * @param Reader $reader Текущий ридер
+         * @param SchemaAbstract $schema Текущая схема
+         *
+         * @return Reader
+         */
 		if(has_filter('wc1c_schema_productscml_file_processing_reader'))
 		{
 			$this->log()->info(__('ReaderCML has been overridden by external algorithms.', 'wc1c-main'));
@@ -257,7 +276,7 @@ class Core extends SchemaAbstract
 	{
 		if('no' !== $this->getOptions('ob_end_clean', 'no'))
 		{
-            $this->log()->info(__('Clearing the output buffer.', 'wc1c-main'));
+            $this->log()->debug(__('Clearing the output buffer.', 'wc1c-main'));
 
             $buffer_status = ob_get_status();
 
@@ -277,6 +296,8 @@ class Core extends SchemaAbstract
 
                 unset($content, $buffer_status);
             }
+
+            $this->log()->debug(__('Clearing the output buffer as completed.', 'wc1c-main'));
 		}
 
 		if($this->configuration()->isEnabled() === false)
@@ -364,9 +385,11 @@ class Core extends SchemaAbstract
 			/**
 			 * Внешняя обработка классификатора
 			 *
-			 * @param ClassifierDataContract $classifier
-			 * @param SchemaAbstract $this
-             * @param SimpleXMLElement $classifier_xml
+			 * @param ClassifierDataContract $classifier Текущий классификатор
+			 * @param SchemaAbstract $this Текущая схема
+             * @param SimpleXMLElement $classifier_xml Исходный xml классификатора
+             *
+             * @retun ClassifierDataContract
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_classifier'))
 			{
@@ -405,11 +428,6 @@ class Core extends SchemaAbstract
 	 */
 	public function processingClassifierGroups(ClassifierDataContract $classifier, Reader $reader)
 	{
-		if($reader->schema_version === '3.1' && $reader->getFiletype() !== 'groups')
-		{
-			return;
-		}
-
 		if(!$classifier->hasGroups())
 		{
 			$this->log()->info(__('Classifier groups is empty.', 'wc1c-main'));
@@ -460,9 +478,9 @@ class Core extends SchemaAbstract
 				/**
 				 * Поиск существующей категории по внешним алгоритмам
 				 *
-				 * @param SchemaAbstract $schema Текущая схема
-				 * @param array $property Данные категории в CML
-				 * @param Reader $reader Текущий итератор
+				 * @param SchemaAbstract $this Текущая схема
+				 * @param array $group Данные категории в CML
+				 * @param Reader $reader Текущий ридер
 				 *
 				 * @return int|false
 				 */
@@ -878,11 +896,6 @@ class Core extends SchemaAbstract
 	 */
 	public function processingClassifierProperties(ClassifierDataContract $classifier, Reader $reader)
 	{
-		if($reader->schema_version === '3.1' && $reader->getFiletype() !== 'propertiesGoods')
-		{
-			return;
-		}
-
 		if(!$classifier->hasProperties())
 		{
 			$this->log()->info(__('Classifier properties is empty.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
@@ -915,7 +928,7 @@ class Core extends SchemaAbstract
 				/**
 				 * Поиск существующего атрибута по внешним алгоритмам
 				 *
-				 * @param SchemaAbstract $schema Текущая схема
+				 * @param SchemaAbstract $this Текущая схема
 				 * @param array $property Данные свойства в CML
 				 * @param Reader $reader Текущий итератор
 				 *
@@ -943,7 +956,7 @@ class Core extends SchemaAbstract
 
 					if($attribute instanceof AttributeContract)
 					{
-						$this->log()->info(__('An existing attribute was found when searching by name.', 'wc1c-main'), ['property_name' => $property['name'], 'attribute' => $attribute]);
+						$this->log()->info(__('An existing attribute was found when searching by name.', 'wc1c-main'), ['property_name' => $property['name'], 'attribute' => $attribute->getData()]);
 					}
 				}
 
@@ -959,7 +972,14 @@ class Core extends SchemaAbstract
 						$attribute = new Attribute();
 						$attribute->setLabel($property['name']);
 
-						$attribute->save();
+						$result_save = $attribute->save();
+
+                        if($result_save === 0)
+                        {
+                            $this->log()->warning(__('The attribute was not created. Creating error.', 'wc1c-main'));
+
+                            continue;
+                        }
 					}
 					else
 					{
@@ -1179,12 +1199,12 @@ class Core extends SchemaAbstract
                     $products_count = $reader->elements['Товар'];
                 }
 
-                $this->log()->info(__('Processing of the product catalog is completed.', 'wc1c-main'), ['products_count' => $products_count]);
+                $this->log()->notice(__('Processing of the product catalog as completed.', 'wc1c-main'), ['products_count' => $products_count]);
 
                 /**
                  * Сохранение каталога в базу данных
                  */
-                $this->log()->info(__('Saving a catalog to meta configuration data.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
+                $this->log()->debug(__('Saving a catalog to meta configuration data.', 'wc1c-main'), ['filetype' => $reader->getFiletype()]);
 
                 // todo: сохранение не только последнего каталога, но и пул всех каталогов?
 				$this->configuration()->addMetaData('catalog:' . $reader->catalog->getId(), maybe_serialize($reader->catalog), true);
@@ -1209,16 +1229,6 @@ class Core extends SchemaAbstract
 				$only_changes = false;
 			}
 			$reader->catalog->setOnlyChanges($only_changes);
-
-            if(false === $only_changes)
-            {
-                $catalog_full_time = current_time('timestamp', true);
-
-                $this->log()->notice(__('The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $catalog_full_time]);
-
-                $this->configuration()->addMetaData('_catalog_full_time', $catalog_full_time, true);
-                $this->configuration()->saveMetaData();
-            }
 		}
 
 		if($reader->parentNodeName === 'Каталог')
@@ -1255,6 +1265,19 @@ class Core extends SchemaAbstract
 			}
 		}
 
+        if($reader->nodeName === 'Товары' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+        {
+            if(false === $reader->catalog->isOnlyChanges())
+            {
+                $catalog_full_time = current_time('timestamp', true);
+
+                $this->configuration()->addMetaData('_catalog_full_time', $catalog_full_time, true);
+                $this->configuration()->saveMetaData();
+
+                $this->log()->notice(__('The catalog contains full data. The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $catalog_full_time, 'catalog_id' => $reader->catalog->getId()]);
+            }
+        }
+
 		/*
 		 * Пропуск создания и обновления продуктов
 		 */
@@ -1263,32 +1286,48 @@ class Core extends SchemaAbstract
             && 'yes' !== $this->getOptions('products_create', 'no')
 		)
 		{
-			$this->log()->info(__('Products creation and updating is disabled. The processing of goods was skipped.', 'wc1c-main'));
+			$this->log()->debug(__('Products creation and updating is disabled. The processing of goods was skipped.', 'wc1c-main'));
 			$reader->next();
 		}
 
 		if($reader->parentNodeName === 'Товары' && $reader->nodeName === 'Товар')
 		{
-			$product_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+            try
+            {
+                $product_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+            }
+            catch (\Throwable $e)
+            {
+                $this->log()->warning(__('An exception was thrown from SimpleXMLElement.', 'wc1c-main'), ['exception' => $e]);
+                return;
+            }
 
 			/**
 			 * Декодирование данных продукта из XML в объект реализующий ProductDataContract
 			 */
-			$product = $reader->decoder->process('product', $product_xml);
+            try
+            {
+                $product = $reader->decoder->process('product', $product_xml);
+            }
+            catch(\Throwable $e)
+            {
+                $this->log()->warning(__('An exception was thrown while decoding the product.', 'wc1c-main'), ['exception' => $e]);
+                return;
+            }
 
 			/**
 			 * Внешняя фильтрация перед непосредственной обработкой
 			 *
-			 * @param ProductDataContract $product
-			 * @param Reader $reader
-			 * @param SchemaAbstract $this
-             * @param SimpleXMLElement $product_xml
+			 * @param ProductDataContract $product Данные продукта в объектном виде (обработанные)
+			 * @param Reader $reader Текущий ридер
+			 * @param SchemaAbstract $this Текущая схема
+             * @param SimpleXMLElement $product_xml Не обработанные данные продукта из XML
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_products'))
 			{
 				$product = apply_filters('wc1c_schema_productscml_processing_products', $product, $reader, $this, $product_xml);
 
-				$this->log()->info(__('The product is modified according to external algorithms.', 'wc1c-main'));
+				$this->log()->debug(__('The product is modified according to external algorithms.', 'wc1c-main'));
 			}
 
 			if(!$product instanceof ProductDataContract)
@@ -1302,7 +1341,7 @@ class Core extends SchemaAbstract
 			 */
 			if(true === $product->hasCharacteristicId() && 'yes' !== $this->getOptions('products_with_characteristics', 'no'))
 			{
-				$this->log()->info(__('The use of products with characteristics is disabled. Processing skipped.', 'wc1c-main'));
+				$this->log()->debug(__('The use of products with characteristics is disabled. Processing skipped.', 'wc1c-main'));
 				return;
 			}
 
@@ -1368,7 +1407,7 @@ class Core extends SchemaAbstract
 
 		if($internal_product->isType('variation'))
 		{
-            $this->log()->notice(__('The product is a variation. Name assignment omitted.', 'wc1c-main'));
+            $this->log()->debug(__('The product is a variation. Name assignment omitted.', 'wc1c-main'));
 
 			return $internal_product;
 		}
@@ -1377,14 +1416,14 @@ class Core extends SchemaAbstract
 
 		if('no' === $source)
 		{
-            $this->log()->warning(__('The source for assigning the product name has not been selected.', 'wc1c-main'));
+            $this->log()->debug(__('The source for assigning the product name has not been selected.', 'wc1c-main'));
 
             return $internal_product;
 		}
 
 		if('update' === $mode && 'yes' !== $this->getOptions('products_update_name', 'no'))
 		{
-            $this->log()->info(__('Product name update skipped because its disabled in the settings.', 'wc1c-main'));
+            $this->log()->debug(__('Product name update skipped because its disabled in the settings.', 'wc1c-main'));
 
             return $internal_product;
 		}
@@ -1865,14 +1904,14 @@ class Core extends SchemaAbstract
 
         if('create' === $mode && 'no' === $this->getOptions('products_create_adding_description', 'yes'))
 		{
-            $this->log()->notice(__('Assigning a description to the created product is disabled. Assigning description skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Assigning a description to the created product is disabled. Assigning description skipped.', 'wc1c-main'));
 
 			return $internal_product;
 		}
 
 		if('update' === $mode && 'no' === $this->getOptions('products_update_description', 'no'))
 		{
-            $this->log()->notice(__('Assigning a description to the updated product is disabled. Assigning description skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Assigning a description to the updated product is disabled. Assigning description skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
@@ -1918,14 +1957,14 @@ class Core extends SchemaAbstract
 
 		if('update' === $mode && 'add' === $this->getOptions('products_update_description', 'yes') && !empty($internal_product->get_short_description()))
 		{
-            $this->log()->notice(__('When updating products, it is allowed to add descriptions only to products without a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('When updating products, it is allowed to add descriptions only to products without a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
 
 		if('update' === $mode && empty($short_description) && 'yes_yes' === $this->getOptions('products_update_description', 'yes') && empty($internal_product->get_short_description()))
 		{
-            $this->log()->notice(__('When updating products, it is allowed to add descriptions only to products with a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('When updating products, it is allowed to add descriptions only to products with a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
@@ -1962,14 +2001,14 @@ class Core extends SchemaAbstract
 
 		if('create' === $mode && 'no' === $this->getOptions('products_create_adding_description_full', 'yes'))
 		{
-            $this->log()->notice(__('Assigning a full description to the created product is disabled. Assigning description skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Assigning a full description to the created product is disabled. Assigning description skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
 
 		if('update' === $mode && 'no' === $this->getOptions('products_update_description_full', 'no'))
 		{
-            $this->log()->notice(__('Assigning a full description to the updated product is disabled. Assigning description skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Assigning a full description to the updated product is disabled. Assigning description skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
@@ -2014,14 +2053,14 @@ class Core extends SchemaAbstract
 
 		if('update' === $mode && 'add' === $this->getOptions('products_update_description_full', 'yes') && !empty($internal_product->get_description()))
 		{
-            $this->log()->notice(__('When updating products, it is allowed to add full descriptions only to products without a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('When updating products, it is allowed to add full descriptions only to products without a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
 
 		if('update' === $mode && empty($full_description) && 'yes_yes' === $this->getOptions('products_update_description_full', 'yes') && empty($internal_product->get_description()))
 		{
-            $this->log()->notice(__('When updating products, it is allowed to add full descriptions only to products with a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('When updating products, it is allowed to add full descriptions only to products with a description on the site if there is a description in 1C. Assigning skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
@@ -2287,28 +2326,28 @@ class Core extends SchemaAbstract
 
         if(false === $internal_offer->isType('variation'))
         {
-            $this->log()->notice(__('Assignment of images based on offer package is only possible for variations.. Assigning skipped', 'wc1c-main'));
+            $this->log()->debug(__('Assigning of images based on offer package is only possible for variations. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
 
         if('yes' !== $this->getOptions('products_images_by_cml', 'no'))
         {
-            $this->log()->notice(__('Image assignments for CommerceML data are disabled in the settings. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Image assignments for CommerceML data are disabled in the settings. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
 
         if(false === $external_offer->hasImages())
         {
-            $this->log()->info(__('There are no images for the product. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('There are no images for the product. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
 
         if('no' === $this->getOptions('products_update_images', 'no'))
         {
-            $this->log()->notice(__('Image assignment for the product being updated is disabled. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Image assigning for the product being updated is disabled. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
@@ -2319,14 +2358,14 @@ class Core extends SchemaAbstract
 
         if('add' === $images_mode && !empty($internal_offer->get_image_id()))
         {
-            $this->log()->notice(__('The product being updated contains images. Adding images is allowed only if there are none. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('The product being updated contains images. Adding images is allowed only if there are none. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
 
         if(empty($external_images) && 'yes_yes' === $images_mode && empty($internal_offer->get_image_id()))
         {
-            $this->log()->notice(__('The product being updated does not contain an image. Updating images is allowed only if they are present on the site and in 1C. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('The product being updated does not contain an image. Updating images is allowed only if they are present on the site and in 1C. Assignment skipped.', 'wc1c-main'));
 
             return $internal_offer;
         }
@@ -2345,7 +2384,7 @@ class Core extends SchemaAbstract
             {
                 if($index >= $images_max)
                 {
-                    $this->log()->notice(__('The maximum possible number of images has been processed. The rest of the images are skip.', 'wc1c-main'));
+                    $this->log()->debug(__('The maximum possible number of images has been processed. The rest of the images are skip.', 'wc1c-main'));
                     break;
                 }
 
@@ -2355,7 +2394,7 @@ class Core extends SchemaAbstract
 
                 if(false === $image_current)
                 {
-                    $this->log()->notice(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+                    $this->log()->warning(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
                     continue;
                 }
 
@@ -2368,7 +2407,7 @@ class Core extends SchemaAbstract
 
                 if(0 === $attach_id)
                 {
-                    $this->log()->notice(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+                    $this->log()->warning(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
                     continue;
                 }
 
@@ -2396,7 +2435,7 @@ class Core extends SchemaAbstract
         $parent_offer->set_gallery_image_ids($gallery_image_ids);
         $parent_offer->save();
 
-        $this->log()->debug(__('Product images assign completed successfully.', 'wc1c-main'), ['images' => $gallery_image_ids]);
+        $this->log()->info(__('Assigning images to a product by offers as completed.', 'wc1c-main'), ['images' => $gallery_image_ids]);
 
         return $internal_offer;
     }
@@ -2418,35 +2457,35 @@ class Core extends SchemaAbstract
 
         if('yes' !== $this->getOptions('products_images_by_cml', 'no'))
 		{
-            $this->log()->notice(__('Image assignments for CommerceML data are disabled in the settings. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Image assignments for CommerceML data are disabled in the settings. Assigning skipped.', 'wc1c-main'));
 
 			return $internal_product;
 		}
 
 		if('create' === $mode && false === $external_product->hasImages())
 		{
-            $this->log()->info(__('There are no images for the product being created. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('There are no images for the product being created. Assigning skipped.', 'wc1c-main'));
 
 			return $internal_product;
 		}
 
 		if($internal_product->isType('variation')) // todo: назначение одного изображения для вариации по данным каталога?
 		{
-            $this->log()->notice(__('Assigning images to a product variation is not possible. Assigning skipped', 'wc1c-main'));
+            $this->log()->debug(__('Assigning images to a product variation is not possible. Assigning skipped', 'wc1c-main'));
 
 			return $internal_product;
 		}
 
 		if('create' === $mode && 'yes' !== $this->getOptions('products_create_adding_images', 'no'))
 		{
-            $this->log()->notice(__('Assigning images to the created product is disabled. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Assigning images to the created product is disabled. Assigning skipped.', 'wc1c-main'));
 
 			return $internal_product;
 		}
 
 		if('update' === $mode && 'no' === $this->getOptions('products_update_images', 'no'))
 		{
-            $this->log()->notice(__('Image assignment for the product being updated is disabled. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('Image assignment for the product being updated is disabled. Assigning skipped.', 'wc1c-main'));
 
 			return $internal_product;
 		}
@@ -2457,14 +2496,14 @@ class Core extends SchemaAbstract
 
 		if('update' === $mode && 'add' === $images_mode && !empty($internal_product->get_image_id()))
 		{
-            $this->log()->notice(__('The product being updated contains images. Adding images is allowed only if there are none. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('The product being updated contains images. Adding images is allowed only if there are none. Assigning skipped.', 'wc1c-main'));
 
 			return $internal_product;
 		}
 
 		if('update' === $mode && empty($external_images) && 'yes_yes' === $images_mode && empty($internal_product->get_image_id()))
 		{
-            $this->log()->notice(__('The product being updated does not contain an image. Updating images is allowed only if they are present on the site and in 1C. Assigning skipped.', 'wc1c-main'));
+            $this->log()->debug(__('The product being updated does not contain an image. Updating images is allowed only if they are present on the site and in 1C. Assigning skipped.', 'wc1c-main'));
 
             return $internal_product;
 		}
@@ -2480,7 +2519,7 @@ class Core extends SchemaAbstract
 			{
 				if($index >= $images_max)
 				{
-					$this->log()->notice(__('The maximum possible number of images has been processed. The rest of the images are skip.', 'wc1c-main'));
+					$this->log()->debug(__('The maximum possible number of images has been processed. The rest of the images are skip.', 'wc1c-main'));
 					break;
 				}
 
@@ -2490,7 +2529,7 @@ class Core extends SchemaAbstract
 
 				if(false === $image_current)
 				{
-					$this->log()->notice(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+					$this->log()->warning(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
 					continue;
 				}
 
@@ -2503,7 +2542,7 @@ class Core extends SchemaAbstract
 
 				if(0 === $attach_id)
 				{
-					$this->log()->notice(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
+					$this->log()->warning(__('The image assignment for the product is missing. Image is not found in the media library.', 'wc1c-main'), ['image' => $image]);
 					continue;
 				}
 
@@ -2525,7 +2564,7 @@ class Core extends SchemaAbstract
 
 		$internal_product->set_gallery_image_ids($gallery_image_ids);
 
-        $this->log()->debug(__('Product images assign completed successfully.', 'wc1c-main'), ['images' => $gallery_image_ids]);
+        $this->log()->info(__('Assign images to a product as completed.', 'wc1c-main'), ['images' => $gallery_image_ids]);
 
         return $internal_product;
 	}
@@ -3268,7 +3307,7 @@ class Core extends SchemaAbstract
 	{
         $this->log()->info(__('Assigning attributes to a product based on the properties of the offers package.', 'wc1c-main'), ['filetype' => $reader->getFiletype(), 'internal_product_id' => $internal_product->getId()]);
 
-        if($reader->getFiletype() !== 'offers')
+        if($reader->getFiletype() !== 'offers' && $reader->schema_version !== '3.1')
 		{
             $this->log()->notice(__('The file type is not an offer package. Skip assigning attributes on offer data.', 'wc1c-main'));
 
@@ -3851,7 +3890,7 @@ class Core extends SchemaAbstract
 			 */
 			if('yes' !== $this->getOptions('products_create', 'no'))
 			{
-				$this->log()->notice(__('Products create is disabled. Product create skipped.', 'wc1c-main'));
+				$this->log()->debug(__('Products create is disabled. Product create skipped.', 'wc1c-main'));
 				return;
 			}
 
@@ -3860,14 +3899,14 @@ class Core extends SchemaAbstract
 			 */
 			if($external_product->hasDeleted() && 'yes' !== $this->getOptions('products_create_delete_mark', 'no'))
 			{
-				$this->log()->notice(__('The use of products delete mark is disabled. Product create skipped.', 'wc1c-main'));
+				$this->log()->info(__('The use of products delete mark is disabled. Product create skipped.', 'wc1c-main'));
 				return;
 			}
 
             /**
              * Продукт с характеристикой
              * ---
-             * Проверяем наличие родительского продукта для продукта с характеристикой, и
+             * Проверка наличия родительского продукта для продукта с характеристикой, и
              * если родительского продукта нет, пропускаем обработку.
              * Исключение составляет включенная возможность создания родительского продукта на основе первой характеристики.
              */
@@ -3925,11 +3964,11 @@ class Core extends SchemaAbstract
                     if('yes' !== $this->getOptions('products_with_characteristics_simple', 'no'))
                     {
                         $this->log()->info(__('Parent product is not found.', 'wc1c-main'));
-                        $this->log()->notice(__('Creating simple products by characteristics is disabled in the settings. Product create skipped.', 'wc1c-main'));
+                        $this->log()->debug(__('Creating simple products by characteristics is disabled in the settings. Product create skipped.', 'wc1c-main'));
                         return;
                     }
 
-                    $this->log()->info(__('Creating simple products by characteristics is enabled in the settings. Parent product is not found. Creating simple product by characteristic.', 'wc1c-main'));
+                    $this->log()->debug(__('Creating simple products by characteristics is enabled in the settings. Parent product is not found. Creating simple product by characteristic.', 'wc1c-main'));
                 }
                 else
                 {
@@ -3947,7 +3986,7 @@ class Core extends SchemaAbstract
                         $internal_product_parent->save();
                     }
 
-                    $this->log()->info(__('Variation is not found. Creating.', 'wc1c-main'), ['parent_product_id' => $parent_product_id]);
+                    $this->log()->debug(__('Variation is not found. Creating.', 'wc1c-main'), ['parent_product_id' => $parent_product_id]);
 
                     $internal_product = new VariationVariableProduct();
 
@@ -3961,7 +4000,7 @@ class Core extends SchemaAbstract
 
                     $internal_product_id = $internal_product->save();
 
-                    $this->log()->debug(__('The creation of the variation is completed.', 'wc1c-main'), ['parent_product_id' => $parent_product_id, 'product_variation_id' => $internal_product_id]);
+                    $this->log()->info(__('The creation of the variation is completed.', 'wc1c-main'), ['parent_product_id' => $parent_product_id, 'product_variation_id' => $internal_product_id]);
                 }
 			}
 			else
@@ -4000,7 +4039,7 @@ class Core extends SchemaAbstract
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_products_item_before_save'))
 			{
-                $this->log()->info(__('Assignment of data for the created product according to external algorithms.', 'wc1c-main'));
+                $this->log()->debug(__('Assignment of data for the created product according to external algorithms.', 'wc1c-main'));
 
 				$internal_product = apply_filters('wc1c_schema_productscml_processing_products_item_before_save', $internal_product, $external_product, 'create', $reader);
 			}
@@ -4013,7 +4052,7 @@ class Core extends SchemaAbstract
 			{
 				$id = $internal_product->save();
 
-				$this->log()->info(__('The product is created.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $internal_product->get_type()]);
+				$this->log()->notice(__('The product is created.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $internal_product->get_type()]);
 			}
 			catch(\Throwable $e)
 			{
@@ -4032,7 +4071,7 @@ class Core extends SchemaAbstract
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_products_item_after_save'))
 			{
-                $this->log()->info(__('Assignment of data for the created product according to external algorithms after saving.', 'wc1c-main'));
+                $this->log()->debug(__('Assignment of data for the created product according to external algorithms after saving.', 'wc1c-main'));
 
                 $internal_product = apply_filters('wc1c_schema_productscml_processing_products_item_after_save', $internal_product, $external_product, 'create', $reader);
 
@@ -4051,14 +4090,14 @@ class Core extends SchemaAbstract
 			return;
 		}
 
-        $this->log()->info(__('Product is found. Updating.', 'wc1c-main'));
+        $this->log()->debug(__('Product is found. Updating.', 'wc1c-main'), ['product_id' => $product_id]);
 
 		/**
 		 * Обновление существующих продуктов отключено
 		 */
 		if('yes' !== $this->getOptions('products_update', 'no'))
 		{
-			$this->log()->notice(__('Products update is disabled in settings. Product update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
+			$this->log()->info(__('Products update is disabled in settings. Product update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
 			return;
 		}
 
@@ -4072,7 +4111,7 @@ class Core extends SchemaAbstract
 		 */
 		if('yes' === $this->getOptions('products_update_only_configuration', 'no') && (int)$update_product->getConfigurationId() !== $this->configuration()->getId())
 		{
-			$this->log()->notice(__('The product is created from a different configuration. Update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
+			$this->log()->warning(__('The product is created from a different configuration. Update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
 			return;
 		}
 
@@ -4081,7 +4120,7 @@ class Core extends SchemaAbstract
 		 */
 		if('yes' === $this->getOptions('products_update_only_schema', 'no') && (string)$update_product->getSchemaId() !== $this->getId())
 		{
-			$this->log()->notice(__('The product is created from a different schema. Update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
+			$this->log()->warning(__('The product is created from a different schema. Update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
 			return;
 		}
 
@@ -4095,7 +4134,7 @@ class Core extends SchemaAbstract
             && 'yes' !== $this->getOptions('products_update_use_delete_mark', 'no')
         )
 		{
-			$this->log()->notice(__('The use of products from trash is disabled. Updating skipped.', 'wc1c-main'));
+			$this->log()->warning(__('The use of products from trash is disabled. Updating skipped.', 'wc1c-main'));
 			return;
 		}
 
@@ -4111,7 +4150,7 @@ class Core extends SchemaAbstract
 		 */
 		if(has_filter('wc1c_schema_productscml_processing_products_item_before_save'))
 		{
-            $this->log()->info(__('Assignment of data for the updated product according to external algorithms.', 'wc1c-main'));
+            $this->log()->debug(__('Assignment of data for the updated product according to external algorithms.', 'wc1c-main'));
 
 			$update_product = apply_filters('wc1c_schema_productscml_processing_products_item_before_save', $update_product, $external_product, 'update', $reader);
 		}
@@ -4143,7 +4182,7 @@ class Core extends SchemaAbstract
 		 */
 		if(has_filter('wc1c_schema_productscml_processing_products_item_after_save'))
 		{
-            $this->log()->info(__('Assignment of data for the updated product according to external algorithms after saving.', 'wc1c-main'));
+            $this->log()->debug(__('Assignment of data for the updated product according to external algorithms after saving.', 'wc1c-main'));
 
             $update_product = apply_filters('wc1c_schema_productscml_processing_products_item_after_save', $update_product, $external_product, 'update', $reader);
 
@@ -4228,7 +4267,7 @@ class Core extends SchemaAbstract
             /**
              * Предложение продукта с характеристикой
              * ---
-             * Проверяем наличие родительского продукта для продукта с характеристикой, и
+             * Проверка наличия родительского продукта для продукта с характеристикой, и
              * если родительского продукта нет, пропускаем обработку.
              * Исключение составляет включенная возможность создания родительского продукта на основе первой характеристики.
              */
@@ -4335,7 +4374,7 @@ class Core extends SchemaAbstract
          */
         if('yes' === $this->getOptions('products_update_only_configuration', 'no') && (int)$internal_offer->getConfigurationId() !== $this->configuration()->getId())
         {
-            $this->log()->info(__('The product is created from a different configuration. Update skipped.', 'wc1c-main'), ['offer_id' => $internal_offer_id]);
+            $this->log()->warning(__('The product is created from a different configuration. Update skipped.', 'wc1c-main'), ['offer_id' => $internal_offer_id]);
             return;
         }
 
@@ -4344,7 +4383,7 @@ class Core extends SchemaAbstract
          */
         if('yes' === $this->getOptions('products_update_only_schema', 'no') && (string)$internal_offer->getSchemaId() !== $this->getId())
         {
-            $this->log()->info(__('The product is created from a different schema. Update skipped.', 'wc1c-main'), ['offer_id' => $internal_offer_id]);
+            $this->log()->warning(__('The product is created from a different schema. Update skipped.', 'wc1c-main'), ['offer_id' => $internal_offer_id]);
             return;
         }
 
