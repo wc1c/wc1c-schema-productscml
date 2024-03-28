@@ -1199,7 +1199,7 @@ class Core extends SchemaAbstract
                     $products_count = $reader->elements['Товар'];
                 }
 
-                $this->log()->notice(__('Processing of the product catalog as completed.', 'wc1c-main'), ['products_count' => $products_count]);
+                $this->log()->notice(__('Processing a catalog with products as completed.', 'wc1c-main'), ['products_count' => $products_count]);
 
                 /**
                  * Сохранение каталога в базу данных
@@ -1214,11 +1214,13 @@ class Core extends SchemaAbstract
 			return;
 		}
 
-		if($reader->nodeName === 'Каталог')
+		if($reader->nodeName === 'Каталог' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
 		{
-			if(is_null($reader->catalog))
+            $this->log()->notice(__('Processing a catalog with products.', 'wc1c-main'));
+
+            if(is_null($reader->catalog))
 			{
-				$this->log()->info(__('The catalog object has not been previously initialized. Initialization.', 'wc1c-main'));
+				$this->log()->debug(__('The catalog object has not been previously initialized. Initialization.', 'wc1c-main'));
 
 				$reader->catalog = new Catalog();
 			}
@@ -1274,7 +1276,7 @@ class Core extends SchemaAbstract
                 $this->configuration()->addMetaData('_catalog_full_time', $catalog_full_time, true);
                 $this->configuration()->saveMetaData();
 
-                $this->log()->notice(__('The catalog contains full data. The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $catalog_full_time, 'catalog_id' => $reader->catalog->getId()]);
+                $this->log()->notice(__('The catalog with products contains full data. The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $catalog_full_time, 'catalog_id' => $reader->catalog->getId()]);
             }
         }
 
@@ -4090,7 +4092,7 @@ class Core extends SchemaAbstract
 			return;
 		}
 
-        $this->log()->debug(__('Product is found. Updating.', 'wc1c-main'), ['product_id' => $product_id]);
+        $this->log()->info(__('Product is found. Updating.', 'wc1c-main'), ['product_id' => $product_id]);
 
 		/**
 		 * Обновление существующих продуктов отключено
