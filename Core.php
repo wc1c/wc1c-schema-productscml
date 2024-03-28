@@ -1292,20 +1292,36 @@ class Core extends SchemaAbstract
 
 		if($reader->parentNodeName === 'Товары' && $reader->nodeName === 'Товар')
 		{
-			$product_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+            try
+            {
+                $product_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+            }
+            catch (\Throwable $e)
+            {
+                $this->log()->warning(__('An exception was thrown from SimpleXMLElement.', 'wc1c-main'), ['exception' => $e]);
+                return;
+            }
 
 			/**
 			 * Декодирование данных продукта из XML в объект реализующий ProductDataContract
 			 */
-			$product = $reader->decoder->process('product', $product_xml);
+            try
+            {
+                $product = $reader->decoder->process('product', $product_xml);
+            }
+            catch(\Throwable $e)
+            {
+                $this->log()->warning(__('An exception was thrown while decoding the product.', 'wc1c-main'), ['exception' => $e]);
+                return;
+            }
 
 			/**
 			 * Внешняя фильтрация перед непосредственной обработкой
 			 *
-			 * @param ProductDataContract $product
-			 * @param Reader $reader
-			 * @param SchemaAbstract $this
-             * @param SimpleXMLElement $product_xml
+			 * @param ProductDataContract $product Данные продукта в объектном виде (обработанные)
+			 * @param Reader $reader Текущий ридер
+			 * @param SchemaAbstract $this Текущая схема
+             * @param SimpleXMLElement $product_xml Не обработанные данные продукта из XML
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_products'))
 			{
