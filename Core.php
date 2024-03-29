@@ -1403,7 +1403,7 @@ class Core extends SchemaAbstract
 			}
 			catch(\Throwable $e)
 			{
-				$this->log()->warning(__('An exception was thrown while saving the product.', 'wc1c-main'), ['exception' => $e]);
+				$this->log()->warning(__('An exception was thrown while processing the product.', 'wc1c-main'), ['exception' => $e]);
 
                 if(has_action('wc1c_schema_productscml_processing_products_item_throwable'))
                 {
@@ -4607,7 +4607,7 @@ class Core extends SchemaAbstract
 			try
 			{
                 /**
-                 * Дальнейшая обработка данных предложения
+                 * Обработка данных предложения
                  *
                  * @param ProductDataContract $offer Обработанные данные предложения
                  * @param Reader $reader Текущий ридер
@@ -4618,7 +4618,30 @@ class Core extends SchemaAbstract
 			catch(\Throwable $e)
 			{
 				$this->log()->warning(__('An exception was thrown while processing the offer.', 'wc1c-main'), ['exception' => $e]);
+
+                if(has_action('wc1c_schema_productscml_processing_offers_item_throwable'))
+                {
+                    /**
+                     * Внешнее действие при выброске исключения при обработке предложения
+                     *
+                     * @param ProductDataContract $offer
+                     * @param Reader $reader
+                     * @param SchemaAbstract $this
+                     * @param \Throwable $e
+                     *
+                     * @since 0.14
+                     */
+                    do_action('wc1c_schema_productscml_processing_offers_item_throwable', $offer, $reader, $this, $e);
+                }
 			}
+
+            $current_offer = 0;
+            if(isset($reader->elements['Предложение']))
+            {
+                $current_offer = $reader->elements['Предложение'];
+            }
+
+            $this->log()->info(__('Move on to the next offer.', 'wc1c-main'), ['current_offer_counter' => $current_offer]);
 
 			$reader->next();
 		}
