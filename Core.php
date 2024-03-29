@@ -1239,7 +1239,7 @@ class Core extends SchemaAbstract
                     $products_count = $reader->elements['Товар'];
                 }
 
-                $this->log()->notice(__('Processing a catalog with products as completed.', 'wc1c-main'), ['products_count' => $products_count]);
+                $this->log()->notice(__('Processing a catalog with products as completed.', 'wc1c-main'), ['catalog_id' => $reader->catalog->getId(), 'classifier_id' => $reader->catalog->getClassifierId(), 'products_count' => $products_count]);
 
                 /**
                  * Сохранение каталога в базу данных
