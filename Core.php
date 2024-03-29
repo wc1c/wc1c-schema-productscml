@@ -4554,7 +4554,15 @@ class Core extends SchemaAbstract
 
 		if($reader->parentNodeName === 'Предложения' && $reader->nodeName === 'Предложение')
 		{
-			$offer_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+            try
+            {
+                $offer_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+            }
+            catch(\Throwable $e)
+            {
+                $this->log()->warning(__('SimpleXMLElement threw an exception when converting the offer.', 'wc1c-main'), ['exception' => $e]);
+                return;
+            }
 
 			try
 			{
@@ -4562,23 +4570,23 @@ class Core extends SchemaAbstract
 			}
 			catch(\Throwable $e)
 			{
-				$this->log()->warning(__('An exception was thrown decode the offer.', 'wc1c-main'), ['exception' => $e]);
+				$this->log()->warning(__('DecoderCML threw an exception when converting the offer.', 'wc1c-main'), ['exception' => $e]);
 				return;
 			}
 
 			/**
 			 * Внешняя фильтрация перед непосредственной обработкой
 			 *
-			 * @param ProductDataContract $offer
-			 * @param Reader $reader
-			 * @param SchemaAbstract $this
-			 * @param SimpleXMLElement $offer_xml
+			 * @param ProductDataContract $offer Обработанные данные предложения
+			 * @param Reader $reader Текущий ридер
+			 * @param SchemaAbstract $this Текущая схема
+			 * @param SimpleXMLElement $offer_xml Данные предложения в формате xml
 			 */
 			if(has_filter('wc1c_schema_productscml_processing_offers'))
 			{
 				$offer = apply_filters('wc1c_schema_productscml_processing_offers', $offer, $reader, $this, $offer_xml);
 
-				$this->log()->info(__('The offer has been changed according to external algorithms.', 'wc1c-main'));
+				$this->log()->debug(__('The offer has been changed according to external algorithms.', 'wc1c-main'), ['offer' => $offer]);
 			}
 
 			if(!$offer instanceof ProductDataContract)
@@ -4598,6 +4606,13 @@ class Core extends SchemaAbstract
 
 			try
 			{
+                /**
+                 * Дальнейшая обработка данных предложения
+                 *
+                 * @param ProductDataContract $offer Обработанные данные предложения
+                 * @param Reader $reader Текущий ридер
+                 * @param SchemaAbstract $this Текущая схема
+                 */
 				do_action('wc1c_schema_productscml_processing_offers_item', $offer, $reader, $this);
 			}
 			catch(\Throwable $e)
