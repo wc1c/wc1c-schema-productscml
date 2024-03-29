@@ -748,7 +748,7 @@ final class Receiver extends ReceiverAbstract
 	{
 		$filename = wc1c()->getVar($_GET['filename'], '');
 
-        $this->core()->log()->notice(__('On request from 1C - started importing data from a file.', 'wc1c-main'), ['file' => $filename]);
+        $this->core()->log()->info(__('On request from 1C - started importing data from a file.', 'wc1c-main'), ['file' => $filename]);
 
 		if($filename === '')
 		{

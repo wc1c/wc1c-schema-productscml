@@ -121,6 +121,7 @@ class Core extends SchemaAbstract
 
 			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingTimer'], 5, 1);
 
+            add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingStart'], 10, 1);
 			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingClassifier'], 10, 1);
 			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingCatalog'], 20, 1);
 			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingOffers'], 20, 1);
@@ -344,6 +345,26 @@ class Core extends SchemaAbstract
 			$this->receiver->sendResponseByType('failure', $message);
 		}
 	}
+
+    /**
+     * Обработка начальных данных
+     *
+     * @param Reader $reader
+     *
+     * @return void
+     * @throws \Exception
+     */
+    public function processingStart(Reader $reader)
+    {
+        if($reader->nodeName === 'КоммерческаяИнформация' && $reader->isElement())
+        {
+            $version = $reader->xml_reader->getAttribute('ВерсияСхемы');
+            $formation_date = $reader->xml_reader->getAttribute('ДатаФормирования');
+            $date = strtotime($formation_date);
+
+            $this->log()->notice(__('Processing a commercial info.', 'wc1c-main'), ['cml_version' => $version, 'date' => $formation_date, 'timestamp' => $date]);
+        }
+    }
 
 	/**
 	 * Обработка данных классификатора
