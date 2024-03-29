@@ -977,7 +977,7 @@ class Admin
 			'description' => sprintf
             (
                 '%s<hr>%s',
-                __('The product SKU will be added according to data from 1C. It is recommended to enable this feature.', 'wc1c-main'),
+                __('Product SKUs will be filled according to the data from 1C on the selected source for SKUs. It is recommended to enable this feature.', 'wc1c-main'),
                 __('The setting works when creating products (goods).', 'wc1c-main')
             ),
             'default' => 'yes'
