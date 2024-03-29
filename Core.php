@@ -1316,7 +1316,7 @@ class Core extends SchemaAbstract
                 $this->configuration()->addMetaData('_catalog_full_time', $catalog_full_time, true);
                 $this->configuration()->saveMetaData();
 
-                $this->log()->notice(__('The catalog with products contains full data. The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $catalog_full_time, 'catalog_id' => $reader->catalog->getId()]);
+                $this->log()->info(__('The catalog with products contains full data. The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $catalog_full_time, 'catalog_id' => $reader->catalog->getId()]);
             }
         }
 
