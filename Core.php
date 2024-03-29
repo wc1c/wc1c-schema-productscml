@@ -4467,6 +4467,17 @@ class Core extends SchemaAbstract
 	{
 		if(false === $reader->isElement())
 		{
+            if(($reader->nodeName === 'ПакетПредложений' || $reader->nodeName === 'ИзмененияПакетаПредложений') && $reader->xml_reader->nodeType === XMLReader::END_ELEMENT)
+            {
+                $offers_count = 0;
+                if(isset($reader->elements['Предложение']))
+                {
+                    $offers_count = $reader->elements['Предложение'];
+                }
+
+                $this->log()->notice(__('Processing a offers package as completed.', 'wc1c-main'), ['offers_package_id' => $reader->offers_package->getId(), 'catalog_id' => $reader->offers_package->getCatalogId(), 'classifier_id' => $reader->offers_package->getClassifierId(), 'offers_count' => $offers_count]);
+            }
+
 			return;
 		}
 
@@ -4474,6 +4485,11 @@ class Core extends SchemaAbstract
 		{
 			$reader->offers_package = new OffersPackage();
 		}
+
+        if(($reader->nodeName === 'ПакетПредложений' || $reader->nodeName === 'ИзмененияПакетаПредложений'))
+        {
+            $this->log()->notice(__('Processing a offers package.', 'wc1c-main'));
+        }
 
 		if($reader->nodeName === 'ПакетПредложений')
 		{
