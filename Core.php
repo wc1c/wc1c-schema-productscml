@@ -1564,7 +1564,7 @@ class Core extends SchemaAbstract
     }
 
 	/**
-	 * Назначение данных продукта исходя из режима: артикул
+	 * Назначение артикула для продуктов исходя из режима
 	 *
 	 * @param ProductContract $internal_product Экземпляр продукта - либо существующий, либо новый
 	 * @param ProductDataContract $external_product Данные продукта из XML
@@ -1575,18 +1575,18 @@ class Core extends SchemaAbstract
 	 */
 	public function assignProductsItemSku(ProductContract $internal_product, ProductDataContract $external_product, string $mode, Reader $reader): ProductContract
 	{
-        $this->log()->info(__('Assign a SKU to a product.', 'wc1c-main'));
+        $this->log()->info(__('Assigning a SKU to a product.', 'wc1c-main'), ['mode' => $mode, 'product_id' => $internal_product->getId()]);
 
         if('update' === $mode && 'no' === $this->getOptions('products_update_sku', 'no'))
 		{
-            $this->log()->notice(__('SKU update during product update is disabled in the settings.', 'wc1c-main'));
+            $this->log()->debug(__('SKU update during product update is disabled in the configuration settings.', 'wc1c-main'));
 
             return $internal_product;
 		}
 
 		if('create' === $mode && 'no' === $this->getOptions('products_create_adding_sku', 'yes'))
 		{
-            $this->log()->notice(__('Adding a SKU when adding a product is disabled in the settings.', 'wc1c-main'));
+            $this->log()->debug(__('Adding a SKU when adding a product is disabled in the configuration settings.', 'wc1c-main'));
 
 			return $internal_product;
 		}
@@ -1595,7 +1595,7 @@ class Core extends SchemaAbstract
 
 		if('no' === $source)
 		{
-            $this->log()->warning(__('The source for the article is not specified.', 'wc1c-main'));
+            $this->log()->warning(__('The source of the SKUs is not specified.', 'wc1c-main'));
 
 			return $internal_product;
 		}
@@ -1637,27 +1637,34 @@ class Core extends SchemaAbstract
 
 		if('update' === $mode && 'add' === $this->getOptions('products_update_sku', 'no') && !empty($internal_product->getSku()))
 		{
-            $this->log()->notice(__('SKU update skipped. The mode of adding SKU is enabled for products that do not have them.', 'wc1c-main'));
+            $this->log()->debug(__('SKU update skipped. The mode of adding SKU is enabled for products that do not have them.', 'wc1c-main'));
 
             return $internal_product;
 		}
 
 		if('update' === $mode && empty($sku) && 'yes_yes' === $this->getOptions('products_update_sku', 'no') && empty($internal_product->getSku()))
 		{
-            $this->log()->notice(__('SKU update skipped. The mode for adding SKUs is enabled for products that have them on the site and in 1C.', 'wc1c-main'));
+            $this->log()->debug(__('SKU update skipped. The mode for adding SKUs is enabled for products that have them on the site and in 1C.', 'wc1c-main'));
 
             return $internal_product;
 		}
 
+        if($sku === $internal_product->getSku())
+        {
+            $this->log()->debug(__('SKU update skipped. A new SKU is equal to an already filled SKU.', 'wc1c-main'));
+
+            return $internal_product;
+        }
+
 		try
 		{
-			$internal_product->setSku($sku);
+            $this->log()->notice(__('Assigning a SKU to a product as completed.', 'wc1c-main'), ['product_id' => $internal_product->getId(), 'sku' => $internal_product->getSku(), 'new_sku' => $sku]);
 
-            $this->log()->info(__('The SKU assignment for the product has been successfully completed.', 'wc1c-main'), ['product_id' => $internal_product->getId(), 'sku' => $external_product->getSku()]);
+            $internal_product->setSku($sku);
 		}
 		catch(\Throwable $e)
 		{
-			$this->log()->notice(__('Failed to set SKU for product.', 'wc1c-main'), ['exception' => $e, 'sku' => $external_product->getSku()]);
+			$this->log()->notice(__('Failed to set SKU for product.', 'wc1c-main'), ['exception' => $e, 'sku' => $internal_product->getSku(), 'new_sku' => $sku]);
 		}
 
 		return $internal_product;
