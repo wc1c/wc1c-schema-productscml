@@ -362,7 +362,7 @@ class Core extends SchemaAbstract
             $formation_date = $reader->xml_reader->getAttribute('ДатаФормирования');
             $date = strtotime($formation_date);
 
-            $this->log()->notice(__('Processing a commercial info.', 'wc1c-main'), ['cml_version' => $version, 'date' => $formation_date, 'timestamp' => $date]);
+            $this->log()->notice(__('Processing a commercial info.', 'wc1c-main'), ['cml_version' => $version, 'date' => $formation_date, 'timestamp' => $date, 'file_type' => $reader->getFileType(), 'file' => basename($reader->getFile())]);
         }
     }
 
