@@ -362,13 +362,23 @@ class Core extends SchemaAbstract
 
 		if($reader->nodeName === 'Классификатор' && $reader->isElement())
 		{
+            $this->log()->notice(__('Processing a classifier.', 'wc1c-main'));
+
 			$only_changes = $reader->xml_reader->getAttribute('СодержитТолькоИзменения') ?: false;
 			if($only_changes === 'true')
 			{
 				$only_changes = true;
 			}
 
-            $classifier_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+            try
+            {
+                $classifier_xml = new SimpleXMLElement($reader->xml_reader->readOuterXml());
+            }
+            catch(\Throwable $e)
+            {
+                $this->log()->warning(__('SimpleXMLElement threw an exception when converting the classifier.', 'wc1c-main'), ['exception' => $e]);
+                return;
+            }
 
             try
             {
@@ -376,7 +386,7 @@ class Core extends SchemaAbstract
             }
             catch(\Throwable $e)
             {
-                $this->log()->warning(__('DecoderCML threw an exception while converting the classifier.', 'wc1c-main'), ['exception' => $e]);
+                $this->log()->warning(__('DecoderCML threw an exception when converting the classifier.', 'wc1c-main'), ['exception' => $e]);
                 return;
             }
 
@@ -404,6 +414,13 @@ class Core extends SchemaAbstract
 
 			$reader->classifier = $classifier;
 
+            /**
+             * Обработка объекта классификатора
+             *
+             * @param ClassifierDataContract $classifier Объект классификатора
+             * @param Reader $reader Текущий ридер
+             * @param SchemaAbstract $this Текущая схема
+             */
 			try
 			{
 				do_action('wc1c_schema_productscml_processing_classifier_item', $classifier, $reader, $this);
@@ -412,6 +429,8 @@ class Core extends SchemaAbstract
 			{
 				$this->log()->warning(__('An exception was thrown while saving the classifier.', 'wc1c-main'), ['exception' => $e]);
 			}
+
+            $this->log()->notice(__('Processing a classifier an completed.', 'wc1c-main'), ['classifier_id' => $classifier->getId(), 'classifier_name' => $classifier->getName()]);
 
 			$reader->next();
 		}
