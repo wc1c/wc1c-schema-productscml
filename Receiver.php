@@ -776,7 +776,7 @@ final class Receiver extends ReceiverAbstract
 			{
 				$response_description = __('Import of data from file completed successfully.', 'wc1c-main');
 
-                $this->core()->log()->notice($response_description, ['file_name' => $filename, 'file_path' => $file]);
+                $this->core()->log()->info($response_description, ['file_name' => $filename, 'file_path' => $file]);
 				$this->sendResponseByType('success', $response_description);
 			}
 		}
