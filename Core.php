@@ -126,7 +126,7 @@ class Core extends SchemaAbstract
 			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingCatalog'], 20, 1);
 			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingOffers'], 20, 1);
 
-			add_action('wc1c_schema_productscml_processing_classifier_item', [$this, 'processingClassifierItem'], 10, 2);
+			add_action('wc1c_schema_productscml_processing_classifier_item', [$this, 'processingClassifierSave'], 10, 2);
 			add_action('wc1c_schema_productscml_processing_classifier_item', [$this, 'processingClassifierGroups'], 10, 2);
 			add_action('wc1c_schema_productscml_processing_classifier_item', [$this, 'processingClassifierProperties'], 10, 2);
 
@@ -1079,9 +1079,9 @@ class Core extends SchemaAbstract
 	 *
 	 * @return void
 	 */
-	public function processingClassifierItem(ClassifierDataContract $classifier, Reader $reader)
+	public function processingClassifierSave(ClassifierDataContract $classifier, Reader $reader)
 	{
-        $this->log()->info(__('Classifier processing.', 'wc1c-main'));
+        $this->log()->info(__('Saving classifier data.', 'wc1c-main'));
 
 		$classifier_push = true;
 		$all_classifiers = $this->configuration()->getMeta('classifier', false, 'edit');
@@ -1217,6 +1217,8 @@ class Core extends SchemaAbstract
         }
 
 		$this->configuration()->save();
+
+        $this->log()->notice(__('Saving classifier data as completed.', 'wc1c-main'));
 	}
 
 	/**
