@@ -362,7 +362,7 @@ class Core extends SchemaAbstract
             $formation_date = $reader->xml_reader->getAttribute('ДатаФормирования');
             $date = strtotime($formation_date);
 
-            $this->log()->notice(__('Processing a commercial info.', 'wc1c-main'), ['cml_version' => $version, 'date' => $formation_date, 'timestamp' => $date, 'file_type' => $reader->getFileType(), 'file' => basename($reader->getFile())]);
+            $this->log()->info(__('Processing a commercial info.', 'wc1c-main'), ['cml_version' => $version, 'date' => $formation_date, 'timestamp' => $date, 'file_type' => $reader->getFileType(), 'file' => basename($reader->getFile())]);
         }
     }
 
@@ -383,7 +383,7 @@ class Core extends SchemaAbstract
 
 		if($reader->nodeName === 'Классификатор' && $reader->isElement())
 		{
-            $this->log()->notice(__('Processing a classifier.', 'wc1c-main'));
+            $this->log()->info(__('Processing a classifier.', 'wc1c-main'));
 
 			$only_changes = $reader->xml_reader->getAttribute('СодержитТолькоИзменения') ?: false;
 			if($only_changes === 'true')
@@ -451,7 +451,7 @@ class Core extends SchemaAbstract
 				$this->log()->warning(__('An exception was thrown while saving the classifier.', 'wc1c-main'), ['exception' => $e]);
 			}
 
-            $this->log()->notice(__('Processing a classifier an completed.', 'wc1c-main'), ['classifier_id' => $classifier->getId(), 'classifier_name' => $classifier->getName()]);
+            $this->log()->info(__('Processing a classifier an completed.', 'wc1c-main'), ['classifier_id' => $classifier->getId(), 'classifier_name' => $classifier->getName()]);
 
 			$reader->next();
 		}
