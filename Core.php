@@ -4502,7 +4502,7 @@ class Core extends SchemaAbstract
 
         if(($reader->nodeName === 'ПакетПредложений' || $reader->nodeName === 'ИзмененияПакетаПредложений'))
         {
-            $this->log()->notice(__('Processing a offers package.', 'wc1c-main'));
+            $this->log()->info(__('Processing a offers package.', 'wc1c-main'));
         }
 
 		if($reader->nodeName === 'ПакетПредложений')
