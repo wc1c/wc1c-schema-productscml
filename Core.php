@@ -4489,7 +4489,7 @@ class Core extends SchemaAbstract
 
             if(($reader->nodeName === 'ПакетПредложений' || $reader->nodeName === 'ИзмененияПакетаПредложений') && $reader->xml_reader->nodeType === XMLReader::END_ELEMENT)
             {
-                $this->log()->notice(__('Processing a offers package as completed.', 'wc1c-main'), ['offers_package_id' => $reader->offers_package->getId(), 'catalog_id' => $reader->offers_package->getCatalogId(), 'classifier_id' => $reader->offers_package->getClassifierId()]);
+                $this->log()->info(__('Processing a offers package as completed.', 'wc1c-main'), ['offers_package_id' => $reader->offers_package->getId(), 'catalog_id' => $reader->offers_package->getCatalogId(), 'classifier_id' => $reader->offers_package->getClassifierId()]);
             }
 
 			return;
