@@ -4162,7 +4162,7 @@ class Core extends SchemaAbstract
 		 */
 		if('yes' === $this->getOptions('products_update_only_configuration', 'no') && (int)$update_product->getConfigurationId() !== $this->configuration()->getId())
 		{
-			$this->log()->warning(__('The product is created from a different configuration. Update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
+			$this->log()->notice(__('The product is created from a different configuration. Update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
 			return;
 		}
 
@@ -4171,7 +4171,7 @@ class Core extends SchemaAbstract
 		 */
 		if('yes' === $this->getOptions('products_update_only_schema', 'no') && (string)$update_product->getSchemaId() !== $this->getId())
 		{
-			$this->log()->warning(__('The product is created from a different schema. Update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
+			$this->log()->notice(__('The product is created from a different schema. Update skipped.', 'wc1c-main'), ['product_id' => $product_id]);
 			return;
 		}
 
@@ -4212,9 +4212,23 @@ class Core extends SchemaAbstract
 
 		try
 		{
+            $saving_changes = false;
+
+            if(!empty($update_product->get_changes()))
+            {
+                $saving_changes = true;
+            }
+
             $id = $update_product->save();
 
-            $this->log()->info(__('Product update has been successfully completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type()]);
+            if($saving_changes)
+            {
+                $this->log()->notice(__('Product is found. Product data is changed. Saving changes is completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type(), 'data' => $update_product->get_changes()]);
+            }
+            else
+            {
+                $this->log()->info(__('Product is found. Product data is not changed. Updating is completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type()]);
+            }
         }
 		catch(\Throwable $e)
 		{
@@ -4233,15 +4247,18 @@ class Core extends SchemaAbstract
 		 */
 		if(has_filter('wc1c_schema_productscml_processing_products_item_after_save'))
 		{
-            $this->log()->debug(__('Assignment of data for the updated product according to external algorithms after saving.', 'wc1c-main'));
+            $this->log()->info(__('Assignment of data for the updated product according to external algorithms after saving.', 'wc1c-main'));
 
             $update_product = apply_filters('wc1c_schema_productscml_processing_products_item_after_save', $update_product, $external_product, 'update', $reader);
 
 			try
 			{
-                $id = $update_product->save();
+                if(!empty($update_product->get_changes()))
+                {
+                    $id = $update_product->save();
 
-                $this->log()->info(__('Product update after assigning data using external algorithms has been successfully completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type()]);
+                    $this->log()->notice(__('Product update after assigning data using external algorithms has been successfully completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type()]);
+                }
 			}
 			catch(\Throwable $e)
 			{
