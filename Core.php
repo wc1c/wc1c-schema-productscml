@@ -1218,7 +1218,7 @@ class Core extends SchemaAbstract
 
 		$this->configuration()->save();
 
-        $this->log()->notice(__('Saving classifier data as completed.', 'wc1c-main'));
+        $this->log()->notice(__('Saving classifier data as completed.', 'wc1c-main'), ['classifier_id' => $classifier->getId(), 'classifier_name' => $classifier->getName()]);
 	}
 
 	/**
