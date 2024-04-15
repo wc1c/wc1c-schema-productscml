@@ -4213,8 +4213,9 @@ class Core extends SchemaAbstract
 		try
 		{
             $saving_changes = false;
+            $changes_data = $update_product->get_changes();
 
-            if(!empty($update_product->get_changes()))
+            if(!empty($changes_data))
             {
                 $saving_changes = true;
             }
@@ -4223,7 +4224,7 @@ class Core extends SchemaAbstract
 
             if($saving_changes)
             {
-                $this->log()->notice(__('Product is found. Product data is changed. Saving changes is completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type(), 'data' => $update_product->get_changes()]);
+                $this->log()->notice(__('Product is found. Product data is changed. Saving changes is completed.', 'wc1c-main'), ['product_id' => $id, 'product_type' => $update_product->get_type(), 'data' => $changes_data]);
             }
             else
             {
