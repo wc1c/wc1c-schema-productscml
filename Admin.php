@@ -977,7 +977,7 @@ class Admin
 			'description' => sprintf
             (
                 '%s<hr>%s',
-                __('The product SKU will be added according to data from 1C. It is recommended to enable this feature.', 'wc1c-main'),
+                __('Product SKUs will be filled according to the data from 1C on the selected source for SKUs. It is recommended to enable this feature.', 'wc1c-main'),
                 __('The setting works when creating products (goods).', 'wc1c-main')
             ),
             'default' => 'yes'
@@ -1514,6 +1514,94 @@ class Admin
 			'default' => '10',
 			'css' => 'min-width: 60px;',
 		];
+
+        $products_update_images_options =
+        [
+            'no' => __('Do not update', 'wc1c-main'),
+            'yes' => __('При создании и обновлении продуктов', 'wc1c-main'),
+            'create' => __('При создании продуктов', 'wc1c-main'),
+            'update' => __('При обновлении продуктов', 'wc1c-main'),
+        ];
+
+        $fields['products_images_rename'] =
+        [
+            'title' => __('Обновление наименования изображений по наименованию продуктов', 'wc1c-main'),
+            'default' => 'no',
+            'type' => 'select',
+            'description' => sprintf
+            (
+                '<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+                __('Do not update', 'wc1c-main'),
+                __('Обновление будет пропущено в любом случае.', 'wc1c-main'),
+                __('При создании и обновлении продуктов', 'wc1c-main'),
+                __('Обновление произойдет как при создании продукта, так и при его обновлении.', 'wc1c-main'),
+                __('При создании продуктов', 'wc1c-main'),
+                __('Наименование будет обновлено только при создании продуктов.', 'wc1c-main'),
+                __('При обновлении продуктов', 'wc1c-main'),
+                __('Наименование будет обновлено только при обновлении продуктов.', 'wc1c-main')
+            ),
+            'options' => $products_update_images_options
+        ];
+
+        $fields['products_images_alt'] =
+        [
+            'title' => __('Обновление атрибута ALT изображений по наименованию продуктов', 'wc1c-main'),
+            'default' => 'no',
+            'type' => 'select',
+            'description' => sprintf
+            (
+                '<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+                __('Do not update', 'wc1c-main'),
+                __('Обновление будет пропущено в любом случае.', 'wc1c-main'),
+                __('При создании и обновлении продуктов', 'wc1c-main'),
+                __('Обновление произойдет как при создании продукта, так и при его обновлении.', 'wc1c-main'),
+                __('При создании продуктов', 'wc1c-main'),
+                __('Атрибут ALT будет обновлен только при создании продуктов.', 'wc1c-main'),
+                __('При обновлении продуктов', 'wc1c-main'),
+                __('Атрибут ALT будет обновлен только при обновлении продуктов.', 'wc1c-main')
+            ),
+            'options' => $products_update_images_options
+        ];
+
+        $fields['products_images_rename_file'] =
+        [
+            'title' => __('Обновление наименования изображений из описания файла', 'wc1c-main'),
+            'default' => 'no',
+            'type' => 'select',
+            'description' => sprintf
+            (
+                '<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+                __('Do not update', 'wc1c-main'),
+                __('Обновление будет пропущено в любом случае.', 'wc1c-main'),
+                __('При создании и обновлении продуктов', 'wc1c-main'),
+                __('Обновление произойдет как при создании продукта, так и при его обновлении.', 'wc1c-main'),
+                __('При создании продуктов', 'wc1c-main'),
+                __('Наименование будет обновлено только при создании продуктов.', 'wc1c-main'),
+                __('При обновлении продуктов', 'wc1c-main'),
+                __('Наименование будет обновлено только при обновлении продуктов.', 'wc1c-main')
+            ),
+            'options' => $products_update_images_options
+        ];
+
+        $fields['products_images_alt_file'] =
+        [
+            'title' => __('Обновление атрибута ALT у изображений из описания файла', 'wc1c-main'),
+            'default' => 'no',
+            'type' => 'select',
+            'description' => sprintf
+            (
+                '<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
+                __('Do not update', 'wc1c-main'),
+                __('Обновление будет пропущено в любом случае.', 'wc1c-main'),
+                __('При создании и обновлении продуктов', 'wc1c-main'),
+                __('Обновление произойдет как при создании продукта, так и при его обновлении.', 'wc1c-main'),
+                __('При создании продуктов', 'wc1c-main'),
+                __('Атрибут ALT будет обновлен только при создании продуктов.', 'wc1c-main'),
+                __('При обновлении продуктов', 'wc1c-main'),
+                __('Атрибут ALT будет обновлен только при обновлении продуктов.', 'wc1c-main')
+            ),
+            'options' => $products_update_images_options
+        ];
 
 		return $fields;
 	}
