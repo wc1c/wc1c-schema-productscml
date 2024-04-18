@@ -701,6 +701,11 @@ final class Receiver extends ReceiverAbstract
                             $new_image->addMetaData('_wc1c_external_image_extension', $file_extension);
                             $new_image->addMetaData('_wc1c_external_hash', $file_hash);
 
+                            /**
+                             * @since 0.23
+                             */
+                            $new_image->addMetaData('_wc1c_external_file', $filename);
+
                             $new_image->setConfigurationId($this->core()->configuration()->getId());
 							$new_image->setSchemaId($this->core()->getId());
 
