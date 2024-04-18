@@ -2611,6 +2611,77 @@ class Core extends SchemaAbstract
 				}
 
 				$image_current->setProductId($internal_product->getId());
+
+                /**
+                 * Заполнение имени изображения по имени продукта
+                 */
+                if(
+                    'yes' === $this->getOptions('products_images_rename', 'no')
+                    || ('update' === $mode && 'update' === $this->getOptions('products_images_rename', 'no'))
+                    || ('create' === $mode && 'create' === $this->getOptions('products_images_rename', 'no'))
+                )
+                {
+                    $image_current->setName($internal_product->get_name());
+                }
+
+
+                /**
+                 * Заполнение имени изображения по описанию файла
+                 */
+                if(
+                    'yes' === $this->getOptions('products_images_rename_file', 'no')
+                    || ('update' === $mode && 'update' === $this->getOptions('products_images_rename_file', 'no'))
+                    || ('create' === $mode && 'create' === $this->getOptions('products_images_rename_file', 'no'))
+                )
+                {
+                    $req = $external_product->getRequisites('ОписаниеФайла');
+                    if(isset($req['value']))
+                    {
+                        $im_name = explode('#', $req['value']);
+                        if(isset($im_name[1]))
+                        {
+                            $im_name = $im_name[1];
+
+                            $image_current->setName($im_name);
+                        }
+                    }
+                }
+
+
+                /**
+                 * Заполнение альта по имени продукта
+                 */
+                if(
+                    'yes' === $this->getOptions('products_images_alt', 'no')
+                    || ('update' === $mode && 'update' === $this->getOptions('products_images_rename', 'no'))
+                    || ('create' === $mode && 'create' === $this->getOptions('products_images_rename', 'no'))
+                )
+                {
+                    \update_metadata('post', $attach_id, '_wp_attachment_image_alt', $internal_product->get_name());
+                }
+
+                /**
+                 * Заполнение альта по описанию файла
+                 */
+                if(
+                    'yes' === $this->getOptions('products_images_alt_file', 'no')
+                    || ('update' === $mode && 'update' === $this->getOptions('products_images_alt_file', 'no'))
+                    || ('create' === $mode && 'create' === $this->getOptions('products_images_alt_file', 'no'))
+                )
+                {
+                    $req = $external_product->getRequisites('ОписаниеФайла');
+                    if(isset($req['value']))
+                    {
+                        $im_name = explode('#', $req['value']);
+                        if(isset($im_name[1]))
+                        {
+                            $im_name = $im_name[1];
+
+                            \update_metadata('post', $attach_id, '_wp_attachment_image_alt', $im_name);
+                        }
+                    }
+                }
+
 				$image_current->save();
 
 				if($index === 0)
