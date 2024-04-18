@@ -123,7 +123,10 @@ class Core extends SchemaAbstract
 
             add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingStart'], 10, 1);
 			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingClassifier'], 10, 1);
-			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingCatalog'], 20, 1);
+
+            add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingCatalog'], 20, 1);
+            add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingCatalogFullTime'], 20, 1);
+
 			add_action('wc1c_schema_productscml_file_processing_read', [$this, 'processingOffers'], 20, 1);
 
 			add_action('wc1c_schema_productscml_processing_classifier_item', [$this, 'processingClassifierSave'], 10, 2);
@@ -1221,6 +1224,29 @@ class Core extends SchemaAbstract
         $this->log()->notice(__('Saving classifier data as completed.', 'wc1c-main'), ['classifier_id' => $classifier->getId(), 'classifier_name' => $classifier->getName()]);
 	}
 
+    /**
+     * Установка времени полного обмена каталога на основе отметки полного обмена
+     *
+     * @param Reader $reader
+     *
+     * @return void
+     */
+    public function processingCatalogFullTime(Reader $reader)
+    {
+        if($reader->nodeName === 'Товары' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
+        {
+            if(false === $reader->catalog->isOnlyChanges())
+            {
+                $catalog_full_time = current_time('timestamp', true);
+
+                $this->configuration()->addMetaData('_catalog_full_time', $catalog_full_time, true);
+                $this->configuration()->saveMetaData();
+
+                $this->log()->info(__('The catalog with products contains full data. The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $catalog_full_time, 'catalog_id' => $reader->catalog->getId()]);
+            }
+        }
+    }
+
 	/**
 	 * Обработка каталога товаров
 	 *
@@ -1308,19 +1334,6 @@ class Core extends SchemaAbstract
 					break;
 			}
 		}
-
-        if($reader->nodeName === 'Товары' && $reader->xml_reader->nodeType === XMLReader::ELEMENT)
-        {
-            if(false === $reader->catalog->isOnlyChanges())
-            {
-                $catalog_full_time = current_time('timestamp', true);
-
-                $this->configuration()->addMetaData('_catalog_full_time', $catalog_full_time, true);
-                $this->configuration()->saveMetaData();
-
-                $this->log()->info(__('The catalog with products contains full data. The time of the last full exchange has been set.', 'wc1c-main'), ['timestamp' => $catalog_full_time, 'catalog_id' => $reader->catalog->getId()]);
-            }
-        }
 
 		/*
 		 * Пропуск создания и обновления продуктов
@@ -3519,7 +3532,7 @@ class Core extends SchemaAbstract
                 {
                     $variation_meta_name .= 'pa_' . \esc_attr(\sanitize_title($global->getName()));
                     $variation_term = get_term_by('name', $characteristic_value['value'], $global->getTaxonomyName());
-                    $variation_meta_value = $variation_term->slug;
+                    $variation_meta_value = isset($variation_term->slug) ?? '';
                 }
 
 				// значение отсутствует в атрибутах
