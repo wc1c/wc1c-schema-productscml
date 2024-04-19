@@ -3932,6 +3932,12 @@ class Core extends SchemaAbstract
 		{
 			$internal_product->set_manage_stock(false);
 		}
+		else if('yes' === get_option('woocommerce_manage_stock'))
+		{
+			$this->log()->info(__('Stock is managed by variation product. Disable stock management of parent product.', 'wc1c-main'));
+			$internal_product_parent->set_manage_stock(false);
+			$internal_product_parent->save();
+		}
 
 		$product_quantity = $external_product->getQuantity();
 
