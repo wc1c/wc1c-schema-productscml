@@ -92,13 +92,13 @@ final class Receiver extends ReceiverAbstract
 					break;
 				default:
 					do_action('wc1c_schema_productscml_catalog_handler_none', $mode, $this);
-					$this->sendResponseByType('failure', __('Catalog: mode not found.', 'wc1c-main'));
+					$this->sendResponseByType('failure', esc_html__('Catalog: mode not found.', 'wc1c-main'));
 			}
 		}
 
 		do_action('wc1c_schema_productscml_handler_none', $mode, $this);
 
-		$response_description = __('Action is not found in schema.', 'wc1c-main');
+		$response_description = esc_html__('Action is not found in schema.', 'wc1c-main');
 
 		$this->core()->log()->warning($response_description);
 
@@ -112,7 +112,7 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handlerCatalogModeComplete()
 	{
-        $this->core()->log()->notice(__('Sending a successful completion of the exchange in 1C.', 'wc1c-main'));
+        $this->core()->log()->notice(esc_html__('Sending a successful completion of the exchange in 1C.', 'wc1c-main'));
 
         $this->sendResponseByType('success');
 	}
@@ -194,7 +194,7 @@ final class Receiver extends ReceiverAbstract
             }
         }
 
-        $this->core()->log()->info(sprintf('%s %s.', __('In 1C was send a response of the type:', 'wc1c-main'),  $type), ['type' => $type]);
+        $this->core()->log()->info(sprintf('%s %s.', esc_html__('In 1C was send a response of the type:', 'wc1c-main'),  $type), ['type' => $type]);
 
 		switch($type)
 		{
@@ -240,7 +240,7 @@ final class Receiver extends ReceiverAbstract
 
 			if(!isset($remote_user))
 			{
-				$descriptions = __('Server in CGI mode. Not detected the presence of an entry in the root .htaccess file on the subject of the contents of the lines.', 'wc1c-main');
+				$descriptions = esc_html__('Server in CGI mode. Not detected the presence of an entry in the root .htaccess file on the subject of the contents of the lines.', 'wc1c-main');
 
 				$this->core()->log('schemas')->critical($descriptions, ['lines' => "RewriteEngine On:\nRewriteCond %{HTTP:Authorization} ^(.*)\nRewriteRule ^(.*) - [E=HTTP_AUTHORIZATION:%1]"]);
 
@@ -283,7 +283,7 @@ final class Receiver extends ReceiverAbstract
 		{
 			if($credentials['login'] !== $this->core()->getOptions('user_login', ''))
 			{
-                $message = __('Not a valid username.', 'wc1c-main');
+                $message = esc_html__('Not a valid username.', 'wc1c-main');
 
 				$this->core()->log()->warning($message);
 
@@ -292,7 +292,7 @@ final class Receiver extends ReceiverAbstract
 
 			if($credentials['password'] !== $this->core()->getOptions('user_password', ''))
 			{
-                $message = __('Not a valid user password.', 'wc1c-main');
+                $message = esc_html__('Not a valid user password.', 'wc1c-main');
 
 				$this->core()->log()->warning($message);
 
@@ -362,7 +362,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(!isset($_GET['lazysign']))
 		{
-			$warning = __('Authorization key verification failed. 1C did not send the name of the lazy signature.', 'wc1c-main');
+			$warning = esc_html__('Authorization key verification failed. 1C did not send the name of the lazy signature.', 'wc1c-main');
 			$this->core()->log()->warning($warning);
 
 			if($send_response)
@@ -378,7 +378,7 @@ final class Receiver extends ReceiverAbstract
 
 		if($lazy_sign_store !== $lazy_sign)
 		{
-			$warning = __('Authorization key verification failed. 1C sent an incorrect lazy signature.', 'wc1c-main');
+			$warning = esc_html__('Authorization key verification failed. 1C sent an incorrect lazy signature.', 'wc1c-main');
 			$this->core()->log()->warning($warning);
 
 			if($send_response)
@@ -393,7 +393,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(!isset($_COOKIE[$session_name]))
 		{
-			$warning = __('Authorization key verification failed. 1C sent an empty session name.', 'wc1c-main');
+			$warning = esc_html__('Authorization key verification failed. 1C sent an empty session name.', 'wc1c-main');
 			$this->core()->log()->warning($warning);
 
 			if($send_response)
@@ -408,7 +408,7 @@ final class Receiver extends ReceiverAbstract
 
 		if($_COOKIE[$session_name] !== $session_id)
 		{
-			$warning = __('Authorization check failed - session id differs from the original.', 'wc1c-main');
+			$warning = esc_html__('Authorization check failed - session id differs from the original.', 'wc1c-main');
 
 			$this->core()->log()->warning($warning, ['client_session_id' => $_COOKIE[$session_name], 'server_session_id' => $session_id]);
 
@@ -480,7 +480,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(!wc1c()->filesystem()->isDirectory($directory))
 		{
-			$error = __('Failed to check the temp directory.', 'wc1c-main');
+			$error = esc_html__('Failed to check the temp directory.', 'wc1c-main');
 
 			$this->core()->log()->error($error, ['directory' => $directory]);
 
@@ -557,7 +557,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(!wc1c()->filesystem()->exists($upload_directory))
 		{
-			$response_description = sprintf('%s %s', __('Directory is unavailable:', 'wc1c-main'), $upload_directory);
+			$response_description = sprintf('%s %s', esc_html__('Directory is unavailable:', 'wc1c-main'), $upload_directory);
 
 			$this->core()->log()->error($response_description, ['directory' => $upload_directory]);
 
@@ -573,7 +573,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(empty($filename))
 		{
-			$response_description = __('Filename is empty.', 'wc1c-main');
+			$response_description = esc_html__('Filename is empty.', 'wc1c-main');
 
 			$this->core()->log()->error($response_description);
 
@@ -582,7 +582,7 @@ final class Receiver extends ReceiverAbstract
 
 		$upload_file_path = wp_normalize_path($upload_directory . $filename);
 
-		$this->core()->log()->info(sprintf('%s %s', __('Writing data to a file named:', 'wc1c-main'), $filename), ['file_path' => $upload_file_path]);
+		$this->core()->log()->info(sprintf('%s %s', esc_html__('Writing data to a file named:', 'wc1c-main'), $filename), ['file_path' => $upload_file_path]);
 
 		if(strpos($filename, 'import_files') !== false)
 		{
@@ -591,7 +591,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(!wc1c()->filesystem()->isWritable($upload_directory))
 		{
-			$response_description = __('Directory is unavailable for write.', 'wc1c-main');
+			$response_description = esc_html__('Directory is unavailable for write.', 'wc1c-main');
 
 			$this->core()->log()->error($response_description, ['directory' => $upload_directory]);
 			$this->sendResponseByType('failure', $response_description);
@@ -605,7 +605,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(false === $file_data)
 		{
-			$response_description = __('The request contains no data to write to the file. Retry the upload.', 'wc1c-main');
+			$response_description = esc_html__('The request contains no data to write to the file. Retry the upload.', 'wc1c-main');
 
 			$this->core()->log()->error($response_description);
 			$this->sendResponseByType('failure', $response_description);
@@ -629,7 +629,7 @@ final class Receiver extends ReceiverAbstract
             $file_extension = wc1c()->filesystem()->extension($upload_file_path);
             $file_hash = wc1c()->filesystem()->hash($upload_file_path);
 
-			$response_description = __('The data is successfully written to a file. Recorded data size:', 'wc1c-main') . ' '. size_format($file_size);
+			$response_description = esc_html__('The data is successfully written to a file. Recorded data size:', 'wc1c-main') . ' '. size_format($file_size);
 
 			/*
 			 * Adding to media library
@@ -716,11 +716,11 @@ final class Receiver extends ReceiverAbstract
 
 							if($image_id === false)
 							{
-								$response_description .= '. ' . __('The image has not been added to the media library.', 'wc1c-main');
+								$response_description .= '. ' . esc_html__('The image has not been added to the media library.', 'wc1c-main');
 							}
 							else
 							{
-								$response_description .= '. ' . __('Image added to media library, id:', 'wc1c-main') . ' ' . $image_id;
+								$response_description .= '. ' . esc_html__('Image added to media library, id:', 'wc1c-main') . ' ' . esc_html($image_id);
 							}
 						}
 						else
@@ -728,7 +728,7 @@ final class Receiver extends ReceiverAbstract
                             $image_current = $this->core()->setImageTimes($image_current);
                             $image_current->save();
 
-							$response_description .= '. ' . __('The image has not been added to the media library. It was added earlier, id:', 'wc1c-main') . ' ' . $image_current->getId();
+							$response_description .= '. ' . esc_html__('The image has not been added to the media library. It was added earlier, id:', 'wc1c-main') . ' ' . esc_attr($image_current->getId());
 						}
 					}
 				}
@@ -740,7 +740,7 @@ final class Receiver extends ReceiverAbstract
 			return;
 		}
 
-		$response_description = __('Failed to write data to file.', 'wc1c-main');
+		$response_description = esc_html__('Failed to write data to file.', 'wc1c-main');
 
 		$this->core()->log()->error($response_description, ['file_path' => $upload_file_path]);
 		$this->sendResponseByType('failure', $response_description);
@@ -757,7 +757,7 @@ final class Receiver extends ReceiverAbstract
 
 		if($filename === '')
 		{
-			$response_description = __('1C sent an empty file name for data import.', 'wc1c-main');
+			$response_description = esc_html__('1C sent an empty file name for data import.', 'wc1c-main');
 
             $this->core()->log()->warning($response_description);
 			$this->sendResponseByType('failure', $response_description);
@@ -767,7 +767,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(!wc1c()->filesystem()->exists($file))
 		{
-			$response_description = __('File for import is not exists.', 'wc1c-main');
+			$response_description = esc_html__('File for import is not exists.', 'wc1c-main');
 
             $this->core()->log()->error($response_description);
 			$this->sendResponseByType('failure', $response_description);
@@ -779,7 +779,7 @@ final class Receiver extends ReceiverAbstract
 
 			if($result_file_processing)
 			{
-				$response_description = __('Import of data from file completed successfully.', 'wc1c-main');
+				$response_description = esc_html__('Import of data from file completed successfully.', 'wc1c-main');
 
                 $this->core()->log()->info($response_description, ['file_name' => $filename, 'file_path' => $file]);
 				$this->sendResponseByType('success', $response_description);
@@ -787,14 +787,14 @@ final class Receiver extends ReceiverAbstract
 		}
 		catch(\Throwable $e)
 		{
-			$response_description = sprintf('%s %s', __('Importing data from a file ended with an error:', 'wc1c-main'), $e->getMessage());
+			$response_description = sprintf('%s %s', esc_html__('Importing data from a file ended with an error:', 'wc1c-main'), $e->getMessage());
 
             $this->core()->log()->error($response_description, ['exception' => $e]);
 
 			$this->sendResponseByType('failure', $response_description);
 		}
 
-		$response_description = __('Importing data from a file ended with an error.', 'wc1c-main');
+		$response_description = esc_html__('Importing data from a file ended with an error.', 'wc1c-main');
 
         $this->core()->log()->error($response_description);
 		$this->sendResponseByType('failure', $response_description);

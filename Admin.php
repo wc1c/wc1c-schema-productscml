@@ -64,9 +64,9 @@ class Admin
 	{
 		$fields['title_receiver'] =
 		[
-			'title' => __('Receiving requests from 1C', 'wc1c-main'),
+			'title' => esc_html__('Receiving requests from 1C', 'wc1c-main'),
 			'type' => 'title',
-			'description' => __('Authorization of requests and regulation of algorithms for receiving requests for the Receiver from the 1C programs by CommerceML protocol.', 'wc1c-main'),
+			'description' => esc_html__('Authorization of requests and regulation of algorithms for receiving requests for the Receiver from the 1C programs by CommerceML protocol.', 'wc1c-main'),
 		];
 
 		$lazy_sign = $this->core()->configuration()->getMeta('receiver_lazy_sign');
@@ -83,24 +83,24 @@ class Admin
 
 		$fields['url_requests'] =
 		[
-			'title' => __('Website address', 'wc1c-main'),
+			'title' => esc_html__('Website address', 'wc1c-main'),
 			'type' => 'raw',
 			'raw' => $url_raw,
 			'description' => sprintf(
 				'%s<hr>%s',
-				__('Specified in the exchange settings on the 1C side. The Recipient is located at this address, which will receive requests from 1C.', 'wc1c-main'),
-				__('When copying, you need to get rid of whitespace characters, if they are present.', 'wc1c-main')
+                esc_html__('Specified in the exchange settings on the 1C side. The Recipient is located at this address, which will receive requests from 1C.', 'wc1c-main'),
+                esc_html__('When copying, you need to get rid of whitespace characters, if they are present.', 'wc1c-main')
 			)
 		];
 
 		$fields['user_login'] =
 		[
-			'title' => __('Username', 'wc1c-main'),
+			'title' => esc_html__('Username', 'wc1c-main'),
 			'type' => 'text',
 			'description' => sprintf(
 				'%s<hr>%s',
-				__('Specified when setting up an exchange with a site on the 1C side. Any name can be specified, except for an empty value.', 'wc1c-main'),
-				__('Work with data on the site is performed on behalf of the configuration owner, and not on behalf of the specified username.', 'wc1c-main')
+                esc_html__('Specified when setting up an exchange with a site on the 1C side. Any name can be specified, except for an empty value.', 'wc1c-main'),
+                esc_html__('Work with data on the site is performed on behalf of the configuration owner, and not on behalf of the specified username.', 'wc1c-main')
 			),
 			'default' => '',
 			'css' => 'min-width: 377px;',
@@ -108,9 +108,9 @@ class Admin
 
 		$fields['user_password'] =
 		[
-			'title' => __('User password', 'wc1c-main'),
+			'title' => esc_html__('User password', 'wc1c-main'),
 			'type' => 'password',
-			'description' => __('Specified in pair with the username when setting up on the 1C side. It is advisable not to specify a password for the current WordPress user.', 'wc1c-main'),
+			'description' => esc_html__('Specified in pair with the username when setting up on the 1C side. It is advisable not to specify a password for the current WordPress user.', 'wc1c-main'),
 			'default' => '',
 			'css' => 'min-width: 377px;',
 		];
@@ -129,22 +129,22 @@ class Admin
 	{
 		$fields['title_other'] =
 		[
-			'title' => __('Other parameters', 'wc1c-main'),
+			'title' => esc_html__('Other parameters', 'wc1c-main'),
 			'type' => 'title',
-			'description' => __('Change of data processing behavior for environment compatibility and so on.', 'wc1c-main'),
+			'description' => esc_html__('Change of data processing behavior for environment compatibility and so on.', 'wc1c-main'),
 		];
 
 		$fields['php_post_max_size'] =
 		[
-			'title' => __('Maximum size of accepted requests', 'wc1c-main'),
+			'title' => esc_html__('Maximum size of accepted requests', 'wc1c-main'),
 			'type' => 'text',
 			'description' => sprintf
 			(
 				'%s<br />%s <b>%s</b><hr>%s',
-				__('Enter the maximum size of accepted requests from 1C at a time in bytes. May be specified with a dimension suffix, such as 7M, where M = megabyte, K = kilobyte, G - gigabyte.', 'wc1c-main'),
-				__('Current WC1C limit:', 'wc1c-main'),
+                esc_html__('Enter the maximum size of accepted requests from 1C at a time in bytes. May be specified with a dimension suffix, such as 7M, where M = megabyte, K = kilobyte, G - gigabyte.', 'wc1c-main'),
+                esc_html__('Current WC1C limit:', 'wc1c-main'),
 				wc1c()->settings()->get('php_post_max_size', wc1c()->environment()->get('php_post_max_size')),
-				__('Can only decrease the value, because it must not exceed the limits from the WC1C settings.', 'wc1c-main')
+                esc_html__('Can only decrease the value, because it must not exceed the limits from the WC1C settings.', 'wc1c-main')
 			),
 			'default' => wc1c()->settings()->get('php_post_max_size', wc1c()->environment()->get('php_post_max_size')),
 			'css' => 'min-width: 100px;',
@@ -152,15 +152,15 @@ class Admin
 
 		$fields['php_max_execution_time'] =
 		[
-			'title' => __('Maximum time for execution PHP', 'wc1c-main'),
+			'title' => esc_html__('Maximum time for execution PHP', 'wc1c-main'),
 			'type' => 'text',
 			'description' => sprintf
 			(
 				'%s <br /> %s <b>%s</b> <br /> %s',
-				__('Value is seconds. Algorithms of current configuration will run until a time limit is end.', 'wc1c-main'),
-				__('Current WC1C limit:', 'wc1c-main'),
+                esc_html__('Value is seconds. Algorithms of current configuration will run until a time limit is end.', 'wc1c-main'),
+                esc_html__('Current WC1C limit:', 'wc1c-main'),
 				wc1c()->settings()->get('php_max_execution_time', wc1c()->environment()->get('php_max_execution_time')),
-				__('If specify 0, the time limit will be disabled. Specifying 0 is not recommended, it is recommended not to exceed the WC1C limit.', 'wc1c-main')
+                esc_html__('If specify 0, the time limit will be disabled. Specifying 0 is not recommended, it is recommended not to exceed the WC1C limit.', 'wc1c-main')
 			),
 			'default' => wc1c()->settings()->get('php_max_execution_time', wc1c()->environment()->get('php_max_execution_time')),
 			'css' => 'min-width: 100px;',
@@ -170,20 +170,20 @@ class Admin
 		[
 			'title' => __('Browser debug mode', 'wc1c-main'),
 			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'label' => esc_html__('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
 			'description' => sprintf
 			(
 				'%s<hr>%s',
-				__('The setting is required only for debugging activities and must be turned off when such activities are completed.', 'wc1c-main'),
-				__('Only used in debug mode.', 'wc1c-main')
+                esc_html__('The setting is required only for debugging activities and must be turned off when such activities are completed.', 'wc1c-main'),
+                esc_html__('Only used in debug mode.', 'wc1c-main')
 			),
 			'default' => 'no'
 		];
 
 		$response_options =
 		[
-			'no' => __('Do not use', 'wc1c-main'),
-			'standard' => __('Standard', 'wc1c-main'),
+			'no' => esc_html__('Do not use', 'wc1c-main'),
+			'standard' => esc_html__('Standard', 'wc1c-main'),
 		];
 
 		$fields['directory_clean_mode'] =
