@@ -4191,7 +4191,7 @@ class Core extends SchemaAbstract
 			}
 			catch(\Throwable $e)
 			{
-				throw new Exception($e->getMessage());
+				throw new Exception(esc_html($e->getMessage()));
 			}
 
 			/**
@@ -4218,7 +4218,7 @@ class Core extends SchemaAbstract
 				}
 				catch(\Throwable $e)
 				{
-					throw new Exception($e->getMessage());
+					throw new Exception(esc_html($e->getMessage()));
 				}
 			}
 
@@ -4317,7 +4317,7 @@ class Core extends SchemaAbstract
         }
 		catch(\Throwable $e)
 		{
-			throw new Exception($e->getMessage());
+			throw new Exception(esc_html($e->getMessage()));
 		}
 
 		/**
@@ -4347,7 +4347,7 @@ class Core extends SchemaAbstract
 			}
 			catch(\Throwable $e)
 			{
-				throw new Exception($e->getMessage());
+				throw new Exception(esc_html($e->getMessage()));
 			}
 		}
 	}
@@ -4562,7 +4562,7 @@ class Core extends SchemaAbstract
 		}
 		catch(\Throwable $e)
 		{
-			throw new Exception($e->getMessage());
+			throw new Exception(esc_html($e->getMessage()));
 		}
 	}
 
