@@ -41,17 +41,17 @@ class Core extends SchemaAbstract
 	/**
 	 * @var string Текущий каталог в файловой системе
 	 */
-	protected $upload_directory;
+	protected string $upload_directory;
 
 	/**
 	 * @var Admin
 	 */
-	public $admin;
+	public Admin $admin;
 
 	/**
 	 * @var Receiver
 	 */
-	public $receiver;
+	public Receiver $receiver;
 
 	/**
 	 * Core constructor.
@@ -61,8 +61,8 @@ class Core extends SchemaAbstract
 		$this->setId('productscml');
 		$this->setVersion('0.15.0');
 
-		$this->setName(__('Products data exchange via CommerceML', 'wc1c-main'));
-		$this->setDescription(__('Creating and updating products (goods) in WooCommerce according to data from 1C using the CommerceML protocol of different versions.', 'wc1c-main'));
+		$this->setName(esc_html__('Products data exchange via CommerceML', 'wc1c-main'));
+		$this->setDescription(esc_html__('Creating and updating products (goods) in WooCommerce according to data from 1C using the CommerceML protocol of different versions.', 'wc1c-main'));
 	}
 
 	/**
@@ -219,7 +219,7 @@ class Core extends SchemaAbstract
 		}
 		catch(\Throwable $exception)
 		{
-			$this->log()->error(__('The file cannot be processed. ReaderCML threw an exception.', 'wc1c-main'), ['exception' => $exception]);
+			$this->log()->error(esc_html__('The file cannot be processed. ReaderCML threw an exception.', 'wc1c-main'), ['exception' => $exception]);
 			return false;
 		}
 
@@ -247,7 +247,7 @@ class Core extends SchemaAbstract
 			}
 			catch(\Throwable $e)
 			{
-				$this->log()->error(__('Import file processing not completed. ReaderCML threw an exception.', 'wc1c-main'), ['exception' => $e]);
+				$this->log()->error(esc_html__('Import file processing not completed. ReaderCML threw an exception.', 'wc1c-main'), ['exception' => $e]);
 				break;
 			}
 		}
