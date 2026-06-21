@@ -49,13 +49,13 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handler()
 	{
-		$this->core()->log()->info(__('Received new request from 1C for Receiver.', 'wc1c-main'));
+		$this->core()->log()->info(esc_html__('Received new request from 1C for Receiver.', 'wc1c-main'));
 
 		$mode_and_type = $this->detectModeAndType();
 		$mode = $mode_and_type['mode'];
 		$type = $mode_and_type['type'];
 
-		$this->core()->log()->debug(__('The resulting query parameters.', 'wc1c-main'), ['type' => $type, 'mode=' => $mode]);
+		$this->core()->log()->debug(esc_html__('The resulting query parameters.', 'wc1c-main'), ['type' => $type, 'mode=' => $mode]);
 
         $this->core()->configuration()->addMetaData('_receiver_mode', $mode, true);
         $this->core()->configuration()->addMetaData('_receiver_type', $type, true);
@@ -186,7 +186,7 @@ final class Receiver extends ReceiverAbstract
 
         if(!headers_sent())
         {
-            $this->core()->log()->debug(__('Headers for response.', 'wc1c-main'), ['context' => $headers]);
+            $this->core()->log()->debug(esc_html__('Headers for response.', 'wc1c-main'), ['context' => $headers]);
 
             foreach($headers as $header)
             {
@@ -306,7 +306,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(session_status() === PHP_SESSION_NONE)
 		{
-			$this->core()->log()->debug(__('PHP session none, start new PHP session.', 'wc1c-main'));
+			$this->core()->log()->debug(esc_html__('PHP session none, start new PHP session.', 'wc1c-main'));
 			session_start();
 		}
 
@@ -317,7 +317,7 @@ final class Receiver extends ReceiverAbstract
 
 		$this->core()->configuration()->saveMetaData();
 
-		$this->core()->log()->info(__('1C authorization has been successfully passed.', 'wc1c-main'), ['session_name' => $session_name, 'session_id' => $session_id]);
+		$this->core()->log()->info(esc_html__('1C authorization has been successfully passed.', 'wc1c-main'), ['session_name' => $session_name, 'session_id' => $session_id]);
 
 		$lines['success'] = 'success' . PHP_EOL;
 		$lines['session_name'] = $session_name . PHP_EOL;
@@ -331,7 +331,7 @@ final class Receiver extends ReceiverAbstract
 			$lines = apply_filters('wc1c_schema_productscml_handler_checkauth_lines', $lines);
 		}
 
-		$this->core()->log()->debug(__('Print lines for 1C.', 'wc1c-main'), $lines);
+		$this->core()->log()->debug(esc_html__('Print lines for 1C.', 'wc1c-main'), $lines);
 
         if($this->core()->configuration()->isStatus('processing'))
         {
@@ -424,7 +424,7 @@ final class Receiver extends ReceiverAbstract
 		{
 			session_id($session_id);
 
-			$this->core()->log()->debug(__('PHP session none, restart last PHP session.', 'wc1c-main'), ['session_id' => $session_id]);
+			$this->core()->log()->debug(esc_html__('PHP session none, restart last PHP session.', 'wc1c-main'), ['session_id' => $session_id]);
 			session_start();
 		}
 
@@ -440,13 +440,13 @@ final class Receiver extends ReceiverAbstract
 	{
 		$directory = $this->core()->getUploadDirectory();
 
-		$this->core()->log()->debug(__('Cleaning the directory for temporary files.', 'wc1c-main'), ['directory' => $directory]);
+		$this->core()->log()->debug(esc_html__('Cleaning the directory for temporary files.', 'wc1c-main'), ['directory' => $directory]);
 
 		wc1c()->filesystem()->ensureDirectoryExists($directory);
 
 		if(wc1c()->filesystem()->cleanDirectory($directory))
 		{
-			$this->core()->log()->info(__('Cleaning the directory for temporary files as completed.', 'wc1c-main'), ['directory' => $this->core()->getUploadDirectory()]);
+			$this->core()->log()->info(esc_html__('Cleaning the directory for temporary files as completed.', 'wc1c-main'), ['directory' => $this->core()->getUploadDirectory()]);
 		}
 		else
 		{
@@ -463,18 +463,18 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handlerCatalogModeInit()
 	{
-		$this->core()->log()->info(__('Initialization of receiving requests from 1C.', 'wc1c-main'));
+		$this->core()->log()->info(esc_html__('Initialization of receiving requests from 1C.', 'wc1c-main'));
 
 		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_init_session'))
 		{
 			$_SESSION = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_session', $_SESSION, $this);
 
-			$this->core()->log()->info(__('Session for receiving requests is changed by external algorithms.', 'wc1c-main'), ['session'=> $_SESSION]);
+			$this->core()->log()->info(esc_html__('Session for receiving requests is changed by external algorithms.', 'wc1c-main'), ['session'=> $_SESSION]);
 		}
 
 		$directory = $this->core()->getUploadDirectory();
 
-		$this->core()->log()->info(__('Check the directory for temporary files.', 'wc1c-main'), ['directory' => $directory]);
+		$this->core()->log()->info(esc_html__('Check the directory for temporary files.', 'wc1c-main'), ['directory' => $directory]);
 
 		wc1c()->filesystem()->ensureDirectoryExists($directory);
 
@@ -506,18 +506,18 @@ final class Receiver extends ReceiverAbstract
 		$max_wc1c = $this->utilityConvertFileSize(wc1c()->settings('main')->get('php_post_max_size'));
 		$max_configuration = $this->utilityConvertFileSize($this->core()->getOptions('php_post_max_size'));
 
-		$this->core()->log()->debug(__('The maximum size of accepted files from 1C is assigned:', 'wc1c-main') . ' ' . size_format($max_size));
+		$this->core()->log()->debug(esc_html__('The maximum size of accepted files from 1C is assigned:', 'wc1c-main') . ' ' . size_format($max_size));
 
 		if($max_wc1c && $max_wc1c < $max_size)
 		{
 			$max_size = $max_wc1c;
-			$this->core()->log()->debug(__('Based on the global settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c-main') . ' ' . size_format($max_size));
+			$this->core()->log()->debug(esc_html__('Based on the global settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c-main') . ' ' . size_format($max_size));
 		}
 
 		if($max_configuration && $max_configuration < $max_size)
 		{
 			$max_size = $max_configuration;
-			$this->core()->log()->debug(__('Based on the configuration settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c-main') . ' ' . size_format($max_size));
+			$this->core()->log()->debug(esc_html__('Based on the configuration settings of WC1C, the size of received files has been reduced from 1C to:', 'wc1c-main') . ' ' . size_format($max_size));
 		}
 
 		$data['file_limit'] = 'file_limit=' . $max_size . PHP_EOL;
@@ -527,7 +527,7 @@ final class Receiver extends ReceiverAbstract
 			$data = apply_filters('wc1c_schema_productscml_handler_catalog_mode_init_data', $data, $this);
 		}
 
-		$this->core()->log()->debug(__('Print lines for 1C.', 'wc1c-main'), ['data' => $data]);
+		$this->core()->log()->debug(esc_html__('Print lines for 1C.', 'wc1c-main'), ['data' => $data]);
 
 		foreach($data as $line_id => $line)
 		{
@@ -613,7 +613,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(wc1c()->filesystem()->exists($upload_file_path))
 		{
-			$this->core()->log()->info(__('The file exists. Write a data to the end of an existing file.', 'wc1c-main'));
+			$this->core()->log()->info(esc_html__('The file exists. Write a data to the end of an existing file.', 'wc1c-main'));
 		}
 
 		$file_size = false;
@@ -638,7 +638,7 @@ final class Receiver extends ReceiverAbstract
 			{
 				if('yes' !== $this->core()->getOptions('media_library', 'no'))
 				{
-					$this->core()->log()->warning(__('The file was not saved to the media library. Adding is disabled in the settings.', 'wc1c-main'));
+					$this->core()->log()->warning(esc_html__('The file was not saved to the media library. Adding is disabled in the settings.', 'wc1c-main'));
 				}
 				else
 				{
@@ -753,7 +753,7 @@ final class Receiver extends ReceiverAbstract
 	{
 		$filename = wc1c()->getVar($_GET['filename'], '');
 
-        $this->core()->log()->info(__('On request from 1C - started importing data from a file.', 'wc1c-main'), ['file' => $filename]);
+        $this->core()->log()->info(esc_html__('On request from 1C - started importing data from a file.', 'wc1c-main'), ['file' => $filename]);
 
 		if($filename === '')
 		{
