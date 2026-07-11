@@ -284,26 +284,25 @@ final class Receiver extends ReceiverAbstract
 			$validator = apply_filters('wc1c_schema_productscml_handler_checkauth_validate', $credentials);
 		}
 
-		if(true !== $validator)
-		{
-			if($credentials['login'] !== $this->core()->getOptions('user_login', ''))
-			{
-                $message = esc_html__('Not a valid username.', 'wc1c-main');
+        if(true !== $validator)
+        {
+            $stored_login = (string) $this->core()->getOptions('user_login', '');
+            $stored_password = (string) $this->core()->getOptions('user_password', '');
 
-				$this->core()->log()->warning($message);
+            if(!hash_equals($stored_login, $credentials['login']))
+            {
+                $this->core()->log()->notice(esc_html__('Not a valid username.', 'wc1c-main'));
 
-				$this->sendResponseByType('failure', $message);
-			}
+                $this->sendResponseByType('failure', esc_html__('Not a valid username.', 'wc1c-main'));
+            }
 
-			if($credentials['password'] !== $this->core()->getOptions('user_password', ''))
-			{
-                $message = esc_html__('Not a valid user password.', 'wc1c-main');
+            if(!hash_equals($stored_password, $credentials['password']))
+            {
+                $this->core()->log()->notice(esc_html__('Not a valid user password.', 'wc1c-main'));
 
-				$this->core()->log()->warning($message);
-
-				$this->sendResponseByType('failure', $message);
-			}
-		}
+                $this->sendResponseByType('failure', esc_html__('Not a valid user password.', 'wc1c-main'));
+            }
+        }
 
 		$lines = [];
 
