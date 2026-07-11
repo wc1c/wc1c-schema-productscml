@@ -569,23 +569,107 @@ final class Receiver extends ReceiverAbstract
 			$this->sendResponseByType('failure', $response_description);
 		}
 
-		$filename = wc1c()->getVar($_GET['filename'], '');
+        $filename = wc1c()->getVar($_GET['filename'], '');
 
-		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_file_filename'))
-		{
-			$filename = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_filename', $filename);
-		}
+        if(has_filter('wc1c_schema_productscml_handler_catalog_mode_file_filename'))
+        {
+            $filename = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_filename', $filename);
+        }
 
-		if(empty($filename))
-		{
-			$response_description = esc_html__('Filename is empty.', 'wc1c-main');
+        if(empty($filename))
+        {
+            $response_description = esc_html__('Filename is empty.', 'wc1c-main');
+            $this->core()->log()->error($response_description);
+            $this->sendResponseByType('failure', $response_description);
+        }
 
-			$this->core()->log()->error($response_description);
+        if(strlen($filename) > 255)
+        {
+            $this->core()->log()->error(esc_html__('Filename is too long.', 'wc1c-main'), ['length' => strlen($filename)]);
+            $this->sendResponseByType('failure', esc_html__('Filename is too long.', 'wc1c-main'));
+        }
 
-			$this->sendResponseByType('failure', $response_description);
-		}
+        if
+        (
+            strpos($filename, '..') !== false ||
+            strpos($filename, './') !== false ||
+            strpos($filename, '/.') !== false ||
+            strpos($filename, '\\') !== false
+        )
+        {
+            $this->core()->log()->error(esc_html__('Invalid filename: directory traversal detected.', 'wc1c-main'), ['filename' => $filename]);
+            $this->sendResponseByType('failure', esc_html__('Invalid filename.', 'wc1c-main'));
+        }
 
-		$upload_file_path = wp_normalize_path($upload_directory . $filename);
+        if(in_array(strtolower($filename), ['.htaccess', '.htpasswd', 'web.config', 'php.ini'], true))
+        {
+            $this->core()->log()->error(esc_html__('Forbidden filename.', 'wc1c-main'), ['filename' => $filename]);
+            $this->sendResponseByType('failure', esc_html__('Forbidden filename.', 'wc1c-main'));
+        }
+
+        $file_extension = wc1c()->filesystem()->extension($filename);
+        if(empty($file_extension))
+        {
+            $this->core()->log()->error(esc_html__('File has no extension.', 'wc1c-main'), ['filename' => $filename]);
+            $this->sendResponseByType('failure', esc_html__('File has no extension.', 'wc1c-main'));
+        }
+
+        $allowed_mimes = get_allowed_mime_types();
+
+        $cml_mimes =
+        [
+            'xml' => 'text/xml',
+            'cml' => 'text/xml',
+            'zip' => 'application/zip',
+            'gz' => 'application/gzip',
+        ];
+
+        $allowed_mimes = array_merge($cml_mimes, $allowed_mimes);
+
+        /**
+         * Фильтр разрешенных MIME-типов для загрузки файлов через CommerceML
+         */
+        $allowed_mimes = apply_filters('wc1c_schema_productscml_allowed_upload_mimes', $allowed_mimes, $filename, $this->core());
+
+        $is_allowed = false;
+        $matched_mime = '';
+
+        foreach ($allowed_mimes as $extensions => $mime)
+        {
+            $exts = array_map('trim', explode('|', $extensions));
+
+            if (in_array($file_extension, $exts, true)) {
+                $is_allowed = true;
+                $matched_mime = $mime;
+                break;
+            }
+        }
+
+        if (!$is_allowed)
+        {
+            $this->core()->log()->error
+            (
+                esc_html__('Invalid file extension. This type of file is not allowed for upload.', 'wc1c-main'),
+                [
+                    'filename' => $filename,
+                    'extension' => $file_extension,
+                    'allowed_count' => count($allowed_mimes),
+                ]
+            );
+            $this->sendResponseByType('failure', esc_html__('Invalid file extension. This type of file is not allowed for upload.', 'wc1c-main'));
+        }
+
+        $this->core()->log()->debug
+        (
+            esc_html__('File extension is allowed.', 'wc1c-main'),
+            [
+                'filename' => $filename,
+                'extension' => $file_extension,
+                'mime_type' => $matched_mime,
+            ]
+        );
+
+        $upload_file_path = wp_normalize_path($upload_directory . $filename);
 
 		$this->core()->log()->info(sprintf('%s %s', esc_html__('Writing data to a file named:', 'wc1c-main'), $filename), ['file_path' => $upload_file_path]);
 
