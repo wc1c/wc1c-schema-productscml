@@ -742,7 +742,6 @@ final class Receiver extends ReceiverAbstract
 			$this->core()->log()->info($response_description, ['file_size' => $file_size]);
 
 			$this->sendResponseByType('success', $response_description);
-			return;
 		}
 
 		$response_description = esc_html__('Failed to write data to file.', 'wc1c-main');
