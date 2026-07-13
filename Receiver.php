@@ -476,6 +476,8 @@ final class Receiver extends ReceiverAbstract
 			$this->core()->log()->info(esc_html__('Session for receiving requests is changed by external algorithms.', 'wc1c-main'), ['session'=> $_SESSION]);
 		}
 
+        $this->core()->log()->debug(esc_html__('Session for receiving requests.', 'wc1c-main'), ['session'=> $_SESSION]);
+
 		$directory = $this->core()->getUploadDirectory();
 
 		$this->core()->log()->info(esc_html__('Check the directory for temporary files.', 'wc1c-main'), ['directory' => $directory]);
@@ -492,16 +494,27 @@ final class Receiver extends ReceiverAbstract
 		}
 		else
 		{
-			$ht_name = $directory . '/.htaccess';
-			if(!file_exists($ht_name))
-			{
-				$fp = fopen($ht_name, 'wb');
-				if($fp)
-				{
-					fwrite($fp, "Deny from All");
-					fclose($fp);
-				}
-			}
+            $ht_name = $directory . '/.htaccess';
+            if(!file_exists($ht_name))
+            {
+                $htaccess_content = "Options -Indexes\n" .
+                    "<IfModule mod_authz_core.c>\n" .
+                    "    Require all denied\n" .
+                    "</IfModule>\n" .
+                    "<IfModule !mod_authz_core.c>\n" .
+                    "    Deny from all\n" .
+                    "</IfModule>\n";
+
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+                $fp = fopen($ht_name, 'wb');
+                if($fp)
+                {
+                    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+                    fwrite($fp, $htaccess_content);
+                    // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+                    fclose($fp);
+                }
+            }
 		}
 
 		$data['zip'] = 'zip=no' . PHP_EOL;
@@ -540,33 +553,34 @@ final class Receiver extends ReceiverAbstract
 		exit;
 	}
 
-	/**
-	 * Uploading files from 1C to a local directory
-	 *
-	 * @return void
-	 * @throws Exception
-	 */
-	public function handlerCatalogModeFile()
-	{
-		$upload_directory = $this->core()->getUploadDirectory() . DIRECTORY_SEPARATOR;
+    /**
+     * Uploading files from 1C to a local directory
+     *
+     * @return void
+     *
+     * @throws Exception
+     */
+    public function handlerCatalogModeFile()
+    {
+        $upload_directory = $this->core()->getUploadDirectory() . DIRECTORY_SEPARATOR;
 
-		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_file_directory'))
-		{
-			$upload_directory = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_directory', $upload_directory);
-		}
+        if(has_filter('wc1c_schema_productscml_handler_catalog_mode_file_directory'))
+        {
+            $upload_directory = apply_filters('wc1c_schema_productscml_handler_catalog_mode_file_directory', $upload_directory);
+        }
 
-		$upload_directory = wp_normalize_path($upload_directory);
+        $upload_directory = wp_normalize_path($upload_directory);
 
-		wc1c()->filesystem()->ensureDirectoryExists($upload_directory);
+        wc1c()->filesystem()->ensureDirectoryExists($upload_directory);
 
-		if(!wc1c()->filesystem()->exists($upload_directory))
-		{
-			$response_description = sprintf('%s %s', esc_html__('Directory is unavailable:', 'wc1c-main'), $upload_directory);
+        if(!wc1c()->filesystem()->exists($upload_directory))
+        {
+            $response_description = sprintf('%s %s', esc_html__('Directory is unavailable:', 'wc1c-main'), $upload_directory);
 
-			$this->core()->log()->error($response_description, ['directory' => $upload_directory]);
+            $this->core()->log()->error($response_description, ['directory' => $upload_directory]);
 
-			$this->sendResponseByType('failure', $response_description);
-		}
+            $this->sendResponseByType('failure', $response_description);
+        }
 
         $filename = wc1c()->getVar($_GET['filename'], '');
 
@@ -588,8 +602,7 @@ final class Receiver extends ReceiverAbstract
             $this->sendResponseByType('failure', esc_html__('Filename is too long.', 'wc1c-main'));
         }
 
-        if
-        (
+        if(
             strpos($filename, '..') !== false ||
             strpos($filename, './') !== false ||
             strpos($filename, '/.') !== false ||
@@ -620,7 +633,7 @@ final class Receiver extends ReceiverAbstract
             'xml' => 'text/xml',
             'cml' => 'text/xml',
             'zip' => 'application/zip',
-            'gz' => 'application/gzip',
+            'gz'  => 'application/gzip',
         ];
 
         $allowed_mimes = array_merge($cml_mimes, $allowed_mimes);
@@ -632,26 +645,25 @@ final class Receiver extends ReceiverAbstract
 
         $is_allowed = false;
         $matched_mime = '';
-
         foreach ($allowed_mimes as $extensions => $mime)
         {
             $exts = array_map('trim', explode('|', $extensions));
-
-            if (in_array($file_extension, $exts, true)) {
+            if (in_array($file_extension, $exts, true))
+            {
                 $is_allowed = true;
                 $matched_mime = $mime;
                 break;
             }
         }
 
-        if (!$is_allowed)
+        if(!$is_allowed)
         {
             $this->core()->log()->error
             (
                 esc_html__('Invalid file extension. This type of file is not allowed for upload.', 'wc1c-main'),
                 [
-                    'filename' => $filename,
-                    'extension' => $file_extension,
+                    'filename'      => $filename,
+                    'extension'     => $file_extension,
                     'allowed_count' => count($allowed_mimes),
                 ]
             );
@@ -662,7 +674,7 @@ final class Receiver extends ReceiverAbstract
         (
             esc_html__('File extension is allowed.', 'wc1c-main'),
             [
-                'filename' => $filename,
+                'filename'  => $filename,
                 'extension' => $file_extension,
                 'mime_type' => $matched_mime,
             ]
@@ -670,168 +682,194 @@ final class Receiver extends ReceiverAbstract
 
         $upload_file_path = wp_normalize_path($upload_directory . $filename);
 
-		$this->core()->log()->info(sprintf('%s %s', esc_html__('Writing data to a file named:', 'wc1c-main'), $filename), ['file_path' => $upload_file_path]);
+        $this->core()->log()->info(sprintf('%s %s', esc_html__('Writing data to a file named:', 'wc1c-main'), $filename), ['file_path' => $upload_file_path]);
 
-		if(strpos($filename, 'import_files') !== false)
-		{
-			wc1c()->filesystem()->ensureDirectoryExists(dirname($upload_file_path));
-		}
+        // Нормализуем слеши для кроссплатформенности
+        $normalized_filename = str_replace('\\', '/', $filename);
+        if(strpos($normalized_filename, 'import_files/') === 0)
+        {
+            wc1c()->filesystem()->ensureDirectoryExists(dirname($upload_file_path));
+        }
 
-		if(!wc1c()->filesystem()->isWritable($upload_directory))
-		{
-			$response_description = esc_html__('Directory is unavailable for write.', 'wc1c-main');
+        if(!wc1c()->filesystem()->isWritable($upload_directory))
+        {
+            $response_description = esc_html__('Directory is unavailable for write.', 'wc1c-main');
 
-			$this->core()->log()->error($response_description, ['directory' => $upload_directory]);
-			$this->sendResponseByType('failure', $response_description);
-		}
+            $this->core()->log()->error($response_description, ['directory' => $upload_directory]);
+            $this->sendResponseByType('failure', $response_description);
+        }
 
-		$file_data = false;
-		if(function_exists('file_get_contents'))
-		{
-			$file_data = file_get_contents('php://input');
-		}
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+        $input_stream = fopen('php://input', 'rb');
+        if(!$input_stream)
+        {
+            $response_description = esc_html__('Failed to open input stream. The request contains no data to write to the file.', 'wc1c-main');
 
-		if(false === $file_data)
-		{
-			$response_description = esc_html__('The request contains no data to write to the file. Retry the upload.', 'wc1c-main');
+            $this->core()->log()->error($response_description);
+            $this->sendResponseByType('failure', $response_description);
+        }
 
-			$this->core()->log()->error($response_description);
-			$this->sendResponseByType('failure', $response_description);
-		}
+        $file_mode = wc1c()->filesystem()->exists($upload_file_path) ? 'ab' : 'wb';
 
-		if(wc1c()->filesystem()->exists($upload_file_path))
-		{
-			$this->core()->log()->info(esc_html__('The file exists. Write a data to the end of an existing file.', 'wc1c-main'));
-		}
+        if(wc1c()->filesystem()->exists($upload_file_path))
+        {
+            $this->core()->log()->info(esc_html__('The file exists. Write a data to the end of an existing file.', 'wc1c-main'), ['file_mode' > $file_mode]);
+        }
 
-		$file_size = false;
-		if($fp = fopen($upload_file_path, "ab"))
-		{
-			$file_size = fwrite($fp, $file_data);
-		}
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen
+        $output_stream = fopen($upload_file_path, $file_mode);
+        if(!$output_stream)
+        {
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+            fclose($input_stream);
 
-		if($file_size)
-		{
-			wc1c()->filesystem()->chmod($upload_file_path , 0755);
+            $response_description = esc_html__('Failed to open output file for writing.', 'wc1c-main');
 
-            $file_extension = wc1c()->filesystem()->extension($upload_file_path);
-            $file_hash = wc1c()->filesystem()->hash($upload_file_path);
+            $this->core()->log()->error($response_description, ['file_path' => $upload_file_path]);
+            $this->sendResponseByType('failure', $response_description);
+        }
 
-			$response_description = esc_html__('The data is successfully written to a file. Recorded data size:', 'wc1c-main') . ' '. size_format($file_size);
+        $chunk_size = 8192; // 8 KB (оптимально для баланса скорости и памяти)
+        $total_size = 0;
+        $chunks_count = 0;
 
-			/*
-			 * Adding to media library
-			 */
-			if($file_extension !== 'xml' && 'yes' === $this->core()->getOptions('media_library_images_by_receiver', 'no'))
-			{
-				if('yes' !== $this->core()->getOptions('media_library', 'no'))
-				{
-					$this->core()->log()->warning(esc_html__('The file was not saved to the media library. Adding is disabled in the settings.', 'wc1c-main'));
-				}
-				else
-				{
-					$image = wp_get_image_mime($upload_file_path);
-					if($image)
-					{
-						/** @var ImagesStorageContract $images_storage */
-						$images_storage = Storage::load('image');
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_feof
+        while(!feof($input_stream))
+        {
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread
+            $chunk = fread($input_stream, $chunk_size);
+            if($chunk === false)
+            {
+                break;
+            }
 
-						$image_file_name = explode('.', basename($upload_file_path));
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fwrite
+            $written = fwrite($output_stream, $chunk);
+            if($written === false)
+            {
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+                fclose($input_stream);
+                // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+                fclose($output_stream);
 
-						$image_current = $images_storage->getByExternalName($image_file_name[0]);
-						if(is_array($image_current))
-						{
-							$image_current = $image_current[0];
-						}
+                $response_description = esc_html__('Failed to write data to file.', 'wc1c-main');
 
-                        if($image_current)
+                $this->core()->log()->error($response_description, ['file_path' => $upload_file_path]);
+                $this->sendResponseByType('failure', $response_description);
+            }
+
+            $total_size += $written;
+            $chunks_count++;
+        }
+
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+        fclose($input_stream);
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose
+        fclose($output_stream);
+
+        if($total_size === 0)
+        {
+            $response_description = esc_html__('The request contains no data to write to the file. Retry the upload.', 'wc1c-main');
+
+            $this->core()->log()->error($response_description);
+            $this->sendResponseByType('failure', $response_description);
+        }
+
+        wc1c()->filesystem()->chmod($upload_file_path, 0755);
+
+        $file_extension = wc1c()->filesystem()->extension($upload_file_path);
+        $file_hash = wc1c()->filesystem()->hash($upload_file_path);
+
+        $response_description = esc_html__('The data is successfully written to a file. Recorded data size:', 'wc1c-main') . ' ' . size_format($total_size);
+
+        $is_image = !in_array($file_extension, ['xml', 'cml', 'zip', 'gz'], true);
+
+        if($is_image && 'yes' === $this->core()->getOptions('media_library_images_by_receiver', 'no'))
+        {
+            if('yes' !== $this->core()->getOptions('media_library', 'no'))
+            {
+                $this->core()->log()->warning(esc_html__('The file was not saved to the media library. Adding is disabled in the settings.', 'wc1c-main'));
+            }
+            else
+            {
+                $image_mime = wp_get_image_mime($upload_file_path);
+                if($image_mime)
+                {
+                    /** @var ImagesStorageContract $images_storage */
+                    $images_storage = Storage::load('image');
+                    $external_name = pathinfo($upload_file_path, PATHINFO_FILENAME);
+
+                    $image_current = $images_storage->getByExternalName($external_name);
+                    if(is_array($image_current))
+                    {
+                        $image_current = reset($image_current);
+                    }
+
+                    $needs_upload = false;
+
+                    if(!$image_current)
+                    {
+                        $image_current = new Image();
+                        $this->core()->setImageTimes($image_current);
+                        $image_current->setName(__('No name', 'wc1c-main'));
+                        $image_current->setExternalName($external_name);
+                        $image_current->setSlug($external_name);
+                        $image_current->setConfigurationId($this->core()->configuration()->getId());
+                        $image_current->setSchemaId($this->core()->getId());
+                        $image_current->setUserId($this->core()->configuration()->getUserId());
+                        $image_current->setMimeType($image_mime);
+                        $needs_upload = true;
+                    }
+                    else
+                    {
+                        $this->core()->setImageTimes($image_current);
+
+                        // Проверяем, изменился ли хэш файла, чтобы понять, нужна ли повторная загрузка
+                        $current_file_hash = $image_current->getMeta('_wc1c_external_hash', true);
+
+                        if(is_array($current_file_hash)) $current_file_hash = reset($current_file_hash);
+
+                        if(!empty($current_file_hash) && $current_file_hash !== $file_hash)
                         {
-                            $current_file_extension = $image_current->getMeta('_wc1c_external_image_extension', true);
-                            if(is_array($current_file_extension))
-                            {
-                                $current_file_extension = reset($current_file_extension);
-                            }
-
-                            $current_file_hash = $image_current->getMeta('_wc1c_external_hash', true);
-                            if(is_array($current_file_hash))
-                            {
-                                $current_file_hash = reset($current_file_hash);
-                            }
-
-                            if(!empty($current_file_extension) && $current_file_extension !== $file_extension)
-                            {
-                                $image_current = false;
-                            }
-                            elseif(empty($current_file_extension))
-                            {
-                                $image_current->addMetaData('_wc1c_external_image_extension', $file_extension);
-                            }
-
-                            if(!empty($current_file_hash) && $current_file_hash !== $file_hash)
-                            {
-                                $image_current = false;
-                            }
-                            elseif(empty($current_file_hash))
-                            {
-                                $image_current->addMetaData('_wc1c_external_hash', $file_hash);
-                            }
+                            $needs_upload = true;
                         }
+                    }
 
-						if(false === $image_current)
-						{
-							$new_image = new Image();
-                            $this->core()->setImageTimes($new_image);
+                    // Обновляем мета-данные
+                    $image_current->addMetaData('_wc1c_external_image_extension', $file_extension);
+                    $image_current->addMetaData('_wc1c_external_hash', $file_hash);
+                    $image_current->addMetaData('_wc1c_external_file', $filename);
 
-							$new_image->setName(__('No name', 'wc1c-main'));
-							$new_image->setExternalName($image_file_name[0]);
-							$new_image->setSlug($image_file_name[0]);
+                    if($needs_upload)
+                    {
+                        $image_id = $images_storage->uploadByPath($upload_file_path, $image_current);
+                        if($image_id === false)
+                        {
+                            $response_description .= '. ' . esc_html__('The image has not been added to the media library.', 'wc1c-main');
+                        }
+                        else
+                        {
+                            $response_description .= '. ' . esc_html__('Image added to media library, id:', 'wc1c-main') . ' ' . esc_html($image_id);
+                        }
+                    }
+                    else
+                    {
+                        $image_current->save();
+                        $response_description .= '. ' . esc_html__('The image has not been added to the media library. It was added earlier, id:', 'wc1c-main') . ' ' . esc_attr($image_current->getId());
+                    }
+                }
+            }
+        }
 
-                            $new_image->addMetaData('_wc1c_external_image_extension', $file_extension);
-                            $new_image->addMetaData('_wc1c_external_hash', $file_hash);
+        $this->core()->log()->info($response_description,
+        [
+            'file_size'    => $total_size,
+            'chunks_count' => $chunks_count,
+            'memory_peak'  => size_format(memory_get_peak_usage())
+        ]);
 
-                            /**
-                             * @since 0.23
-                             */
-                            $new_image->addMetaData('_wc1c_external_file', $filename);
-
-                            $new_image->setConfigurationId($this->core()->configuration()->getId());
-							$new_image->setSchemaId($this->core()->getId());
-
-							$new_image->setUserId($this->core()->configuration()->getUserId());
-							$new_image->setMimeType($image);
-
-							$image_id = $images_storage->uploadByPath($upload_file_path, $new_image);
-
-							if($image_id === false)
-							{
-								$response_description .= '. ' . esc_html__('The image has not been added to the media library.', 'wc1c-main');
-							}
-							else
-							{
-								$response_description .= '. ' . esc_html__('Image added to media library, id:', 'wc1c-main') . ' ' . esc_html($image_id);
-							}
-						}
-						else
-						{
-                            $image_current = $this->core()->setImageTimes($image_current);
-                            $image_current->save();
-
-							$response_description .= '. ' . esc_html__('The image has not been added to the media library. It was added earlier, id:', 'wc1c-main') . ' ' . esc_attr($image_current->getId());
-						}
-					}
-				}
-			}
-
-			$this->core()->log()->info($response_description, ['file_size' => $file_size]);
-
-			$this->sendResponseByType('success', $response_description);
-		}
-
-		$response_description = esc_html__('Failed to write data to file.', 'wc1c-main');
-
-		$this->core()->log()->error($response_description, ['file_path' => $upload_file_path]);
-		$this->sendResponseByType('failure', $response_description);
-	}
+        $this->sendResponseByType('success', $response_description);
+    }
 
 	/**
 	 * Catalog import
