@@ -49,7 +49,7 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handler()
 	{
-		$this->core()->log()->info(esc_html__('Received new request from 1C for Receiver.', 'wc1c-main'));
+		$this->core()->log()->info(esc_html__('Received new request from 1C.', 'wc1c-main'));
 
 		$mode_and_type = $this->detectModeAndType();
 		$mode = $mode_and_type['mode'];
@@ -241,13 +241,13 @@ final class Receiver extends ReceiverAbstract
 
             if (empty($remote_user))
             {
-                $this->core()->log('schemas')->critical(esc_html__('Server in CGI mode. Auth headers not detected.', 'wc1c-main'),
+                $this->core()->log('schemas')->critical(esc_html__('Server running in CGI mode. Authorization headers not detected.', 'wc1c-main'),
                     ['lines' => "RewriteEngine On\nRewriteCond %{HTTP:Authorization} ^(.*)\nRewriteRule ^(.*) - [E=HTTP_AUTHORIZATION:%1]"]
                 );
 
                 $this->core()->configuration()->setStatus('error');
                 $this->core()->configuration()->save();
-                $this->sendResponseByType('failure', esc_html__('Not specified the user. Check the server settings.', 'wc1c-main'));
+                $this->sendResponseByType('failure', esc_html__('User not specified. Please check server configuration.', 'wc1c-main'));
             }
 
             $str_tmp = base64_decode(substr($remote_user, 6));
@@ -321,7 +321,7 @@ final class Receiver extends ReceiverAbstract
 
 		$this->core()->configuration()->saveMetaData();
 
-		$this->core()->log()->info(esc_html__('1C authorization has been successfully passed.', 'wc1c-main'), ['session_name' => $session_name, 'session_id' => $session_id]);
+		$this->core()->log()->info(esc_html__('1C authorization successful.', 'wc1c-main'), ['session_name' => $session_name, 'session_id' => $session_id]);
 
 		$lines['success'] = 'success' . PHP_EOL;
 		$lines['session_name'] = $session_name . PHP_EOL;
@@ -366,7 +366,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(!isset($_GET['lazysign']))
 		{
-			$warning = esc_html__('Authorization key verification failed. 1C did not send the name of the lazy signature.', 'wc1c-main');
+			$warning = esc_html__('Lazy signature verification failed: 1C did not send the lazy signature parameter.', 'wc1c-main');
 			$this->core()->log()->warning($warning);
 
 			if($send_response)
@@ -412,7 +412,7 @@ final class Receiver extends ReceiverAbstract
 
 		if($_COOKIE[$session_name] !== $session_id)
 		{
-			$warning = esc_html__('Authorization check failed - session id differs from the original.', 'wc1c-main');
+			$warning = esc_html__('Session verification failed: Session ID mismatch.', 'wc1c-main');
 
 			$this->core()->log()->warning($warning, ['client_session_id' => $_COOKIE[$session_name], 'server_session_id' => $session_id]);
 
@@ -450,7 +450,7 @@ final class Receiver extends ReceiverAbstract
 
 		if(wc1c()->filesystem()->cleanDirectory($directory))
 		{
-			$this->core()->log()->info(esc_html__('Cleaning the directory for temporary files as completed.', 'wc1c-main'), ['directory' => $this->core()->getUploadDirectory()]);
+			$this->core()->log()->info(esc_html__('Temporary files directory cleaned successfully.', 'wc1c-main'), ['directory' => $this->core()->getUploadDirectory()]);
 		}
 		else
 		{
@@ -467,7 +467,7 @@ final class Receiver extends ReceiverAbstract
 	 */
 	public function handlerCatalogModeInit()
 	{
-		$this->core()->log()->info(esc_html__('Initialization of receiving requests from 1C.', 'wc1c-main'));
+		$this->core()->log()->info(esc_html__('Initializing 1C request receiver.', 'wc1c-main'));
 
 		if(has_filter('wc1c_schema_productscml_handler_catalog_mode_init_session'))
 		{
@@ -878,7 +878,7 @@ final class Receiver extends ReceiverAbstract
 	{
 		$filename = wc1c()->getVar($_GET['filename'], '');
 
-        $this->core()->log()->info(esc_html__('On request from 1C - started importing data from a file.', 'wc1c-main'), ['file' => $filename]);
+        $this->core()->log()->info(esc_html__('Starting data import from file requested by 1C.', 'wc1c-main'), ['file' => $filename]);
 
 		if($filename === '')
 		{
