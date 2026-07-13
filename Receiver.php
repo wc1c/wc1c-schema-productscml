@@ -919,9 +919,9 @@ final class Receiver extends ReceiverAbstract
 			$this->sendResponseByType('failure', $response_description);
 		}
 
-		$response_description = esc_html__('Importing data from a file ended with an error.', 'wc1c-main');
+        $response_description = esc_html__('Importing data from a file ended with an error.', 'wc1c-main');
 
-        $this->core()->log()->error($response_description);
-		$this->sendResponseByType('failure', $response_description);
+        $this->core()->log()->error($response_description, ['file_name' => $filename, 'file_path' => $file]);
+        $this->sendResponseByType('failure', $response_description);
 	}
 }
