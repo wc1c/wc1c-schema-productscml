@@ -3086,7 +3086,8 @@ class Core extends SchemaAbstract
 					$attribute_id = $attribute_exist ? $attribute_exist->getId() : 0;
 				}
 
-				$attribute_name = $attribute_id ? $attribute_exist->getTaxonomyName() : sanitize_title($attribute['name']);
+                $raw_name = $attribute_id ? $attribute_exist->getTaxonomyName() : $attribute['name'];
+                $attribute_name = sanitize_title($raw_name);
 
 				if(!isset($parent_attributes[$attribute_name]))
 				{
@@ -3138,53 +3139,67 @@ class Core extends SchemaAbstract
 	 * @return array
 	 * @throws Exception
 	 */
-	protected function getVariationParentAttributes(array $attributes, ProductContract $parent): array
-	{
+    protected function getVariationParentAttributes(array $attributes, ProductContract $parent): array
+    {
         $this->log()->debug(esc_html__('Getting to variation parent attributes.', 'wc1c-main'), ['attributes' => $attributes]);
 
-		/** @var AttributesStorageContract $attributes_storage */
-		$attributes_storage = Storage::load('attribute');
+        /** @var AttributesStorageContract $attributes_storage */
+        $attributes_storage = Storage::load('attribute');
 
-		$parent_attributes = $parent->get_attributes();
-		$require_save = false;
+        $parent_attributes = $parent->get_attributes();
+        $require_save = false;
 
-		foreach($attributes as $attribute)
-		{
-			$attribute_id = 0;
-			$attribute_exist = $attributes_storage->getByName($attribute['name']);
+        foreach($attributes as $attribute)
+        {
+            $attribute_id = 0;
+            $attribute_exist = $attributes_storage->getByName($attribute['name']);
 
-			// Get ID if is a global attribute.
-			if(!empty($attribute['taxonomy']))
-			{
-				$attribute_id = $attribute_exist ? $attribute_exist->getId() : 0;
-			}
+            // Get ID if is a global attribute.
+            if(!empty($attribute['taxonomy']))
+            {
+                $attribute_id = $attribute_exist ? $attribute_exist->getId() : 0;
+            }
 
-			$attribute_name = $attribute_id ? $attribute_exist->getTaxonomyName() : sanitize_title($attribute['name']);
+            $raw_name = $attribute_id ? $attribute_exist->getTaxonomyName() : $attribute['name'];
+            $attribute_name = sanitize_title($raw_name);
 
-			// Check if attribute handle variations.
-			if(isset($parent_attributes[$attribute_name]) && !$parent_attributes[$attribute_name]->get_variation())
-			{
+            $found_parent_attribute = null;
+            foreach ($parent_attributes as $parent_attr_obj)
+            {
+                if ($parent_attr_obj->get_name() === $attribute_name)
+                {
+                    $found_parent_attribute = $parent_attr_obj;
+                    break;
+                }
+            }
+
+            // Check if attribute handle variations.
+            if ($found_parent_attribute && !$found_parent_attribute->get_variation())
+            {
                 $this->log()->notice(__('The attribute is not for variations. Save required.', 'wc1c-main'), ['attribute_name' => $attribute_name]);
 
-				// Re-create the attribute to CRUD save and generate again.
-				$parent_attributes[$attribute_name] = clone $parent_attributes[$attribute_name];
-				$parent_attributes[$attribute_name]->set_variation(1);
+                // Находим ключ в исходном массиве, чтобы заменить объект
+                $key_to_replace = array_search($found_parent_attribute, $parent_attributes, true);
+                if ($key_to_replace !== false) {
+                    // Re-create the attribute to CRUD save and generate again.
+                    $new_attr = clone $parent_attributes[$key_to_replace];
+                    $new_attr->set_variation(1);
+                    $parent_attributes[$key_to_replace] = $new_attr;
+                    $require_save = true;
+                }
+            }
+        }
 
-				$require_save = true;
-			}
-		}
-
-		// Save parent attributes.
-		if($require_save)
-		{
+        // Save parent attributes.
+        if($require_save)
+        {
             $this->log()->info(esc_html__('Preserve parent attributes for accessibility in variations.', 'wc1c-main'), ['attributes' => $parent_attributes]);
-
             $parent->set_attributes(array_values($parent_attributes));
-			$parent->save();
-		}
+            $parent->save();
+        }
 
-		return $parent_attributes;
-	}
+        return $parent_attributes;
+    }
 
 	/**
 	 * Назначение данных продукта исходя из режима: атрибуты
@@ -3356,7 +3371,7 @@ class Core extends SchemaAbstract
                     $global = $attributes_storage->getByLabel($characteristic_value['name']);
                 }
 
-				$attribute_name = $global ? $global->getName() : $characteristic_value['name'];
+				$attribute_name = $global ? $global->getTaxonomyName() : $characteristic_value['name'];
 
 				$value = $raw_attributes[$attribute_name]['value'] ?? [];
 
@@ -3601,9 +3616,11 @@ class Core extends SchemaAbstract
 
                 if($global)
                 {
-                    $variation_meta_name .= 'pa_' . \esc_attr(\sanitize_title($global->getName()));
+                    //$variation_meta_name .= 'pa_' . \esc_attr(\sanitize_title($global->getName()));
+                    $variation_meta_name .= $global->getTaxonomyName();
                     $variation_term = get_term_by('name', $characteristic_value['value'], $global->getTaxonomyName());
-                    $variation_meta_value = isset($variation_term->slug) ?? '';
+                    //$variation_meta_value = isset($variation_term->slug) ?? '';
+                    $variation_meta_value = $variation_term ? $variation_term->slug : '';
                 }
 
 				// значение отсутствует в атрибутах
