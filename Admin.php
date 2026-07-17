@@ -64,9 +64,9 @@ class Admin
 	{
 		$fields['title_receiver'] =
 		[
-			'title' => __('Receiving requests from 1C', 'wc1c-main'),
+			'title' => esc_html__('Receiving requests from 1C', 'wc1c-main'),
 			'type' => 'title',
-			'description' => __('Authorization of requests and regulation of algorithms for receiving requests for the Receiver from the 1C programs by CommerceML protocol.', 'wc1c-main'),
+			'description' => esc_html__('Authorization of requests and regulation of algorithms for receiving requests for the Receiver from the 1C programs by CommerceML protocol.', 'wc1c-main'),
 		];
 
 		$lazy_sign = $this->core()->configuration()->getMeta('receiver_lazy_sign');
@@ -83,24 +83,24 @@ class Admin
 
 		$fields['url_requests'] =
 		[
-			'title' => __('Website address', 'wc1c-main'),
+			'title' => esc_html__('Website address', 'wc1c-main'),
 			'type' => 'raw',
 			'raw' => $url_raw,
 			'description' => sprintf(
 				'%s<hr>%s',
-				__('Specified in the exchange settings on the 1C side. The Recipient is located at this address, which will receive requests from 1C.', 'wc1c-main'),
-				__('When copying, you need to get rid of whitespace characters, if they are present.', 'wc1c-main')
+                esc_html__('Specified in the exchange settings on the 1C side. The Recipient is located at this address, which will receive requests from 1C.', 'wc1c-main'),
+                esc_html__('When copying, you need to get rid of whitespace characters, if they are present.', 'wc1c-main')
 			)
 		];
 
 		$fields['user_login'] =
 		[
-			'title' => __('Username', 'wc1c-main'),
+			'title' => esc_html__('Username', 'wc1c-main'),
 			'type' => 'text',
 			'description' => sprintf(
 				'%s<hr>%s',
-				__('Specified when setting up an exchange with a site on the 1C side. Any name can be specified, except for an empty value.', 'wc1c-main'),
-				__('Work with data on the site is performed on behalf of the configuration owner, and not on behalf of the specified username.', 'wc1c-main')
+                esc_html__('Specified when setting up an exchange with a site on the 1C side. Any name can be specified, except for an empty value.', 'wc1c-main'),
+                esc_html__('Work with data on the site is performed on behalf of the configuration owner, and not on behalf of the specified username.', 'wc1c-main')
 			),
 			'default' => '',
 			'css' => 'min-width: 377px;',
@@ -108,9 +108,9 @@ class Admin
 
 		$fields['user_password'] =
 		[
-			'title' => __('User password', 'wc1c-main'),
+			'title' => esc_html__('User password', 'wc1c-main'),
 			'type' => 'password',
-			'description' => __('Specified in pair with the username when setting up on the 1C side. It is advisable not to specify a password for the current WordPress user.', 'wc1c-main'),
+			'description' => esc_html__('Specified in pair with the username when setting up on the 1C side. It is advisable not to specify a password for the current WordPress user.', 'wc1c-main'),
 			'default' => '',
 			'css' => 'min-width: 377px;',
 		];
@@ -129,22 +129,22 @@ class Admin
 	{
 		$fields['title_other'] =
 		[
-			'title' => __('Other parameters', 'wc1c-main'),
+			'title' => esc_html__('Other parameters', 'wc1c-main'),
 			'type' => 'title',
-			'description' => __('Change of data processing behavior for environment compatibility and so on.', 'wc1c-main'),
+			'description' => esc_html__('Change of data processing behavior for environment compatibility and so on.', 'wc1c-main'),
 		];
 
 		$fields['php_post_max_size'] =
 		[
-			'title' => __('Maximum size of accepted requests', 'wc1c-main'),
+			'title' => esc_html__('Maximum size of accepted requests', 'wc1c-main'),
 			'type' => 'text',
 			'description' => sprintf
 			(
 				'%s<br />%s <b>%s</b><hr>%s',
-				__('Enter the maximum size of accepted requests from 1C at a time in bytes. May be specified with a dimension suffix, such as 7M, where M = megabyte, K = kilobyte, G - gigabyte.', 'wc1c-main'),
-				__('Current WC1C limit:', 'wc1c-main'),
+                esc_html__('Enter the maximum size of accepted requests from 1C at a time in bytes. May be specified with a dimension suffix, such as 7M, where M = megabyte, K = kilobyte, G - gigabyte.', 'wc1c-main'),
+                esc_html__('Current WC1C limit:', 'wc1c-main'),
 				wc1c()->settings()->get('php_post_max_size', wc1c()->environment()->get('php_post_max_size')),
-				__('Can only decrease the value, because it must not exceed the limits from the WC1C settings.', 'wc1c-main')
+                esc_html__('Can only decrease the value, because it must not exceed the limits from the WC1C settings.', 'wc1c-main')
 			),
 			'default' => wc1c()->settings()->get('php_post_max_size', wc1c()->environment()->get('php_post_max_size')),
 			'css' => 'min-width: 100px;',
@@ -152,15 +152,15 @@ class Admin
 
 		$fields['php_max_execution_time'] =
 		[
-			'title' => __('Maximum time for execution PHP', 'wc1c-main'),
+			'title' => esc_html__('Maximum time for execution PHP', 'wc1c-main'),
 			'type' => 'text',
 			'description' => sprintf
 			(
 				'%s <br /> %s <b>%s</b> <br /> %s',
-				__('Value is seconds. Algorithms of current configuration will run until a time limit is end.', 'wc1c-main'),
-				__('Current WC1C limit:', 'wc1c-main'),
+                esc_html__('Value is seconds. Algorithms of current configuration will run until a time limit is end.', 'wc1c-main'),
+                esc_html__('Current WC1C limit:', 'wc1c-main'),
 				wc1c()->settings()->get('php_max_execution_time', wc1c()->environment()->get('php_max_execution_time')),
-				__('If specify 0, the time limit will be disabled. Specifying 0 is not recommended, it is recommended not to exceed the WC1C limit.', 'wc1c-main')
+                esc_html__('If specify 0, the time limit will be disabled. Specifying 0 is not recommended, it is recommended not to exceed the WC1C limit.', 'wc1c-main')
 			),
 			'default' => wc1c()->settings()->get('php_max_execution_time', wc1c()->environment()->get('php_max_execution_time')),
 			'css' => 'min-width: 100px;',
@@ -170,20 +170,20 @@ class Admin
 		[
 			'title' => __('Browser debug mode', 'wc1c-main'),
 			'type' => 'checkbox',
-			'label' => __('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
+			'label' => esc_html__('Check the box if you want to enable this feature. Disabled by default.', 'wc1c-main'),
 			'description' => sprintf
 			(
 				'%s<hr>%s',
-				__('The setting is required only for debugging activities and must be turned off when such activities are completed.', 'wc1c-main'),
-				__('Only used in debug mode.', 'wc1c-main')
+                esc_html__('The setting is required only for debugging activities and must be turned off when such activities are completed.', 'wc1c-main'),
+                esc_html__('Only used in debug mode.', 'wc1c-main')
 			),
 			'default' => 'no'
 		];
 
 		$response_options =
 		[
-			'no' => __('Do not use', 'wc1c-main'),
-			'standard' => __('Standard', 'wc1c-main'),
+			'no' => esc_html__('Do not use', 'wc1c-main'),
+			'standard' => esc_html__('Standard', 'wc1c-main'),
 		];
 
 		$fields['directory_clean_mode'] =
@@ -415,13 +415,13 @@ class Admin
 		return $fields;
 	}
 
-	/**
-	 * Configuration fields: products with characteristics
-	 *
-	 * @param array $fields Прежний массив настроек
-	 *
-	 * @return array Новый массив настроек
-	 */
+    /**
+     * Configuration fields: products with characteristics
+     *
+     * @param array $fields Current settings array
+     *
+     * @return array New settings array
+     */
 	public function configurationsFieldsProductsWithCharacteristics(array $fields): array
 	{
 		$fields['title_products_with_characteristics'] =
@@ -1518,87 +1518,87 @@ class Admin
         $products_update_images_options =
         [
             'no' => __('Do not update', 'wc1c-main'),
-            'yes' => __('При создании и обновлении продуктов', 'wc1c-main'),
-            'create' => __('При создании продуктов', 'wc1c-main'),
-            'update' => __('При обновлении продуктов', 'wc1c-main'),
+            'yes' => __('On product creation and update', 'wc1c-main'),
+            'create' => __('On product creation', 'wc1c-main'),
+            'update' => __('On product update', 'wc1c-main'),
         ];
 
         $fields['products_images_rename'] =
         [
-            'title' => __('Обновление наименования изображений по наименованию продуктов', 'wc1c-main'),
+            'title' => __('Rename images based on product names', 'wc1c-main'),
             'default' => 'no',
             'type' => 'select',
             'description' => sprintf
             (
                 '<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
                 __('Do not update', 'wc1c-main'),
-                __('Обновление будет пропущено в любом случае.', 'wc1c-main'),
-                __('При создании и обновлении продуктов', 'wc1c-main'),
-                __('Обновление произойдет как при создании продукта, так и при его обновлении.', 'wc1c-main'),
-                __('При создании продуктов', 'wc1c-main'),
-                __('Наименование будет обновлено только при создании продуктов.', 'wc1c-main'),
-                __('При обновлении продуктов', 'wc1c-main'),
-                __('Наименование будет обновлено только при обновлении продуктов.', 'wc1c-main')
+                __('Updates will be skipped in any case.', 'wc1c-main'),
+                __('On product creation and update', 'wc1c-main'),
+                __('Updates will occur on both product creation and update.', 'wc1c-main'),
+                __('On product creation', 'wc1c-main'),
+                __('Names will be updated only on product creation.', 'wc1c-main'),
+                __('On product update', 'wc1c-main'),
+                __('Names will be updated only on product update.', 'wc1c-main')
             ),
             'options' => $products_update_images_options
         ];
 
         $fields['products_images_alt'] =
         [
-            'title' => __('Обновление атрибута ALT изображений по наименованию продуктов', 'wc1c-main'),
+            'title' => __('Update image ALT attributes based on product names', 'wc1c-main'),
             'default' => 'no',
             'type' => 'select',
             'description' => sprintf
             (
                 '<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
                 __('Do not update', 'wc1c-main'),
-                __('Обновление будет пропущено в любом случае.', 'wc1c-main'),
-                __('При создании и обновлении продуктов', 'wc1c-main'),
-                __('Обновление произойдет как при создании продукта, так и при его обновлении.', 'wc1c-main'),
-                __('При создании продуктов', 'wc1c-main'),
-                __('Атрибут ALT будет обновлен только при создании продуктов.', 'wc1c-main'),
-                __('При обновлении продуктов', 'wc1c-main'),
-                __('Атрибут ALT будет обновлен только при обновлении продуктов.', 'wc1c-main')
+                __('Updates will be skipped in any case.', 'wc1c-main'),
+                __('On product creation and update', 'wc1c-main'),
+                __('Updates will occur on both product creation and update.', 'wc1c-main'),
+                __('On product creation', 'wc1c-main'),
+                __('ALT attributes will be updated only on product creation.', 'wc1c-main'),
+                __('On product update', 'wc1c-main'),
+                __('ALT attributes will be updated only on product update.', 'wc1c-main')
             ),
             'options' => $products_update_images_options
         ];
 
         $fields['products_images_rename_file'] =
         [
-            'title' => __('Обновление наименования изображений из описания файла', 'wc1c-main'),
+            'title' => __('Rename images based on file descriptions', 'wc1c-main'),
             'default' => 'no',
             'type' => 'select',
             'description' => sprintf
             (
                 '<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
                 __('Do not update', 'wc1c-main'),
-                __('Обновление будет пропущено в любом случае.', 'wc1c-main'),
-                __('При создании и обновлении продуктов', 'wc1c-main'),
-                __('Обновление произойдет как при создании продукта, так и при его обновлении.', 'wc1c-main'),
-                __('При создании продуктов', 'wc1c-main'),
-                __('Наименование будет обновлено только при создании продуктов.', 'wc1c-main'),
-                __('При обновлении продуктов', 'wc1c-main'),
-                __('Наименование будет обновлено только при обновлении продуктов.', 'wc1c-main')
+                __('Updates will be skipped in any case.', 'wc1c-main'),
+                __('On product creation and update', 'wc1c-main'),
+                __('Updates will occur on both product creation and update.', 'wc1c-main'),
+                __('On product creation', 'wc1c-main'),
+                __('Names will be updated only on product creation.', 'wc1c-main'),
+                __('On product update', 'wc1c-main'),
+                __('Names will be updated only on product update.', 'wc1c-main')
             ),
             'options' => $products_update_images_options
         ];
 
         $fields['products_images_alt_file'] =
         [
-            'title' => __('Обновление атрибута ALT у изображений из описания файла', 'wc1c-main'),
+            'title' => __('Update image ALT attributes based on file descriptions', 'wc1c-main'),
             'default' => 'no',
             'type' => 'select',
             'description' => sprintf
             (
                 '<b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s<br /><b>%s</b> - %s',
                 __('Do not update', 'wc1c-main'),
-                __('Обновление будет пропущено в любом случае.', 'wc1c-main'),
-                __('При создании и обновлении продуктов', 'wc1c-main'),
-                __('Обновление произойдет как при создании продукта, так и при его обновлении.', 'wc1c-main'),
-                __('При создании продуктов', 'wc1c-main'),
-                __('Атрибут ALT будет обновлен только при создании продуктов.', 'wc1c-main'),
-                __('При обновлении продуктов', 'wc1c-main'),
-                __('Атрибут ALT будет обновлен только при обновлении продуктов.', 'wc1c-main')
+                __('Updates will be skipped in any case.', 'wc1c-main'),
+                __('On product creation and update', 'wc1c-main'),
+                __('Updates will occur on both product creation and update.', 'wc1c-main'),
+                __('On product creation', 'wc1c-main'),
+                __('ALT attributes will be updated only on product creation.', 'wc1c-main'),
+                __('On product update', 'wc1c-main'),
+                __('ALT attributes will be updated only on product update.', 'wc1c-main')
             ),
             'options' => $products_update_images_options
         ];
