@@ -1012,10 +1012,13 @@ class Core extends SchemaAbstract
 					{
 						$this->log()->info(esc_html__('The attribute was not found. Creating.', 'wc1c-main'));
 
+                        $safe_slug = $this->generateSafeAttributeSlug($property['name']);
+
 						$attribute = new Attribute();
 						$attribute->setLabel($property['name']);
+                        $attribute->setName($safe_slug);
 
-						$result_save = $attribute->save();
+                        $result_save = $attribute->save();
 
                         if($result_save === 0)
                         {
@@ -3363,8 +3366,11 @@ class Core extends SchemaAbstract
                 {
                     $this->log()->info(esc_html__('The attribute was not found. Creating by characteristic.', 'wc1c-main'));
 
+                    $safe_slug = $this->generateSafeAttributeSlug($characteristic_value['name']);
+
                     $attribute = new Attribute();
                     $attribute->setLabel($characteristic_value['name']);
+                    $attribute->setName($safe_slug);
 
                     $attribute->save();
 
@@ -3604,7 +3610,8 @@ class Core extends SchemaAbstract
 
                     $attribute = new Attribute();
                     $attribute->setLabel($characteristic_value['name']);
-
+                    $safe_slug = $this->generateSafeAttributeSlug($characteristic_value['name']);
+                    $attribute->setName($safe_slug);
                     $attribute->save();
 
                     $global = $attributes_storage->getByLabel($characteristic_value['name']);
@@ -3682,6 +3689,9 @@ class Core extends SchemaAbstract
 
                         $attribute = new Attribute();
                         $attribute->setLabel($characteristic_value['name']);
+
+                        $safe_slug = $this->generateSafeAttributeSlug($characteristic_value['name']);
+                        $attribute->setName($safe_slug);
 
                         $attribute->save();
 
@@ -4797,4 +4807,38 @@ class Core extends SchemaAbstract
 			$reader->next();
 		}
 	}
+
+    /**
+     * Генерирует безопасный slug для глобального атрибута,
+     * гарантируя, что он не превысит лимит WordPress в 32 символа (с учетом pa_).
+     *
+     * @param string $name Название атрибута (например, "Объем морозильной камеры")
+     *
+     * @return string Безопасный slug (максимум 28 символов)
+     */
+    protected function generateSafeAttributeSlug(string $name): string
+    {
+        // 1. Пытаемся использовать встроенный PHP-транслитератор
+        $slug = wc1c()->transliterator()->transliterate($name, 'attribute_slug');
+
+        // 2. Если Intl нет или он не справился, используем MD5-хэш как 100% безопасный fallback
+        if(empty($slug) || preg_match('/[^\x20-\x7E]/', $slug))
+        {
+            // Генерируем уникальный короткий идентификатор на основе имени
+            $slug = 'attr-' . substr(md5($name), 0, 12);
+        }
+
+        // 3. Применяем стандартный санитайз WordPress
+        $slug = sanitize_title($slug);
+
+        // 4. ЖЕСТКОЕ ОГРАНИЧЕНИЕ: обрезаем до 28 символов.
+        // (3 символа на 'pa_' + 28 символов = 31 символ. 1 символ запаса на случай суффикса '-2' от WP).
+        if(strlen($slug) > 28)
+        {
+            $slug = substr($slug, 0, 28);
+            $slug = rtrim($slug, '-'); // Убираем висячий дефис в конце
+        }
+
+        return $slug;
+    }
 }
