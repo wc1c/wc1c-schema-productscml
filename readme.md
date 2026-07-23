@@ -7,5 +7,8 @@ Creating and updating products (goods) in WooCommerce according to data from 1C 
 ## Changelog
   Базовый список изменений в схеме.
 
+### 0.16.1
+- Мелкие фиксы.
+
 ### 0.15.0
 - Совместимость с 0.23.x
