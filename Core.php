@@ -336,7 +336,8 @@ class Core extends SchemaAbstract
 
 			ob_start();
 			nocache_headers();
-			do_action($wc1c_receiver_action);
+            // todo: optimize via remove dynamic  hook
+            do_action($wc1c_receiver_action);  // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound
 			ob_end_clean();
 		}
 
